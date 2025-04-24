@@ -1,0 +1,24 @@
+services:
+  webui:
+    build: .
+    ports: 
+      - 7999:7999
+    networks:
+      - pg-network
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - pg-network
+
+networks:
+  pg-network:
+
+volumes:
+  pg-data:
