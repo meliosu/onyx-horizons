@@ -1,0 +1,12 @@
+[package]
+name = "onyx-horizons"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+askama = "0.14.0"
+axum = "0.8.3"
+serde = { version = "1.0.219", features = ["derive"] }
+sqlx = { version = "0.8.5", features = ["postgres", "runtime-tokio"] }
+tokio = { version = "1.44.2", features = ["full"] }
