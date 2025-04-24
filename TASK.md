@@ -13,6 +13,7 @@ This project is dedicated to the **Onyx Horizons** construction company website.
   * sqlx - database driver
   * anyhow - error handling
   * askama - templating
+  * log and env_logger - logging
 
 # Description
 
