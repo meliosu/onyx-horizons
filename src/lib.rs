@@ -1,19 +1,30 @@
-use axum::response::IntoResponse;
-use axum::routing::get;
-
 use database::Database;
 
-pub mod database;
+mod database;
 
 pub async fn router(postgres_url: &str) -> anyhow::Result<axum::Router> {
     let database = Database::new(postgres_url).await?;
     let router = axum::Router::new()
-        .route("/", get(index))
+        .merge(general::router())
+        .merge(departments::router())
+        .merge(sites::router())
+        .merge(personnel::router())
+        .merge(equipment::router())
+        .merge(clients::router())
+        .merge(brigades::router())
+        .merge(tasks::router())
+        .merge(reports::router())
         .with_state(database);
 
     Ok(router)
 }
 
-pub async fn index() -> impl IntoResponse {
-    ()
-}
+mod sites;
+mod departments;
+mod general;
+mod personnel;
+mod equipment;
+mod clients;
+mod brigades;
+mod tasks;
+mod reports;
