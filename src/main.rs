@@ -15,7 +15,7 @@ async fn run() -> anyhow::Result<()> {
     let port = std::env::var("LISTEN_PORT").unwrap_or(LISTEN_PORT.to_string());
     let pg_url = std::env::var("POSTGRES_URL").unwrap_or(POSTGRES_URL.to_string());
 
-    let listen_addr = format!("localhost:{port}");
+    let listen_addr = format!("0.0.0.0:{port}");
     let listener = tokio::net::TcpListener::bind(listen_addr).await?;
 
     let router = router(&pg_url).await?;
@@ -26,4 +26,4 @@ async fn run() -> anyhow::Result<()> {
 }
 
 const LISTEN_PORT: &str = "7999";
-const POSTGRES_URL: &str = "postgresql://postgres";
+const POSTGRES_URL: &str = "postgresql://postgres@postgres";
