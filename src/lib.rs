@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 use database::Database;
 
 mod database;
@@ -19,12 +21,13 @@ pub async fn router(postgres_url: &str) -> anyhow::Result<axum::Router> {
     Ok(router)
 }
 
-mod sites;
+mod brigades;
+mod clients;
 mod departments;
+mod equipment;
 mod general;
 mod personnel;
-mod equipment;
-mod clients;
-mod brigades;
-mod tasks;
 mod reports;
+mod sites;
+mod tasks;
+
