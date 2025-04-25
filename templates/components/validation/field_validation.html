@@ -1,0 +1,7 @@
+<div class="validation-message text-xs mt-1 {% if is_valid %}text-green-500{% else %}text-red-500{% endif %}" data-field="{{ field }}">
+    {% if !is_valid && message %}
+        <i class="fas fa-exclamation-circle mr-1"></i>{{ message }}
+    {% elif is_valid && message %}
+        <i class="fas fa-check-circle mr-1"></i>{{ message }}
+    {% endif %}
+</div>

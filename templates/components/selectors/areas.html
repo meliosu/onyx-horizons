@@ -1,0 +1,34 @@
+<select name="{{ name }}" id="{{ id }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+        {% if required %}required{% endif %}
+        {% if disabled %}disabled{% endif %}
+        {% if department_dependent %}
+        hx-get="/api/selectors/areas-by-department/${departmentId}"
+        hx-trigger="load-areas from:body"
+        hx-target="this"
+        {% endif %}>
+    {% if placeholder %}
+    <option value="" disabled {% if options | filter(attribute="selected", value=true) | length == 0 %}selected{% endif %}>{{ placeholder }}</option>
+    {% endif %}
+    {% for option in options %}
+    <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+</select>
+<div class="validation-message text-xs text-red-500 mt-1"></div>
+
+{% if department_dependent %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const departmentSelector = document.getElementById('department-selector');
+    if (departmentSelector) {
+        departmentSelector.addEventListener('change', function() {
+            const departmentId = this.value;
+            const areaSelector = document.getElementById('{{ id }}');
+            if (areaSelector) {
+                const event = new CustomEvent('load-areas', { detail: { departmentId } });
+                document.body.dispatchEvent(event);
+            }
+        });
+    }
+});
+</script>
+{% endif %}
