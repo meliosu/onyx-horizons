@@ -1,0 +1,66 @@
+{% if materials|length == 0 %}
+<tr>
+    <td colspan="7" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No materials assigned to this site</p>
+    </td>
+</tr>
+{% else %}
+    {% for material in materials %}
+    <tr class="hover:bg-gray-50 {% if material.exceeds_estimate %}bg-red-50{% endif %}">
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/materials/{{ material.material_id }}" class="text-blue-600 hover:underline font-medium">
+                {{ material.name }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/tasks/{{ material.task_id }}" class="text-blue-600 hover:underline">
+                {{ material.task_name }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ material.expected_amount }} {{ material.units }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if material.actual_amount %}
+                {{ material.actual_amount }} {{ material.units }}
+            {% else %}
+                <span class="text-gray-400">Not recorded</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ material.units }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if material.actual_amount %}
+                {% if material.exceeds_estimate %}
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        Exceeds Estimate
+                    </span>
+                {% else %}
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Within Estimate
+                    </span>
+                {% endif %}
+            {% else %}
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                    Pending
+                </span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="flex justify-end space-x-2">
+                <button class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded"
+                        hx-get="/api/tasks/{{ material.task_id }}/materials/{{ material.material_id }}/edit"
+                        hx-target="#modal-container">
+                    <i class="fas fa-pencil"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information for the parent component -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

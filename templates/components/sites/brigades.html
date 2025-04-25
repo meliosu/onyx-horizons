@@ -1,0 +1,53 @@
+{% if brigades|length == 0 %}
+<tr>
+    <td colspan="5" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No brigades assigned to this site</p>
+    </td>
+</tr>
+{% else %}
+    {% for brigade in brigades %}
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/brigades/{{ brigade.id }}" class="text-blue-600 hover:underline font-medium">
+                Brigade #{{ brigade.id }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/personnel/workers/{{ brigade.brigadier_id }}" class="text-blue-600 hover:underline">
+                {{ brigade.brigadier_name }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ brigade.workers_count }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if brigade.task_name %}
+                <a href="/tasks/{{ brigade.task_id }}" class="text-blue-600 hover:underline">
+                    {{ brigade.task_name }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">No current task</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="flex justify-end space-x-2">
+                <a href="/brigades/{{ brigade.id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                    <i class="fas fa-eye"></i>
+                </a>
+                {% if brigade.task_id %}
+                <button class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded"
+                        hx-get="/api/tasks/{{ brigade.task_id }}/edit"
+                        hx-target="#modal-container">
+                    <i class="fas fa-pencil"></i>
+                </button>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information for the parent component -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

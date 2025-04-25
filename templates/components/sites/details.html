@@ -1,0 +1,161 @@
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b">
+        <h2 class="text-lg font-medium flex items-center">
+            <span class="mr-2">{{ site_details.site.description }}</span>
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if site_details.site.site_type == "power_plant" %}bg-purple-100 text-purple-800
+                {% elif site_details.site.site_type == "road" %}bg-blue-100 text-blue-800
+                {% elif site_details.site.site_type == "housing" %}bg-green-100 text-green-800
+                {% elif site_details.site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
+                {% elif site_details.site.site_type == "park" %}bg-indigo-100 text-indigo-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ site_details.site.site_type | replace(from="_", to=" ") | capitalize }}
+            </span>
+        </h2>
+    </div>
+    <div class="p-6">
+        <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Area</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                    {% if site_details.site.area_name %}
+                        <a href="/areas/{{ site_details.site.area_id }}" class="text-blue-600 hover:underline">
+                            {{ site_details.site.area_name }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500">Not assigned</span>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Department</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                    {% if site_details.site.department_name %}
+                        <a href="/departments/{{ site_details.site.department_id }}" class="text-blue-600 hover:underline">
+                            {{ site_details.site.department_name }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500">Not assigned</span>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Client</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                    {% if site_details.site.client_name %}
+                        <a href="/clients/{{ site_details.site.client_id }}" class="text-blue-600 hover:underline">
+                            {{ site_details.site.client_name }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500">Not assigned</span>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Risk Level</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        {% if site_details.site.risk_level == "high" %}bg-red-100 text-red-800
+                        {% elif site_details.site.risk_level == "medium" %}bg-yellow-100 text-yellow-800
+                        {% elif site_details.site.risk_level == "low" %}bg-green-100 text-green-800
+                        {% endif %}">
+                        {{ site_details.site.risk_level | capitalize }}
+                    </span>
+                </dd>
+            </div>
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Location</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ site_details.site.location.latitude }}, {{ site_details.site.location.longitude }}</dd>
+            </div>
+            <div class="col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Tasks</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ site_details.site.tasks_count | default(value="0") }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b">
+        <h2 class="text-lg font-medium">{{ site_details.site.site_type | replace(from="_", to=" ") | capitalize }} Details</h2>
+    </div>
+    <div class="p-6">
+        <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+            {% match site_details.type_details %}
+                {% when SiteTypeDetails::PowerPlant(details) %}
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Energy Output</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.energy_output }} MW</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Energy Source</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.energy_source }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Grid Connected</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.is_grid_connected | string | capitalize }}</dd>
+                    </div>
+
+                {% when SiteTypeDetails::Road(details) %}
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Length</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.length }} meters</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Lanes</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.lanes }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Surface</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.surface }}</dd>
+                    </div>
+
+                {% when SiteTypeDetails::Housing(details) %}
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Number of Floors</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.number_of_floors }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Number of Entrances</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.number_of_entrances }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Housing Type</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.housing_type }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Energy Efficiency</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.energy_efficiency | capitalize }}</dd>
+                    </div>
+
+                {% when SiteTypeDetails::Bridge(details) %}
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Length</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.length }} meters</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Road Material</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.road_material }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Maximum Load</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.max_load }} tons</dd>
+                    </div>
+
+                {% when SiteTypeDetails::Park(details) %}
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Area</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.area }} square km</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Has Playground</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.has_playground | string | capitalize }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Has Lighting</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ details.has_lighting | string | capitalize }}</dd>
+                    </div>
+            {% endmatch %}
+        </dl>
+    </div>
+</div>

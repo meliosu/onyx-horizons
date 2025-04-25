@@ -1,0 +1,145 @@
+<h3 class="text-lg font-medium">Type-specific Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+    {% match site_type %}
+        {% when SiteType::PowerPlant %}
+            <div>
+                <label for="energy_output" class="block text-sm font-medium text-gray-700 mb-1">Energy Output (MW) *</label>
+                <input type="number" name="energy_output" id="energy_output" step="0.01" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="energy_source" class="block text-sm font-medium text-gray-700 mb-1">Energy Source *</label>
+                <input type="text" name="energy_source" id="energy_source" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Grid Connected *</label>
+                <div class="flex items-center space-x-4 mt-1">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="is_grid_connected" value="true" checked
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">Yes</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="is_grid_connected" value="false"
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">No</span>
+                    </label>
+                </div>
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+
+        {% when SiteType::Road %}
+            <div>
+                <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (meters) *</label>
+                <input type="number" name="length" id="length" step="0.01" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="lanes" class="block text-sm font-medium text-gray-700 mb-1">Number of Lanes *</label>
+                <input type="number" name="lanes" id="lanes" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="surface" class="block text-sm font-medium text-gray-700 mb-1">Surface Type *</label>
+                <input type="text" name="surface" id="surface" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+
+        {% when SiteType::Housing %}
+            <div>
+                <label for="number_of_floors" class="block text-sm font-medium text-gray-700 mb-1">Number of Floors *</label>
+                <input type="number" name="number_of_floors" id="number_of_floors" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="number_of_entrances" class="block text-sm font-medium text-gray-700 mb-1">Number of Entrances *</label>
+                <input type="number" name="number_of_entrances" id="number_of_entrances" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="housing_type" class="block text-sm font-medium text-gray-700 mb-1">Housing Type *</label>
+                <input type="text" name="housing_type" id="housing_type" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="energy_efficiency" class="block text-sm font-medium text-gray-700 mb-1">Energy Efficiency *</label>
+                <select name="energy_efficiency" id="energy_efficiency" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="">Select Energy Efficiency</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+
+        {% when SiteType::Bridge %}
+            <div>
+                <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (meters) *</label>
+                <input type="number" name="length" id="length" step="0.01" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="road_material" class="block text-sm font-medium text-gray-700 mb-1">Road Material *</label>
+                <input type="text" name="road_material" id="road_material" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label for="max_load" class="block text-sm font-medium text-gray-700 mb-1">Maximum Load (tons) *</label>
+                <input type="number" name="max_load" id="max_load" step="0.01" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+
+        {% when SiteType::Park %}
+            <div>
+                <label for="area" class="block text-sm font-medium text-gray-700 mb-1">Area (square km) *</label>
+                <input type="number" name="area" id="area" step="0.01" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Has Playground *</label>
+                <div class="flex items-center space-x-4 mt-1">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="has_playground" value="true"
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">Yes</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="has_playground" value="false" checked
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">No</span>
+                    </label>
+                </div>
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Has Lighting *</label>
+                <div class="flex items-center space-x-4 mt-1">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="has_lighting" value="true"
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">Yes</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="has_lighting" value="false" checked
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                        <span class="ml-2">No</span>
+                    </label>
+                </div>
+                <div class="validation-message text-xs text-red-500 mt-1"></div>
+            </div>
+    {% endmatch %}
+</div>

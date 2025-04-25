@@ -6,9 +6,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::departments::{Area, Department};
 
 // Enums for site types and risk levels
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -246,6 +248,164 @@ pub struct SiteFilter {
     pub risk_level: Option<RiskLevel>,
     #[serde(flatten)]
     pub pagination: PaginationParams,
+}
+
+// Template structs
+#[derive(Template)]
+#[template(path = "sites/index.html")]
+struct SitesTemplate {
+    sites: Vec<Site>,
+    filters: SiteFilter,
+    areas: Vec<Area>,
+    departments: Vec<Department>,
+    clients: Vec<Client>,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "sites/new.html")]
+struct SiteNewTemplate {
+    areas: Vec<Area>,
+    clients: Vec<Client>,
+}
+
+#[derive(Template)]
+#[template(path = "sites/details.html")]
+struct SiteDetailsTemplate {
+    site_details: SiteDetails,
+    client: Client,
+    area: Area,
+    department: Department,
+}
+
+#[derive(Template)]
+#[template(path = "sites/edit.html")]
+struct SiteEditTemplate {
+    site_details: SiteDetails,
+    areas: Vec<Area>,
+    clients: Vec<Client>,
+}
+
+// HTMX Component templates
+#[derive(Template)]
+#[template(path = "components/sites/table_rows.html")]
+struct SiteRowsTemplate {
+    sites: Vec<Site>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/details.html")]
+struct SiteDetailsComponentTemplate {
+    site_details: SiteDetails,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/schedule.html")]
+struct SiteScheduleTemplate {
+    tasks: Vec<Task>,
+    site_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/materials.html")]
+struct SiteMaterialsTemplate {
+    materials: Vec<MaterialUsage>,
+    site_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/equipment.html")]
+struct SiteEquipmentTemplate {
+    equipment: Vec<EquipmentAllocation>,
+    site_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/brigades.html")]
+struct SiteBrigadesTemplate {
+    brigades: Vec<Brigade>,
+    site_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/reports.html")]
+struct SiteReportsTemplate {
+    reports: Vec<Report>,
+    site_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/type_fields.html")]
+struct SiteTypeFieldsTemplate {
+    site_type: SiteType,
+}
+
+// New types needed for templates
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Client {
+    pub id: i32,
+    pub name: String,
+    pub inn: String,
+    pub address: String,
+    pub contact_person_email: String,
+    pub contact_person_name: String,
+    pub is_vip: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct MaterialUsage {
+    pub material_id: i32,
+    pub name: String,
+    pub expected_amount: f64,
+    pub actual_amount: Option<f64>,
+    pub units: String,
+    pub cost_per_unit: f64,
+    pub task_name: String,
+    pub task_id: i32,
+    pub exceeds_estimate: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct EquipmentAllocation {
+    pub equipment_id: i32,
+    pub name: String,
+    pub amount: i32,
+    pub period_start: String,
+    pub period_end: String,
+    pub is_active: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Brigade {
+    pub id: i32,
+    pub brigadier_id: i32,
+    pub brigadier_name: String,
+    pub workers_count: i32,
+    pub task_id: Option<i32>,
+    pub task_name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Report {
+    pub id: i32,
+    pub title: String,
+    pub date: String,
+    pub report_type: String,
+    pub file_url: Option<String>,
 }
 
 // Page Endpoints

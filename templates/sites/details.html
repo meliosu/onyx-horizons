@@ -1,0 +1,462 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">{{ site_details.site.description }}</h1>
+            <p class="text-gray-600">
+                {{ site_details.site.site_type | replace(from="_", to=" ") | capitalize }} Site
+            </p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="/sites/{{ site_details.site.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
+                <i class="fas fa-pencil mr-2"></i> Edit
+            </a>
+            <button class="px-4 py-2 bg-red-100 rounded-lg text-red-700 hover:bg-red-200"
+                    hx-delete="/api/sites/{{ site_details.site.id }}"
+                    hx-confirm="Are you sure you want to delete this site? This cannot be undone."
+                    hx-target="body">
+                <i class="fas fa-trash mr-2"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Site Info Card -->
+    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-lg font-medium">Site Information</h2>
+        </div>
+        <div class="p-6">
+            <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Description</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ site_details.site.description }}</dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Site Type</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if site_details.site.site_type == "power_plant" %}bg-purple-100 text-purple-800
+                            {% elif site_details.site.site_type == "road" %}bg-blue-100 text-blue-800
+                            {% elif site_details.site.site_type == "housing" %}bg-green-100 text-green-800
+                            {% elif site_details.site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
+                            {% elif site_details.site.site_type == "park" %}bg-indigo-100 text-indigo-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ site_details.site.site_type | replace(from="_", to=" ") | capitalize }}
+                        </span>
+                    </dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Risk Level</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if site_details.site.risk_level == "high" %}bg-red-100 text-red-800
+                            {% elif site_details.site.risk_level == "medium" %}bg-yellow-100 text-yellow-800
+                            {% elif site_details.site.risk_level == "low" %}bg-green-100 text-green-800
+                            {% endif %}">
+                            {{ site_details.site.risk_level | capitalize }}
+                        </span>
+                    </dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Construction Area</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <a href="/areas/{{ area.id }}" class="text-blue-600 hover:underline">
+                            {{ area.name }}
+                        </a>
+                    </dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Department</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <a href="/departments/{{ department.id }}" class="text-blue-600 hover:underline">
+                            {{ department.name }}
+                        </a>
+                    </dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Client</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        <a href="/clients/{{ client.id }}" class="text-blue-600 hover:underline">
+                            {{ client.name }}
+                            {% if client.is_vip %}<i class="fas fa-star text-yellow-400 ml-1"></i>{% endif %}
+                        </a>
+                    </dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Location</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ site_details.site.location.latitude }}, {{ site_details.site.location.longitude }}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Type-specific Details Card -->
+    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-lg font-medium">{{ site_details.site.site_type | replace(from="_", to=" ") | capitalize }} Details</h2>
+        </div>
+        <div class="p-6">
+            <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+                {% match site_details.type_details %}
+                    {% when SiteTypeDetails::PowerPlant(details) %}
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Energy Output</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.energy_output }} MW</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Energy Source</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.energy_source }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Grid Connected</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.is_grid_connected | string | capitalize }}</dd>
+                        </div>
+
+                    {% when SiteTypeDetails::Road(details) %}
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Length</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.length }} meters</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Lanes</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.lanes }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Surface</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.surface }}</dd>
+                        </div>
+
+                    {% when SiteTypeDetails::Housing(details) %}
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Number of Floors</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.number_of_floors }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Number of Entrances</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.number_of_entrances }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Housing Type</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.housing_type }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Energy Efficiency</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.energy_efficiency | capitalize }}</dd>
+                        </div>
+
+                    {% when SiteTypeDetails::Bridge(details) %}
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Length</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.length }} meters</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Road Material</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.road_material }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Maximum Load</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.max_load }} tons</dd>
+                        </div>
+
+                    {% when SiteTypeDetails::Park(details) %}
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Area</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.area }} square km</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Has Playground</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.has_playground | string | capitalize }}</dd>
+                        </div>
+                        <div class="col-span-1">
+                            <dt class="text-sm font-medium text-gray-500">Has Lighting</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ details.has_lighting | string | capitalize }}</dd>
+                        </div>
+                {% endmatch %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="mb-6">
+        <nav class="flex space-x-4" aria-label="Tabs">
+            <button class="px-3 py-2 text-sm font-medium rounded-md bg-white shadow text-gray-900"
+                    id="tab-schedule"
+                    onclick="showTab('schedule')">
+                Construction Schedule
+            </button>
+            <button class="px-3 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700"
+                    id="tab-materials"
+                    onclick="showTab('materials')">
+                Materials
+            </button>
+            <button class="px-3 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700"
+                    id="tab-equipment"
+                    onclick="showTab('equipment')">
+                Equipment
+            </button>
+            <button class="px-3 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700"
+                    id="tab-brigades"
+                    onclick="showTab('brigades')">
+                Brigades
+            </button>
+            <button class="px-3 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700"
+                    id="tab-reports"
+                    onclick="showTab('reports')">
+                Reports
+            </button>
+        </nav>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="tab-content-schedule" class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-medium">Construction Schedule</h2>
+            <button class="px-3 py-1 btn-primary rounded-md text-sm"
+                    onclick="showTaskModal()">
+                <i class="fas fa-plus mr-1"></i> Add Task
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected End</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual End</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brigade</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-table"
+                       hx-get="/api/sites/{{ site_details.site.id }}/schedule"
+                       hx-trigger="load">
+                    <!-- Schedule will be loaded via HTMX -->
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-content-materials" class="bg-white rounded-lg shadow hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium">Materials Usage</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="materials-table"
+                       hx-get="/api/sites/{{ site_details.site.id }}/materials"
+                       hx-trigger="load">
+                    <!-- Materials will be loaded via HTMX -->
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-content-equipment" class="bg-white rounded-lg shadow hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium">Allocated Equipment</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipment</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="equipment-table"
+                       hx-get="/api/sites/{{ site_details.site.id }}/equipment"
+                       hx-trigger="load">
+                    <!-- Equipment will be loaded via HTMX -->
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-content-brigades" class="bg-white rounded-lg shadow hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium">Assigned Brigades</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brigade ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brigadier</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Workers</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Task</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="brigades-table"
+                       hx-get="/api/sites/{{ site_details.site.id }}/brigades"
+                       hx-trigger="load">
+                    <!-- Brigades will be loaded via HTMX -->
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-content-reports" class="bg-white rounded-lg shadow hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium">Construction Reports</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Title</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reports-table"
+                       hx-get="/api/sites/{{ site_details.site.id }}/reports"
+                       hx-trigger="load">
+                    <!-- Reports will be loaded via HTMX -->
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Task Modal (initially hidden) -->
+    <div id="task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="z-index: 50;">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium">Add New Task</h3>
+                <button onclick="hideTaskModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form hx-post="/api/sites/{{ site_details.site.id }}/tasks" hx-target="#schedule-table" hx-swap="innerHTML" onsubmit="hideTaskModal()">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label for="task_name" class="block text-sm font-medium text-gray-700 mb-1">Task Name *</label>
+                        <input type="text" name="name" id="task_name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="task_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea name="description" id="task_description" rows="2"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="period_start" class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+                            <input type="date" name="period_start" id="period_start" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        </div>
+                        <div>
+                            <label for="expected_period_end" class="block text-sm font-medium text-gray-700 mb-1">Expected End Date *</label>
+                            <input type="date" name="expected_period_end" id="expected_period_end" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="brigade_id" class="block text-sm font-medium text-gray-700 mb-1">Brigade</label>
+                        <select name="brigade_id" id="brigade_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            <option value="">Select a Brigade (Optional)</option>
+                            <!-- Will be populated from backend -->
+                        </select>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 text-right">
+                    <button type="button" onclick="hideTaskModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-md">
+                        Create Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('[id^="tab-content-"]').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            
+            // Reset all tab button styles
+            document.querySelectorAll('[id^="tab-"]').forEach(button => {
+                button.classList.remove('bg-white', 'shadow', 'text-gray-900');
+                button.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            
+            // Apply active style to clicked tab button
+            document.getElementById(`tab-${tabName}`).classList.remove('text-gray-500', 'hover:text-gray-700');
+            document.getElementById(`tab-${tabName}`).classList.add('bg-white', 'shadow', 'text-gray-900');
+        }
+
+        function showTaskModal() {
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        function hideTaskModal() {
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+    </script>
+</div>
+{% endblock %}
