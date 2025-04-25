@@ -65,6 +65,7 @@ CREATE TABLE site (
     id SERIAL PRIMARY KEY,
     area_id INTEGER NOT NULL REFERENCES area(id),
     client_id INTEGER NOT NULL REFERENCES client(id),
+    name TEXT NOT NULL,
     type site_type NOT NULL,
     location POINT NOT NULL,
     risk_level risk_level NOT NULL,

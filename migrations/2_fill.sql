@@ -196,22 +196,22 @@ INSERT INTO assignment (brigade_id, worker_id) VALUES
 (5, 30);
 
 -- Sites
-INSERT INTO site (area_id, client_id, type, location, risk_level, description) VALUES
+INSERT INTO site (area_id, client_id, name, type, location, risk_level, description) VALUES
 -- Power Plants
-(1, 5, 'power_plant', point(40.7128, -74.0060), 'high', 'Solar power plant with 500 acres of solar panels'),
-(1, 10, 'power_plant', point(41.8781, -87.6298), 'high', 'Natural gas power plant with 600MW capacity'),
+(1, 5, 'Newbrook Solar Farm', 'power_plant', point(40.7128, -74.0060), 'high', 'Solar power plant with 500 acres of solar panels'),
+(1, 10, 'Midtown Energy Center', 'power_plant', point(41.8781, -87.6298), 'high', 'Natural gas power plant with 600MW capacity'),
 -- Roads
-(3, 7, 'road', point(37.7749, -122.4194), 'medium', 'Highway expansion project with 6 lanes'),
-(3, 1, 'road', point(39.9526, -75.1652), 'low', 'City road reconstruction with bike lanes'),
+(3, 7, 'West Highway Extension', 'road', point(37.7749, -122.4194), 'medium', 'Highway expansion project with 6 lanes'),
+(3, 1, 'Downtown Connector', 'road', point(39.9526, -75.1652), 'low', 'City road reconstruction with bike lanes'),
 -- Housing
-(5, 2, 'housing', point(34.0522, -118.2437), 'medium', 'Luxury apartment complex with 200 units'),
-(5, 6, 'housing', point(33.4484, -112.0740), 'low', 'Affordable housing development with 150 units'),
+(5, 2, 'Sunset Towers', 'housing', point(34.0522, -118.2437), 'medium', 'Luxury apartment complex with 200 units'),
+(5, 6, 'Meadow View Residences', 'housing', point(33.4484, -112.0740), 'low', 'Affordable housing development with 150 units'),
 -- Bridges
-(4, 4, 'bridge', point(37.8199, -122.4783), 'high', 'Major suspension bridge spanning 2000m'),
-(4, 1, 'bridge', point(38.6270, -90.1994), 'medium', 'Pedestrian bridge connecting city parks'),
+(4, 4, 'Harbor Crossing Bridge', 'bridge', point(37.8199, -122.4783), 'high', 'Major suspension bridge spanning 2000m'),
+(4, 1, 'Riverside Pedestrian Bridge', 'bridge', point(38.6270, -90.1994), 'medium', 'Pedestrian bridge connecting city parks'),
 -- Parks
-(6, 8, 'park', point(40.7829, -73.9654), 'low', 'Urban park with playground and gardens'),
-(6, 3, 'park', point(47.6062, -122.3321), 'low', 'Waterfront park with recreational facilities');
+(6, 8, 'Central Recreation Park', 'park', point(40.7829, -73.9654), 'low', 'Urban park with playground and gardens'),
+(6, 3, 'Waterfront Park', 'park', point(47.6062, -122.3321), 'low', 'Waterfront park with recreational facilities');
 
 -- Site specific details
 INSERT INTO power_plant (site_id, energy_output, energy_source, is_grid_connected) VALUES
@@ -249,13 +249,6 @@ INSERT INTO equipment (name, amount, purchase_date, purchase_cost, fuel_type) VA
 
 -- Equipment Allocation
 INSERT INTO equipment_allocation (equipment_id, department_id, site_id, amount, period_start, period_end) VALUES
--- Allocated to departments
-(1, 1, NULL, 3, '2022-01-01', '2024-12-31'),
-(1, 2, NULL, 4, '2022-01-01', '2024-12-31'),
-(1, 3, NULL, 3, '2022-01-01', '2024-12-31'),
-(2, 1, NULL, 2, '2022-01-01', '2024-12-31'),
-(2, 2, NULL, 2, '2022-01-01', '2024-12-31'),
-(2, 3, NULL, 1, '2022-01-01', '2024-12-31'),
 -- Allocated to sites
 (1, 1, 1, 1, '2022-01-01', '2023-05-30'),
 (2, 1, 1, 1, '2022-01-01', '2023-05-30'),

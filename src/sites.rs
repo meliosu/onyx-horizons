@@ -71,6 +71,7 @@ pub struct Site {
     pub id: i32,
     pub area_id: i32,
     pub client_id: i32,
+    pub name: String,
     pub site_type: SiteType,
     pub location: Location,
     pub risk_level: RiskLevel,
@@ -155,6 +156,7 @@ pub enum SiteTypeDetails {
 pub struct SiteCreate {
     pub area_id: i32,
     pub client_id: i32,
+    pub name: String,
     pub site_type: SiteType,
     pub latitude: f64,
     pub longitude: f64,
@@ -167,6 +169,7 @@ pub struct SiteCreate {
 pub struct SiteUpdate {
     pub area_id: i32,
     pub client_id: i32,
+    pub name: String,
     pub risk_level: RiskLevel,
     pub latitude: f64,
     pub longitude: f64,
