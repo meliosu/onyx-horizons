@@ -272,18 +272,18 @@ pub fn router() -> Router<Database> {
         // Page Endpoints
         .route("/equipment", get(equipment_page))
         .route("/equipment/new", get(equipment_new_page))
-        .route("/equipment/:id", get(equipment_details_page))
-        .route("/equipment/:id/edit", get(equipment_edit_page))
+        .route("/equipment/{id}", get(equipment_details_page))
+        .route("/equipment/{id}/edit", get(equipment_edit_page))
         // HTMX Endpoints - Equipment
         .route("/api/equipment", get(fetch_equipment).post(create_equipment))
-        .route("/api/equipment/:id", get(fetch_equipment_details).put(update_equipment).delete(delete_equipment))
+        .route("/api/equipment/{id}", get(fetch_equipment_details).put(update_equipment).delete(delete_equipment))
         // HTMX Endpoints - Allocations
-        .route("/api/equipment/:id/allocations", get(fetch_equipment_allocations).post(create_allocation))
-        .route("/api/equipment/:id/allocation-history", get(fetch_allocation_history))
-        .route("/api/equipment/allocations/:allocation_id", put(update_allocation).delete(delete_allocation))
+        .route("/api/equipment/{id}/allocations", get(fetch_equipment_allocations).post(create_allocation))
+        .route("/api/equipment/{id}/allocation-history", get(fetch_allocation_history))
+        .route("/api/equipment/allocations/{allocation_id}", put(update_allocation).delete(delete_allocation))
         // Equipment by relationship
-        .route("/api/equipment/by-department/:dept_id", get(fetch_equipment_by_department))
-        .route("/api/equipment/by-site/:site_id", get(fetch_equipment_by_site))
+        .route("/api/equipment/by-department/{dept_id}", get(fetch_equipment_by_department))
+        .route("/api/equipment/by-site/{site_id}", get(fetch_equipment_by_site))
         // Utility endpoints
         .route("/api/equipment/fuel-types", get(fetch_fuel_types))
 }

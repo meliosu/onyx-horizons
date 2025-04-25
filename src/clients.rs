@@ -157,11 +157,11 @@ pub fn router() -> Router<Database> {
         // Page Endpoints
         .route("/clients", get(clients_page))
         .route("/clients/new", get(client_new_page))
-        .route("/clients/:id", get(client_details_page))
-        .route("/clients/:id/edit", get(client_edit_page))
+        .route("/clients/{id}", get(client_details_page))
+        .route("/clients/{id}/edit", get(client_edit_page))
         // HTMX Endpoints
         .route("/api/clients", get(fetch_clients).post(create_client))
-        .route("/api/clients/:id", get(fetch_client_details).put(update_client).delete(delete_client))
-        .route("/api/clients/:id/sites", get(fetch_client_sites))
-        .route("/api/clients/check-inn/:inn", get(check_inn_unique))
+        .route("/api/clients/{id}", get(fetch_client_details).put(update_client).delete(delete_client))
+        .route("/api/clients/{id}/sites", get(fetch_client_sites))
+        .route("/api/clients/check-inn/{inn}", get(check_inn_unique))
 }

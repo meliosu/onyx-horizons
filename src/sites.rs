@@ -69,9 +69,9 @@ pub enum EnergyEfficiency {
 #[derive(Serialize, Deserialize)]
 pub struct Site {
     pub id: i32,
+    pub name: String,
     pub area_id: i32,
     pub client_id: i32,
-    pub name: String,
     pub site_type: SiteType,
     pub location: Location,
     pub risk_level: RiskLevel,
@@ -156,7 +156,6 @@ pub enum SiteTypeDetails {
 pub struct SiteCreate {
     pub area_id: i32,
     pub client_id: i32,
-    pub name: String,
     pub site_type: SiteType,
     pub latitude: f64,
     pub longitude: f64,
@@ -169,7 +168,6 @@ pub struct SiteCreate {
 pub struct SiteUpdate {
     pub area_id: i32,
     pub client_id: i32,
-    pub name: String,
     pub risk_level: RiskLevel,
     pub latitude: f64,
     pub longitude: f64,
@@ -420,19 +418,19 @@ pub fn router() -> Router<Database> {
         // Page Endpoints
         .route("/sites", get(sites_page))
         .route("/sites/new", get(site_new_page))
-        .route("/sites/:id", get(site_details_page))
-        .route("/sites/:id/edit", get(site_edit_page))
+        .route("/sites/{id}", get(site_details_page))
+        .route("/sites/{id}/edit", get(site_edit_page))
         // HTMX Endpoints
         .route("/api/sites", get(fetch_sites).post(create_site))
-        .route("/api/sites/:id", get(fetch_site_details).put(update_site).delete(delete_site))
-        .route("/api/sites/:id/schedule", get(fetch_site_schedule))
-        .route("/api/sites/:id/materials", get(fetch_site_materials))
-        .route("/api/sites/:id/equipment", get(fetch_site_equipment))
-        .route("/api/sites/:id/brigades", get(fetch_site_brigades))
-        .route("/api/sites/:id/reports", get(fetch_site_reports))
+        .route("/api/sites/{id}", get(fetch_site_details).put(update_site).delete(delete_site))
+        .route("/api/sites/{id}/schedule", get(fetch_site_schedule))
+        .route("/api/sites/{id}/materials", get(fetch_site_materials))
+        .route("/api/sites/{id}/equipment", get(fetch_site_equipment))
+        .route("/api/sites/{id}/brigades", get(fetch_site_brigades))
+        .route("/api/sites/{id}/reports", get(fetch_site_reports))
         .route("/api/sites/type-fields", get(fetch_site_type_fields))
-        .route("/api/sites/:id/tasks", post(create_site_task))
-        .route("/api/sites/by-department/:dept_id", get(fetch_sites_by_department))
-        .route("/api/sites/by-area/:area_id", get(fetch_sites_by_area))
+        .route("/api/sites/{id}/tasks", post(create_site_task))
+        .route("/api/sites/by-department/{dept_id}", get(fetch_sites_by_department))
+        .route("/api/sites/by-area/{area_id}", get(fetch_sites_by_area))
         .route("/api/sites/risk-levels", get(fetch_risk_levels))
 }

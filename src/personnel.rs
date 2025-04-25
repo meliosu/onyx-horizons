@@ -559,25 +559,25 @@ pub fn router() -> Router<Database> {
         // Page Endpoints - Technical Personnel
         .route("/personnel/technical", get(technical_personnel_page))
         .route("/personnel/technical/new", get(technical_personnel_new_page))
-        .route("/personnel/technical/:id", get(technical_personnel_details_page))
-        .route("/personnel/technical/:id/edit", get(technical_personnel_edit_page))
+        .route("/personnel/technical/{id}", get(technical_personnel_details_page))
+        .route("/personnel/technical/{id}/edit", get(technical_personnel_edit_page))
         // Page Endpoints - Workers
         .route("/personnel/workers", get(workers_page))
         .route("/personnel/workers/new", get(worker_new_page))
-        .route("/personnel/workers/:id", get(worker_details_page))
-        .route("/personnel/workers/:id/edit", get(worker_edit_page))
+        .route("/personnel/workers/{id}", get(worker_details_page))
+        .route("/personnel/workers/{id}/edit", get(worker_edit_page))
         // HTMX Endpoints - Technical Personnel
         .route("/api/personnel/technical", get(fetch_technical_personnel).post(create_technical_personnel))
-        .route("/api/personnel/technical/:id", get(fetch_technical_personnel_details).put(update_technical_personnel).delete(delete_technical_personnel))
+        .route("/api/personnel/technical/{id}", get(fetch_technical_personnel_details).put(update_technical_personnel).delete(delete_technical_personnel))
         .route("/api/personnel/technical/qualifications", get(fetch_qualifications))
         .route("/api/personnel/technical/positions", get(fetch_positions))
         // HTMX Endpoints - Workers
         .route("/api/personnel/workers", get(fetch_workers).post(create_worker))
-        .route("/api/personnel/workers/:id", get(fetch_worker_details).put(update_worker).delete(delete_worker))
+        .route("/api/personnel/workers/{id}", get(fetch_worker_details).put(update_worker).delete(delete_worker))
         .route("/api/personnel/workers/professions", get(fetch_professions))
-        .route("/api/personnel/workers/type-fields/:profession", get(fetch_profession_type_fields))
+        .route("/api/personnel/workers/type-fields/{profession}", get(fetch_profession_type_fields))
         // Personnel by relation
-        .route("/api/personnel/by-department/:dept_id", get(fetch_personnel_by_department))
-        .route("/api/personnel/by-area/:area_id", get(fetch_personnel_by_area))
-        .route("/api/personnel/by-brigade/:brigade_id", get(fetch_workers_by_brigade))
+        .route("/api/personnel/by-department/{dept_id}", get(fetch_personnel_by_department))
+        .route("/api/personnel/by-area/{area_id}", get(fetch_personnel_by_area))
+        .route("/api/personnel/by-brigade/{brigade_id}", get(fetch_workers_by_brigade))
 }

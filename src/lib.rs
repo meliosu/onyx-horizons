@@ -14,6 +14,7 @@ pub async fn router(postgres_url: &str) -> anyhow::Result<axum::Router> {
         .merge(brigades::router())
         .merge(tasks::router())
         .merge(reports::router())
+        .merge(helpers::router())
         .with_state(database);
 
     Ok(router)
@@ -28,3 +29,4 @@ mod clients;
 mod brigades;
 mod tasks;
 mod reports;
+mod helpers;
