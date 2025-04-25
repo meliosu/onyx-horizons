@@ -1,0 +1,57 @@
+{% if allocations|length == 0 %}
+<tr>
+    <td colspan="5" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No active allocations</p>
+    </td>
+</tr>
+{% else %}
+    {% for allocation in allocations %}
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if allocation.department_name %}
+                <a href="/departments/{{ allocation.department_id }}" class="text-blue-600 hover:underline">
+                    {{ allocation.department_name }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">Unknown</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if allocation.site_id and allocation.site_name %}
+                <a href="/sites/{{ allocation.site_id }}" class="text-blue-600 hover:underline">
+                    {{ allocation.site_name }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">Department level</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ allocation.amount }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ allocation.period_start }} to {{ allocation.period_end }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="flex justify-end space-x-2">
+                <button class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded"
+                        onclick="openEditAllocationModal({{ allocation.id }})">
+                    <i class="fas fa-pencil"></i>
+                </button>
+                <button class="px-2 py-1 text-red-600 hover:bg-red-100 rounded"
+                        hx-delete="/api/equipment/allocations/{{ allocation.id }}"
+                        hx-confirm="Are you sure you want to end this allocation?"
+                        hx-target="#allocations-table"
+                        hx-swap="innerHTML"
+                        hx-trigger="click">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information for the parent component -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

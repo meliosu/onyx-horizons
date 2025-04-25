@@ -1,0 +1,55 @@
+{% if allocations|length == 0 %}
+<tr>
+    <td colspan="6" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No allocation history</p>
+    </td>
+</tr>
+{% else %}
+    {% for allocation in allocations %}
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if allocation.department_name %}
+                <a href="/departments/{{ allocation.department_id }}" class="text-blue-600 hover:underline">
+                    {{ allocation.department_name }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">Unknown</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if allocation.site_id and allocation.site_name %}
+                <a href="/sites/{{ allocation.site_id }}" class="text-blue-600 hover:underline">
+                    {{ allocation.site_name }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">Department level</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ allocation.amount }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ allocation.period_start }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ allocation.period_end }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if allocation.is_active %}
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Active
+                </span>
+            {% else %}
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                    Ended
+                </span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information for the parent component -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

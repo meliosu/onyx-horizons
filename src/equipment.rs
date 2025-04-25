@@ -7,9 +7,11 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
 use std::str::FromStr;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::departments::{Department, Area};
 
 // Enums for fuel types
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -121,6 +123,91 @@ pub struct AllocationFilter {
     pub active_only: Option<bool>,
     #[serde(flatten)]
     pub pagination: PaginationParams,
+}
+
+// Template structs
+#[derive(Template)]
+#[template(path = "equipment/index.html")]
+struct EquipmentTemplate {
+    equipment: Vec<Equipment>,
+    filters: EquipmentFilter,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/new.html")]
+struct EquipmentNewTemplate {}
+
+#[derive(Template)]
+#[template(path = "equipment/details.html")]
+struct EquipmentDetailsTemplate {
+    equipment: Equipment,
+    current_allocations: Vec<Allocation>,
+    departments: Vec<Department>,
+    areas: Vec<Area>,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/edit.html")]
+struct EquipmentEditTemplate {
+    equipment: Equipment,
+}
+
+// HTMX Component templates
+#[derive(Template)]
+#[template(path = "components/equipment/table_rows.html")]
+struct EquipmentRowsTemplate {
+    equipment: Vec<Equipment>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/details.html")]
+struct EquipmentDetailsComponentTemplate {
+    equipment: Equipment,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/allocations.html")]
+struct EquipmentAllocationsTemplate {
+    allocations: Vec<Allocation>,
+    equipment_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/allocation_history.html")]
+struct AllocationHistoryTemplate {
+    allocations: Vec<Allocation>,
+    equipment_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/allocation_form.html")]
+struct AllocationFormTemplate {
+    equipment_id: i32,
+    departments: Vec<Department>,
+    sites: Vec<Site>,
+    allocation: Option<Allocation>,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/fuel_types.html")]
+struct FuelTypesTemplate {
+    selected: Option<FuelType>,
+}
+
+// Additional model types needed for templates
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Site {
+    pub id: i32,
+    pub description: String,
+    pub department_id: i32,
 }
 
 // Page Endpoints
