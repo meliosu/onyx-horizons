@@ -1,0 +1,116 @@
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Per Unit</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Amount</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Amount</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variance</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% if materials|length == 0 %}
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center">
+                    <p class="text-gray-500">No materials assigned to this task</p>
+                </td>
+            </tr>
+            {% else %}
+                {% for material in materials %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="/materials/{{ material.material_id }}" class="text-blue-600 hover:underline font-medium">
+                            {{ material.material_name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${{ material.material_cost }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ material.expected_amount }} {{ material.material_units }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if material.actual_amount %}
+                            {{ material.actual_amount }} {{ material.material_units }}
+                        {% else %}
+                            <span class="text-gray-400">Not recorded</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if material.actual_amount and material.excess_amount %}
+                            {% if material.excess_amount > 0 %}
+                                <span class="text-red-600">+{{ material.excess_amount }} {{ material.material_units }} ({{ material.excess_percentage }}%)</span>
+                            {% elif material.excess_amount < 0 %}
+                                <span class="text-green-600">{{ material.excess_amount }} {{ material.material_units }} ({{ material.excess_percentage }}%)</span>
+                            {% else %}
+                                <span class="text-gray-600">No variance</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <div class="flex justify-end space-x-2">
+                            <button class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded"
+                                    onclick="editMaterial({{ material.material_id }}, '{{ material.material_name }}', {{ material.expected_amount }}, {% if material.actual_amount %}{{ material.actual_amount }}{% else %}null{% endif %}, '{{ material.material_units }}')">
+                                <i class="fas fa-pencil"></i>
+                            </button>
+                            <button class="px-2 py-1 text-red-600 hover:bg-red-100 rounded"
+                                    hx-delete="/api/tasks/{{ task_id }}/materials/{{ material.material_id }}"
+                                    hx-confirm="Are you sure you want to remove this material from the task?"
+                                    hx-target="#task-materials"
+                                    hx-swap="innerHTML">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if current_page and total_pages > 1 %}
+<div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+    <div class="text-sm text-gray-700">
+        Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
+        <span class="font-medium">{{ [current_page * 10, materials|length]|min }}</span> of 
+        <span class="font-medium">{{ total_pages * 10 }}</span> materials
+    </div>
+    <div class="flex space-x-2">
+        {% if current_page > 1 %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/tasks/{{ task_id }}/materials?page={{ current_page - 1 }}" hx-target="#task-materials">
+            Previous
+        </a>
+        {% endif %}
+        
+        {% if current_page < total_pages %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/tasks/{{ task_id }}/materials?page={{ current_page + 1 }}" hx-target="#task-materials">
+            Next
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="p-6 flex justify-center" id="available-materials-container">
+    {% if available_materials|length > 0 %}
+    <div class="w-full p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <h3 class="text-sm font-medium text-gray-700 mb-2">Add Available Materials</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {% for material in available_materials %}
+            <button class="text-left px-3 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50"
+                    onclick="openMaterialModal(null, '{{ material.name }}', null, null, '{{ material.units }}')">
+                <div class="font-medium">{{ material.name }}</div>
+                <div class="text-xs text-gray-500">${{ material.cost }}/{{ material.units }}</div>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>

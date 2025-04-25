@@ -6,9 +6,12 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::brigades::Brigade;
+use crate::sites::Site;
 
 // Task types
 #[derive(Serialize, Deserialize)]
@@ -128,6 +131,113 @@ pub struct MaterialFilter {
     pub with_excesses: Option<bool>,
     #[serde(flatten)]
     pub pagination: PaginationParams,
+}
+
+// Template structs
+#[derive(Template)]
+#[template(path = "tasks/index.html")]
+struct TasksTemplate {
+    tasks: Vec<Task>,
+    filters: TaskFilter,
+    sites: Vec<Site>,
+    brigades: Vec<Brigade>,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/new.html")]
+struct TaskNewTemplate {
+    sites: Vec<Site>,
+    brigades: Vec<Brigade>,
+    materials: Vec<Material>,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/details.html")]
+struct TaskDetailsTemplate {
+    task: Task,
+    site: Site,
+    brigade: Option<Brigade>,
+    materials: Vec<Expenditure>,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/edit.html")]
+struct TaskEditTemplate {
+    task: Task,
+    sites: Vec<Site>,
+    brigades: Vec<Brigade>,
+}
+
+#[derive(Template)]
+#[template(path = "materials/index.html")]
+struct MaterialsTemplate {
+    materials: Vec<Material>,
+    filters: MaterialFilter,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "materials/new.html")]
+struct MaterialNewTemplate {}
+
+#[derive(Template)]
+#[template(path = "materials/details.html")]
+struct MaterialDetailsTemplate {
+    material: Material,
+    tasks: Vec<Expenditure>,
+}
+
+#[derive(Template)]
+#[template(path = "materials/edit.html")]
+struct MaterialEditTemplate {
+    material: Material,
+}
+
+// HTMX Component templates
+#[derive(Template)]
+#[template(path = "components/tasks/table_rows.html")]
+struct TaskRowsTemplate {
+    tasks: Vec<Task>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/materials/table_rows.html")]
+struct MaterialRowsTemplate {
+    materials: Vec<Material>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/tasks/materials.html")]
+struct TaskMaterialsTemplate {
+    materials: Vec<Expenditure>,
+    task_id: i32,
+    available_materials: Vec<Material>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/materials/tasks.html")]
+struct MaterialTasksTemplate {
+    tasks: Vec<Expenditure>,
+    material_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/tasks/expenditure_form.html")]
+struct ExpenditureFormTemplate {
+    task_id: i32,
+    material_id: i32,
+    expenditure: Option<Expenditure>,
 }
 
 // Page Endpoints - Tasks

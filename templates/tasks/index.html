@@ -1,0 +1,154 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Tasks</h1>
+        <a href="/tasks/new" class="btn-primary px-4 py-2 rounded-lg">
+            <i class="fas fa-plus mr-2"></i> New Task
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Filter Section -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <form hx-get="/api/tasks" hx-target="#tasks-table" hx-trigger="submit" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="site_id" class="block text-sm font-medium text-gray-700 mb-1">Site</label>
+                    <select name="site_id" id="site_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <option value="">All Sites</option>
+                        {% for site in sites %}
+                        <option value="{{ site.id }}" {% if filters.site_id == site.id %}selected{% endif %}>
+                            {{ site.description }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="brigade_id" class="block text-sm font-medium text-gray-700 mb-1">Brigade</label>
+                    <select name="brigade_id" id="brigade_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <option value="">All Brigades</option>
+                        {% for brigade in brigades %}
+                        <option value="{{ brigade.id }}" {% if filters.brigade_id == brigade.id %}selected{% endif %}>
+                            Brigade #{{ brigade.id }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="completed" value="true" {% if filters.completed %}checked{% endif %}
+                                  class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-700">Completed</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="overdue" value="true" {% if filters.overdue %}checked{% endif %}
+                                  class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-700">Overdue</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ filters.start_date | default(value="") }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ filters.end_date | default(value="") }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="bg-primary text-white px-4 py-2 rounded-md shadow-sm">
+                        <i class="fas fa-filter mr-2"></i> Filter
+                    </button>
+                    <button type="reset" class="ml-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700">
+                        <i class="fas fa-undo mr-2"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="#" hx-get="/api/tasks?sort_by=name&sort_dir=asc" hx-target="#tasks-table">
+                                Name
+                                <i class="fas fa-sort ml-1"></i>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="#" hx-get="/api/tasks?sort_by=site&sort_dir=asc" hx-target="#tasks-table">
+                                Site
+                                <i class="fas fa-sort ml-1"></i>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Brigade
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="#" hx-get="/api/tasks?sort_by=start&sort_dir=asc" hx-target="#tasks-table">
+                                Period
+                                <i class="fas fa-sort ml-1"></i>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="#" hx-get="/api/tasks?sort_by=status&sort_dir=asc" hx-target="#tasks-table">
+                                Status
+                                <i class="fas fa-sort ml-1"></i>
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Progress
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tasks-table" class="bg-white divide-y divide-gray-200" 
+                       hx-get="/api/tasks" hx-trigger="load">
+                    <!-- Table rows will be loaded by HTMX -->
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page | default(value=20) + 1 }}</span> to 
+                <span class="font-medium">{{ current_page * filters.pagination.per_page | default(value=20) }}</span> of 
+                <span class="font-medium">{{ total_pages * filters.pagination.per_page | default(value=20) }}</span> results
+            </div>
+            <div class="flex space-x-2">
+                {% if current_page > 1 %}
+                <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                   hx-get="/api/tasks?page={{ current_page - 1 }}" hx-target="#tasks-table">
+                    Previous
+                </a>
+                {% endif %}
+                
+                {% if current_page < total_pages %}
+                <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                   hx-get="/api/tasks?page={{ current_page + 1 }}" hx-target="#tasks-table">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

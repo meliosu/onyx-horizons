@@ -1,0 +1,97 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">{{ material.name }}</h1>
+            <p class="text-gray-600">Material Details</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="/materials/{{ material.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
+                <i class="fas fa-pencil mr-2"></i> Edit
+            </a>
+            <button class="px-4 py-2 bg-red-100 rounded-lg text-red-700 hover:bg-red-200"
+                    hx-delete="/api/materials/{{ material.id }}"
+                    hx-confirm="Are you sure you want to delete this material? This action cannot be undone."
+                    hx-target="body"
+                    hx-push-url="true"
+                    hx-redirect="/materials">
+                <i class="fas fa-trash mr-2"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Material Information Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Basic Info Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Material Information</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ material.name }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Unit of Measurement</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ material.units }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Cost per Unit</dt>
+                        <dd class="mt-1 text-sm text-gray-900">${{ material.cost }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Usage Statistics Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-2">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Usage Statistics</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Total Usage</dt>
+                        <dd class="mt-1 text-xl font-semibold">
+                            {{ material.total_usage | default(value=0) }} {{ material.units }}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Tasks Using</dt>
+                        <dd class="mt-1 text-xl font-semibold">
+                            {{ material.tasks_using_count | default(value=0) }}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Total Value</dt>
+                        <dd class="mt-1 text-xl font-semibold">
+                            ${{ material.total_usage | default(value=0) * material.cost }}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage by Task Section -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+            <h2 class="text-lg font-medium">Usage by Task</h2>
+        </div>
+        <div id="tasks-content" 
+             hx-get="/api/materials/{{ material.id }}/tasks" 
+             hx-trigger="load">
+            <!-- Tasks will be loaded via HTMX -->
+            <div class="p-6 text-center">
+                <div class="animate-pulse flex justify-center">
+                    <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

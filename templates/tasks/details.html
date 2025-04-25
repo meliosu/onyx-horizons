@@ -1,0 +1,366 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">{{ task.name }}</h1>
+            <p class="text-gray-600">Task Details</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="/tasks/{{ task.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
+                <i class="fas fa-pencil mr-2"></i> Edit
+            </a>
+            {% if not task.is_completed %}
+                <button id="complete-task-btn" class="px-4 py-2 bg-green-100 rounded-lg text-green-700 hover:bg-green-200">
+                    <i class="fas fa-check mr-2"></i> Complete
+                </button>
+            {% endif %}
+            <button class="px-4 py-2 bg-red-100 rounded-lg text-red-700 hover:bg-red-200"
+                    hx-delete="/api/tasks/{{ task.id }}"
+                    hx-confirm="Are you sure you want to delete this task? This action cannot be undone."
+                    hx-target="body"
+                    hx-push-url="true"
+                    hx-redirect="/tasks">
+                <i class="fas fa-trash mr-2"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Task Information Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Task Details Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Task Information</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ task.name }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ task.description | default(value="No description") }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Site</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <a href="/sites/{{ site.id }}" class="text-blue-600 hover:underline">
+                                {{ site.description }}
+                            </a>
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Brigade</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if brigade %}
+                                <a href="/brigades/{{ brigade.id }}" class="text-blue-600 hover:underline">
+                                    Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400">Not assigned</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Time Period Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Time Period</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Start Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ task.period_start }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Expected End Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ task.expected_period_end }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Actual End Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if task.actual_period_end %}
+                                {{ task.actual_period_end }}
+                            {% else %}
+                                <span class="text-gray-400">Not completed</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Status</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Current Status</dt>
+                        <dd class="mt-1">
+                            {% if task.is_completed %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Completed
+                                </span>
+                            {% elif task.is_overdue %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Overdue
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    In Progress
+                                </span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Completion</dt>
+                        <dd class="mt-1">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-primary h-2.5 rounded-full" style="width: {{ task.completion_percentage | default(value=0) }}%"></div>
+                            </div>
+                            <p class="text-xs mt-1 text-gray-500">{{ task.completion_percentage | default(value=0) }}% complete</p>
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Material Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ materials|length }} materials assigned
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Materials Section -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b flex justify-between items-center">
+            <h2 class="text-lg font-medium">Materials</h2>
+            <button id="add-material-btn" class="px-3 py-1 btn-primary rounded-md text-sm">
+                <i class="fas fa-plus mr-1"></i> Add Material
+            </button>
+        </div>
+        <div id="task-materials" 
+             hx-get="/api/tasks/{{ task.id }}/materials"
+             hx-trigger="load">
+            <!-- Materials will be loaded via HTMX -->
+            <div class="p-6 text-center">
+                <div class="animate-pulse flex justify-center">
+                    <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Material Modal -->
+    <div id="material-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium" id="modal-title">Add Material</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="closeMaterialModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="material-form" hx-post="/api/tasks/{{ task.id }}/materials" hx-target="#task-materials" hx-swap="innerHTML">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label for="material_id" class="block text-sm font-medium text-gray-700 mb-1">Material *</label>
+                        <select name="material_id" id="material_id" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            <option value="" disabled selected>Select Material</option>
+                            {% for material in materials %}
+                                <option value="{{ material.material_id }}">{{ material.material_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="expected_amount" class="block text-sm font-medium text-gray-700 mb-1">Expected Amount *</label>
+                        <div class="flex">
+                            <input type="number" name="expected_amount" id="expected_amount" step="0.01" min="0.01" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            <span class="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md">
+                                <span id="material-unit">units</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="actual-amount-container" class="hidden">
+                        <label for="actual_amount" class="block text-sm font-medium text-gray-700 mb-1">Actual Amount</label>
+                        <div class="flex">
+                            <input type="number" name="actual_amount" id="actual_amount" step="0.01" min="0"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            <span class="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md">
+                                <span id="material-unit-2">units</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Leave blank if not yet measured</p>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-4 bg-gray-50 text-right">
+                    <button type="button" onclick="closeMaterialModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-md" id="modal-submit">
+                        Add Material
+                    </button>
+                </div>
+                
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <input type="hidden" name="editing_material_id" id="editing_material_id" value="">
+            </form>
+        </div>
+    </div>
+
+    <!-- Complete Task Modal -->
+    <div id="complete-task-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium">Complete Task</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="closeCompleteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form hx-put="/api/tasks/{{ task.id }}/complete" hx-target="body" hx-push-url="true">
+                <div class="p-6 space-y-4">
+                    <p class="text-sm text-gray-600">Please enter the actual completion date for this task:</p>
+                    <div>
+                        <label for="actual_period_end" class="block text-sm font-medium text-gray-700 mb-1">Completion Date *</label>
+                        <input type="date" name="actual_period_end" id="actual_period_end" required
+                               value="{{ task.expected_period_end }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    <p class="text-sm text-gray-500">Note: This will mark the task as completed and can't be undone.</p>
+                </div>
+                
+                <div class="px-6 py-4 bg-gray-50 text-right">
+                    <button type="button" onclick="closeCompleteModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        Complete Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Material modal functions
+        function openMaterialModal(materialId = null, materialName = "", expectedAmount = "", actualAmount = "", unit = "units") {
+            const modal = document.getElementById('material-modal');
+            const titleEl = document.getElementById('modal-title');
+            const submitBtn = document.getElementById('modal-submit');
+            const form = document.getElementById('material-form');
+            const materialIdInput = document.getElementById('material_id');
+            const expectedAmountInput = document.getElementById('expected_amount');
+            const actualAmountInput = document.getElementById('actual_amount');
+            const actualAmountContainer = document.getElementById('actual-amount-container');
+            const editingMaterialId = document.getElementById('editing_material_id');
+            const unitSpans = document.querySelectorAll('#material-unit, #material-unit-2');
+            
+            if (materialId) {
+                // Edit mode
+                titleEl.textContent = "Edit Material";
+                submitBtn.textContent = "Update";
+                actualAmountContainer.classList.remove('hidden');
+                
+                // Set form method to PUT for the specific material
+                form.setAttribute('hx-post', '');
+                form.setAttribute('hx-put', `/api/tasks/{{ task.id }}/materials/${materialId}`);
+                
+                // Set values
+                if (materialIdInput) {
+                    materialIdInput.value = materialId;
+                    materialIdInput.disabled = true;
+                }
+                if (expectedAmountInput) expectedAmountInput.value = expectedAmount;
+                if (actualAmountInput) actualAmountInput.value = actualAmount || "";
+                if (editingMaterialId) editingMaterialId.value = materialId;
+                
+                // Update units display
+                unitSpans.forEach(span => {
+                    if (span) span.textContent = unit;
+                });
+            } else {
+                // Add mode
+                titleEl.textContent = "Add Material";
+                submitBtn.textContent = "Add Material";
+                actualAmountContainer.classList.add('hidden');
+                
+                // Reset form
+                form.setAttribute('hx-put', '');
+                form.setAttribute('hx-post', `/api/tasks/{{ task.id }}/materials`);
+                if (form) form.reset();
+                if (materialIdInput) materialIdInput.disabled = false;
+                if (editingMaterialId) editingMaterialId.value = "";
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeMaterialModal() {
+            document.getElementById('material-modal').classList.add('hidden');
+        }
+        
+        // Complete task modal functions
+        function openCompleteModal() {
+            document.getElementById('complete-task-modal').classList.remove('hidden');
+        }
+        
+        function closeCompleteModal() {
+            document.getElementById('complete-task-modal').classList.add('hidden');
+        }
+        
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const addMaterialBtn = document.getElementById('add-material-btn');
+            if (addMaterialBtn) {
+                addMaterialBtn.addEventListener('click', function() {
+                    openMaterialModal();
+                });
+            }
+            
+            const completeTaskBtn = document.getElementById('complete-task-btn');
+            if (completeTaskBtn) {
+                completeTaskBtn.addEventListener('click', function() {
+                    openCompleteModal();
+                });
+            }
+            
+            // Material selection change event
+            const materialSelect = document.getElementById('material_id');
+            if (materialSelect) {
+                materialSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption && selectedOption.dataset.unit) {
+                        document.querySelectorAll('#material-unit, #material-unit-2').forEach(span => {
+                            span.textContent = selectedOption.dataset.unit;
+                        });
+                    } else {
+                        document.querySelectorAll('#material-unit, #material-unit-2').forEach(span => {
+                            span.textContent = "units";
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Function to edit material (called from material table)
+        function editMaterial(materialId, materialName, expectedAmount, actualAmount, unit) {
+            openMaterialModal(materialId, materialName, expectedAmount, actualAmount, unit);
+        }
+    </script>
+</div>
+{% endblock %}
