@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 use database::Database;
 
 mod database;
