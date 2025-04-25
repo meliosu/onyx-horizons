@@ -13,9 +13,47 @@
 
         <!-- HTMX -->
         <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        
+        <style>
+            :root {
+                --primary: #0F1621;  /* Deep onyx */
+                --secondary: #FFC107; /* Gold/amber */
+                --background: #F5F7FA; /* Light gray */
+                --text-normal: #333333; /* Dark gray */
+                --text-heading: #000000; /* Black */
+                --success: #4CAF50; /* Green */
+                --warning: #FFBF00; /* Amber */
+                --error: #F44336; /* Red */
+            }
+            
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--background);
+                color: var(--text-normal);
+            }
+            
+            .sidebar {
+                background-color: var(--primary);
+                color: white;
+            }
+            
+            .btn-primary {
+                background-color: var(--secondary);
+                color: var(--primary);
+            }
+            
+            .stats-card {
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+        </style>
     </head>
 
-    <body>
-
+    <body class="flex h-screen bg-gray-100">
+        {% include "components/sidebar.html" %}
+        <div class="flex-1 overflow-x-hidden overflow-y-auto">
+            {% block content %}{% endblock %}
+        </div>
     </body>
 </html>

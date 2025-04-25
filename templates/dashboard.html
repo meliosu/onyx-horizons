@@ -1,0 +1,72 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+    
+    <!-- Quick Stats section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" 
+         hx-get="/components/stats" 
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <div class="stats-card h-24 animate-pulse flex items-center justify-center">
+            <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="stats-card h-24 animate-pulse flex items-center justify-center">
+            <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="stats-card h-24 animate-pulse flex items-center justify-center">
+            <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="stats-card h-24 animate-pulse flex items-center justify-center">
+            <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Alerts section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow mb-6">
+                <div class="px-4 py-5 border-b border-gray-200">
+                    <h2 class="text-lg font-medium">Alerts</h2>
+                </div>
+                <div class="p-4" 
+                     hx-get="/components/alerts" 
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <div class="animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Timeline section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-4 py-5 border-b border-gray-200">
+                    <h2 class="text-lg font-medium">Recent Activity</h2>
+                </div>
+                <div class="p-4" 
+                     hx-get="/components/activity" 
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <div class="animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6 mb-5"></div>
+                        
+                        <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3 mb-5"></div>
+                        
+                        <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
