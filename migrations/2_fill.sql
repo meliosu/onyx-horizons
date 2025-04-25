@@ -249,13 +249,6 @@ INSERT INTO equipment (name, amount, purchase_date, purchase_cost, fuel_type) VA
 
 -- Equipment Allocation
 INSERT INTO equipment_allocation (equipment_id, department_id, site_id, amount, period_start, period_end) VALUES
--- Allocated to departments
-(1, 1, NULL, 3, '2022-01-01', '2024-12-31'),
-(1, 2, NULL, 4, '2022-01-01', '2024-12-31'),
-(1, 3, NULL, 3, '2022-01-01', '2024-12-31'),
-(2, 1, NULL, 2, '2022-01-01', '2024-12-31'),
-(2, 2, NULL, 2, '2022-01-01', '2024-12-31'),
-(2, 3, NULL, 1, '2022-01-01', '2024-12-31'),
 -- Allocated to sites
 (1, 1, 1, 1, '2022-01-01', '2023-05-30'),
 (2, 1, 1, 1, '2022-01-01', '2023-05-30'),
