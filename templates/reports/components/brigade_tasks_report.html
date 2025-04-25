@@ -1,0 +1,182 @@
+<div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Brigade Tasks Report</h2>
+        <div class="text-sm text-gray-500">
+            <span>Brigade #{{ brigade_id }} - {{ brigade_name }}</span>
+            {% if start_date and end_date %}
+                <span class="mx-1">•</span>
+                <span>{{ start_date }} to {{ end_date }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="p-6">
+    {% if tasks|length == 0 %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No tasks found for this brigade in the specified date range.</p>
+        </div>
+    {% else %}
+        <div class="mb-6">
+            <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Tasks</div>
+                    <div class="text-2xl font-bold">{{ tasks|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Completed Tasks</div>
+                    <div class="text-2xl font-bold">{{ tasks|filter(attribute="is_completed", value=true)|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Overdue Tasks</div>
+                    <div class="text-2xl font-bold text-red-600">{{ tasks|filter(attribute="is_overdue", value=true)|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Days Worked</div>
+                    <div class="text-2xl font-bold">{{ tasks|map(attribute="days_worked")|sum }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Site Types Distribution Chart -->
+        <div class="mb-8">
+            <h3 class="text-lg font-medium mb-4">Tasks by Site Type</h3>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="h-64" id="site-types-chart">
+                    <!-- Chart will be rendered with JavaScript -->
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center">
+                            <div class="text-gray-400 mb-2">
+                                <i class="fas fa-chart-pie text-4xl"></i>
+                            </div>
+                            <p class="text-gray-500">Chart will be displayed here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Task Name
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Site
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Site Type
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Period
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Days Worked
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Materials
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for task in tasks %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/tasks/{{ task.task_id }}" class="text-blue-600 hover:underline font-medium">
+                                {{ task.task_name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/sites/{{ task.site_id }}" class="text-blue-600 hover:underline">
+                                {{ task.site_name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if task.site_type == "power_plant" %}bg-purple-100 text-purple-800
+                                {% elif task.site_type == "road" %}bg-blue-100 text-blue-800
+                                {% elif task.site_type == "housing" %}bg-green-100 text-green-800
+                                {% elif task.site_type == "bridge" %}bg-yellow-100 text-yellow-800
+                                {% elif task.site_type == "park" %}bg-indigo-100 text-indigo-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ task.site_type | replace(from="_", to=" ") | capitalize }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ task.period_start }} - 
+                            {% if task.is_completed %}
+                                {{ task.actual_period_end }}
+                            {% else %}
+                                {{ task.expected_period_end }}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if task.is_completed %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Completed
+                                </span>
+                            {% elif task.is_overdue %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Overdue
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    In Progress
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ task.days_worked }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ task.materials_count }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Simple chart rendering example - would be replaced with a real chart library in production
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartContainer = document.getElementById('site-types-chart');
+        if (chartContainer) {
+            // In a real implementation, this would use Chart.js or similar library
+            // This is just placeholder visualization logic
+            chartContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="flex space-x-4">
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 bg-purple-500" style="height: 100px;"></div>
+                            <div class="mt-2 text-xs">Power Plant</div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 bg-blue-500" style="height: 150px;"></div>
+                            <div class="mt-2 text-xs">Road</div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 bg-green-500" style="height: 80px;"></div>
+                            <div class="mt-2 text-xs">Housing</div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 bg-yellow-500" style="height: 120px;"></div>
+                            <div class="mt-2 text-xs">Bridge</div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 bg-indigo-500" style="height: 60px;"></div>
+                            <div class="mt-2 text-xs">Park</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+</script>

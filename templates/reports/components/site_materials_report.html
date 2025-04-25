@@ -1,0 +1,113 @@
+<div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Site Materials Report</h2>
+        <div class="text-sm text-gray-500">
+            <span>{{ site_name }}</span>
+            {% if start_date and end_date %}
+                <span class="mx-1">•</span>
+                <span>{{ start_date }} to {{ end_date }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="p-6">
+    {% if materials|length == 0 %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No materials found for this site in the specified date range.</p>
+        </div>
+    {% else %}
+        <div class="mb-6">
+            <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Materials</div>
+                    <div class="text-2xl font-bold">{{ materials|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Materials with Recorded Usage</div>
+                    <div class="text-2xl font-bold">{{ materials|filter(attribute="actual_amount", filter="is_some")|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Cost</div>
+                    <div class="text-2xl font-bold">${{ materials|map(attribute="total_cost")|sum }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Material
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Task
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Expected Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actual Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Difference
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cost per Unit
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Cost
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for material in materials %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/materials/{{ material.material_id }}" class="text-blue-600 hover:underline font-medium">
+                                {{ material.material_name }}
+                            </a>
+                            <div class="text-xs text-gray-500">{{ material.units }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/tasks/{{ material.task_id }}" class="text-blue-600 hover:underline">
+                                {{ material.task_name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ material.expected_amount }} {{ material.units }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if material.actual_amount %}
+                                {{ material.actual_amount }} {{ material.units }}
+                            {% else %}
+                                <span class="text-gray-400">Not recorded</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if material.difference_amount and material.difference_percentage %}
+                                {% if material.difference_amount > 0 %}
+                                    <span class="text-red-600">+{{ material.difference_amount }} {{ material.units }} ({{ material.difference_percentage }}%)</span>
+                                {% elif material.difference_amount < 0 %}
+                                    <span class="text-green-600">{{ material.difference_amount }} {{ material.units }} ({{ material.difference_percentage }}%)</span>
+                                {% else %}
+                                    <span class="text-gray-500">No difference</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            ${{ material.cost_per_unit }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            ${{ material.total_cost }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,217 @@
+<div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Material Excesses Report</h2>
+        <div class="text-sm text-gray-500">
+            <span class="text-red-600 font-medium">${{ total_cost_impact|round(2) }}</span> total cost impact
+        </div>
+    </div>
+</div>
+
+<div class="p-6">
+    {% if materials|length == 0 %}
+        <div class="text-center py-8">
+            <div class="text-green-500 mb-2">
+                <i class="fas fa-check-circle text-5xl"></i>
+            </div>
+            <p class="text-lg font-medium text-gray-700">No material excesses found!</p>
+            <p class="text-sm text-gray-500 mt-2">All materials are within estimated amounts.</p>
+        </div>
+    {% else %}
+        <div class="mb-6">
+            <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Materials with Excesses</div>
+                    <div class="text-2xl font-bold text-red-600">{{ materials|map(attribute="material_id")|unique|count }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Excess Records</div>
+                    <div class="text-2xl font-bold">{{ materials|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Average Excess %</div>
+                    <div class="text-2xl font-bold">
+                        {{ (materials|map(attribute="difference_percentage")|sum / materials|length)|round(1) }}%
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Cost Impact</div>
+                    <div class="text-2xl font-bold text-red-600">${{ total_cost_impact|round(2) }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Materials with Excesses -->
+        <div class="mb-8">
+            <h3 class="text-lg font-medium mb-4">Most Frequently Exceeded Materials</h3>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="h-64" id="materials-chart">
+                    <!-- Chart will be rendered with JavaScript -->
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center">
+                            <div class="text-gray-400 mb-2">
+                                <i class="fas fa-chart-bar text-4xl"></i>
+                            </div>
+                            <p class="text-gray-500">Chart will be displayed here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Excesses Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Material
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Site / Task
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Expected Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actual Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Difference
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            % Excess
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cost Impact
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for material in materials|sort(attribute="cost_impact", reverse=true) %}
+                    <tr class="{% if material.difference_percentage > 25 %}bg-red-50{% endif %}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/materials/{{ material.material_id }}" class="text-blue-600 hover:underline font-medium">
+                                {{ material.material_name }}
+                            </a>
+                            <div class="text-xs text-gray-500">{{ material.units }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/sites/{{ material.site_id }}" class="text-blue-600 hover:underline">
+                                {{ material.site_name }}
+                            </a>
+                            <div class="text-xs text-gray-500">
+                                <a href="/tasks/{{ material.task_id }}" class="hover:underline">
+                                    {{ material.task_name }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ material.expected_amount }} {{ material.units }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ material.actual_amount }} {{ material.units }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-red-600">
+                                +{{ material.difference_amount }} {{ material.units }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="{% if material.difference_percentage > 25 %}text-red-600 font-bold{% elif material.difference_percentage > 15 %}text-orange-600 font-medium{% else %}text-yellow-600{% endif %}">
+                                {{ material.difference_percentage }}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right font-medium">
+                            <span class="text-red-600">
+                                ${{ material.cost_impact|round(2) }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ (current_page - 1) * 20 + 1 }}</span> to 
+                <span class="font-medium">{{ [current_page * 20, total_count]|min }}</span> of 
+                <span class="font-medium">{{ total_count }}</span> material excesses
+            </div>
+            <div class="flex-1 flex justify-between sm:justify-end">
+                {% if current_page > 1 %}
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                   hx-get="/api/reports/materials/excesses?page={{ current_page - 1 }}"
+                   hx-target="#report-content">
+                    Previous
+                </a>
+                {% endif %}
+                {% if current_page < total_pages %}
+                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                   hx-get="/api/reports/materials/excesses?page={{ current_page + 1 }}"
+                   hx-target="#report-content">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Simple chart rendering example
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartContainer = document.getElementById('materials-chart');
+        if (chartContainer) {
+            // Group materials by material_id and count occurrences
+            const materialCounts = {};
+            const materialNames = {};
+            
+            // In a real app, this would be done server-side and passed via template
+            // Here we're simulating with the existing data
+            {% for material in materials %}
+            if (!materialCounts[{{ material.material_id }}]) {
+                materialCounts[{{ material.material_id }}] = 0;
+                materialNames[{{ material.material_id }}] = "{{ material.material_name }}";
+            }
+            materialCounts[{{ material.material_id }}]++;
+            {% endfor %}
+            
+            // Convert to array and sort
+            const sortedMaterials = Object.keys(materialCounts)
+                .map(id => ({ 
+                    id: id, 
+                    name: materialNames[id], 
+                    count: materialCounts[id]
+                }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5); // Top 5
+                
+            // Build the chart
+            let chartHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="flex space-x-4 items-end">
+            `;
+            
+            sortedMaterials.forEach(mat => {
+                chartHTML += `
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 bg-red-500" style="height: ${mat.count * 30}px;"></div>
+                        <div class="mt-2 text-xs truncate w-16 text-center" title="${mat.name}">
+                            ${mat.name.length > 10 ? mat.name.substring(0, 10) + '...' : mat.name}
+                        </div>
+                        <div class="text-xs">${mat.count} times</div>
+                    </div>
+                `;
+            });
+            
+            chartHTML += `
+                    </div>
+                </div>
+            `;
+            
+            chartContainer.innerHTML = chartHTML;
+        }
+    });
+</script>

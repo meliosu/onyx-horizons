@@ -1,0 +1,99 @@
+<div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Department Equipment Report</h2>
+        <div class="text-sm text-gray-500">
+            <span>{{ department_name }}</span>
+            {% if start_date and end_date %}
+                <span class="mx-1">•</span>
+                <span>{{ start_date }} to {{ end_date }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="p-6">
+    {% if equipment|length == 0 %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No equipment found for this department in the specified date range.</p>
+        </div>
+    {% else %}
+        <div class="mb-6">
+            <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Equipment Types</div>
+                    <div class="text-2xl font-bold">{{ equipment|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Units</div>
+                    <div class="text-2xl font-bold">{{ equipment|map(attribute="total_amount")|sum }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Allocated Units</div>
+                    <div class="text-2xl font-bold">{{ equipment|map(attribute="allocated_amount")|sum }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Available Units</div>
+                    <div class="text-2xl font-bold">{{ equipment|map(attribute="available_amount")|sum }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Equipment
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Allocated
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Available
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Allocation Rate
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Sites Using
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in equipment %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/equipment/{{ item.equipment_id }}" class="text-blue-600 hover:underline font-medium">
+                                {{ item.equipment_name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ item.total_amount }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ item.allocated_amount }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ item.available_amount }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ item.allocation_rate }}%"></div>
+                                </div>
+                                <span class="text-xs font-medium">{{ item.allocation_rate }}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ item.sites_count }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>

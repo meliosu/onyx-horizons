@@ -1,0 +1,131 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <h1 class="text-2xl font-bold mb-6">Site Reports</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Report Parameters Panel -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Report Parameters</h2>
+            <form id="report-form" hx-get="" hx-target="#report-content" hx-push-url="true" hx-swap="innerHTML">
+                <!-- Site Selection -->
+                <div class="mb-4">
+                    <label for="site_id" class="block text-sm font-medium text-gray-700 mb-1">Site</label>
+                    <select name="site_id" id="site_id" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            onchange="updateReportUrl()">
+                        <option value="" disabled {% if not selected_site_id %}selected{% endif %}>Select Site</option>
+                        {% for site in sites %}
+                            <option value="{{ site.id }}" {% if selected_site_id == site.id %}selected{% endif %}>
+                                {{ site.description }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Report Type Selection -->
+                <div class="mb-4">
+                    <label for="report_type" class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+                    <select name="report_type" id="report_type" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            onchange="updateReportUrl()">
+                        <option value="" disabled {% if not selected_report_type %}selected{% endif %}>Select Report Type</option>
+                        <option value="schedule" {% if selected_report_type == "schedule" %}selected{% endif %}>Schedule</option>
+                        <option value="materials" {% if selected_report_type == "materials" %}selected{% endif %}>Materials</option>
+                        <option value="equipment" {% if selected_report_type == "equipment" %}selected{% endif %}>Equipment</option>
+                        <option value="brigades" {% if selected_report_type == "brigades" %}selected{% endif %}>Brigades</option>
+                        <option value="construction" {% if selected_report_type == "construction" %}selected{% endif %}>Construction Summary</option>
+                    </select>
+                </div>
+                
+                <!-- Date Range (hidden for construction report) -->
+                <div id="date-range-fields" class="{% if selected_report_type == "construction" %}hidden{% endif %}">
+                    <div class="mb-4">
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ start_date | default(value="") }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ end_date | default(value="") }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full btn-primary px-4 py-2 rounded-md" id="generate-report-btn">
+                    <i class="fas fa-chart-bar mr-2"></i> Generate Report
+                </button>
+            </form>
+            
+            <div class="mt-6 border-t border-gray-200 pt-4">
+                <button onclick="printReport()" class="w-full mb-2 px-4 py-2 border border-gray-300 bg-white rounded-md shadow-sm hover:bg-gray-50">
+                    <i class="fas fa-print mr-2"></i> Print
+                </button>
+                <button onclick="downloadReportPDF()" class="w-full px-4 py-2 border border-gray-300 bg-white rounded-md shadow-sm hover:bg-gray-50">
+                    <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                </button>
+            </div>
+        </div>
+        
+        <!-- Report Content -->
+        <div class="lg:col-span-3">
+            <div id="report-content" class="bg-white rounded-lg shadow">
+                {% if not selected_site_id or not selected_report_type %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 mb-2">
+                            <i class="fas fa-chart-bar text-5xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-500">Select a site and report type to generate a report</h3>
+                    </div>
+                {% elif selected_report_type == "schedule" %}
+                    {% include "reports/components/site_schedule_report.html" %}
+                {% elif selected_report_type == "materials" %}
+                    {% include "reports/components/site_materials_report.html" %}
+                {% elif selected_report_type == "equipment" %}
+                    {% include "reports/components/site_equipment_report.html" %}
+                {% elif selected_report_type == "brigades" %}
+                    {% include "reports/components/site_brigades_report.html" %}
+                {% elif selected_report_type == "construction" %}
+                    {% include "reports/components/site_construction_report.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateReportUrl() {
+        const form = document.getElementById('report-form');
+        const siteId = document.getElementById('site_id').value;
+        const reportType = document.getElementById('report_type').value;
+        const dateRangeFields = document.getElementById('date-range-fields');
+        
+        if (siteId && reportType) {
+            form.setAttribute('hx-get', `/api/reports/sites/${siteId}/${reportType}`);
+            
+            // Show/hide date fields based on report type
+            if (reportType === 'construction') {
+                dateRangeFields.classList.add('hidden');
+            } else {
+                dateRangeFields.classList.remove('hidden');
+            }
+        }
+    }
+    
+    function printReport() {
+        window.print();
+    }
+    
+    function downloadReportPDF() {
+        // In a real implementation, this would trigger a download
+        alert('PDF download functionality would be implemented here');
+    }
+    
+    // Initialize the form URL if values are already selected
+    document.addEventListener('DOMContentLoaded', function() {
+        updateReportUrl();
+    });
+</script>
+{% endblock %}

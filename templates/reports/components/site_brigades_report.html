@@ -1,0 +1,108 @@
+<div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Site Brigades Report</h2>
+        <div class="text-sm text-gray-500">
+            <span>{{ site_name }}</span>
+            {% if start_date and end_date %}
+                <span class="mx-1">•</span>
+                <span>{{ start_date }} to {{ end_date }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="p-6">
+    {% if brigades|length == 0 %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No brigades worked at this site in the specified date range.</p>
+        </div>
+    {% else %}
+        <div class="mb-6">
+            <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Brigades</div>
+                    <div class="text-2xl font-bold">{{ brigades|length }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Workers</div>
+                    <div class="text-2xl font-bold">{{ brigades|map(attribute="workers_count")|sum }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Total Tasks</div>
+                    <div class="text-2xl font-bold">{{ brigades|map(attribute="tasks_count")|sum }}</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-500 uppercase">Completed Tasks</div>
+                    <div class="text-2xl font-bold">{{ brigades|map(attribute="tasks_completed_count")|sum }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Brigade
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Brigadier
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Workers
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Tasks
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            First Task
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Last Task
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Days Worked
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for brigade in brigades %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="/brigades/{{ brigade.brigade_id }}" class="text-blue-600 hover:underline font-medium">
+                                Brigade #{{ brigade.brigade_id }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ brigade.brigadier_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ brigade.workers_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ brigade.tasks_count }} ({{ brigade.tasks_completed_count }} completed)
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if brigade.first_task_date %}
+                                {{ brigade.first_task_date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if brigade.last_task_date %}
+                                {{ brigade.last_task_date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {{ brigade.total_days_worked }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>

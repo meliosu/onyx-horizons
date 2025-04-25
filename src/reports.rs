@@ -6,9 +6,13 @@ use axum::{
 };
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::departments::{Department, Area};
+use crate::sites::Site;
+use crate::brigades::Brigade;
 
 // Common report types
 #[derive(Deserialize)]
@@ -198,9 +202,201 @@ pub struct MaterialExcessReportItem {
     pub cost_impact: f64,
 }
 
+// Report parameter types
+#[derive(Deserialize)]
+pub struct ReportParams {
+    pub report_type: String,
+    #[serde(flatten)]
+    pub date_range: DateRangeParams,
+}
+
+// Template structs for report pages
+#[derive(Template)]
+#[template(path = "reports/departments.html")]
+struct DepartmentsReportsTemplate {
+    departments: Vec<Department>,
+    selected_department_id: Option<i32>,
+    selected_department: Option<Department>,
+    selected_report_type: Option<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+    report_data: Option<ReportData>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/sites.html")]
+struct SitesReportsTemplate {
+    sites: Vec<Site>,
+    selected_site_id: Option<i32>,
+    selected_site: Option<Site>,
+    selected_report_type: Option<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+    report_data: Option<ReportData>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/brigades.html")]
+struct BrigadesReportsTemplate {
+    brigades: Vec<Brigade>,
+    selected_brigade_id: Option<i32>,
+    selected_brigade: Option<Brigade>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+    report_data: Option<ReportData>,
+}
+
+// Template structs for specific reports
+#[derive(Template)]
+#[template(path = "reports/components/department_sites_report.html")]
+struct DepartmentSitesReportTemplate {
+    department_id: i32,
+    department_name: String,
+    sites: Vec<DepartmentSiteReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_equipment_report.html")]
+struct DepartmentEquipmentReportTemplate {
+    department_id: i32,
+    department_name: String,
+    equipment: Vec<DepartmentEquipmentReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_tasks_report.html")]
+struct DepartmentTasksReportTemplate {
+    department_id: i32,
+    department_name: String,
+    tasks: Vec<DepartmentTaskReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_materials_report.html")]
+struct DepartmentMaterialsReportTemplate {
+    department_id: i32,
+    department_name: String,
+    materials: Vec<DepartmentMaterialReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_schedule_report.html")]
+struct SiteScheduleReportTemplate {
+    site_id: i32,
+    site_name: String,
+    schedule_items: Vec<SiteScheduleReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_materials_report.html")]
+struct SiteMaterialsReportTemplate {
+    site_id: i32,
+    site_name: String,
+    materials: Vec<SiteMaterialReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_equipment_report.html")]
+struct SiteEquipmentReportTemplate {
+    site_id: i32,
+    site_name: String,
+    equipment: Vec<SiteEquipmentReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_brigades_report.html")]
+struct SiteBrigadesReportTemplate {
+    site_id: i32,
+    site_name: String,
+    brigades: Vec<SiteBrigadeReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_construction_report.html")]
+struct SiteConstructionReportTemplate {
+    site_id: i32,
+    site_name: String,
+    report: SiteConstructionReportItem,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/brigade_tasks_report.html")]
+struct BrigadeTasksReportTemplate {
+    brigade_id: i32,
+    brigade_name: String,
+    tasks: Vec<BrigadeTaskReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/brigade_sites_report.html")]
+struct BrigadeSitesReportTemplate {
+    brigade_id: i32,
+    brigade_name: String,
+    sites: Vec<BrigadeSiteReportItem>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/overdue_tasks_report.html")]
+struct OverdueTasksReportTemplate {
+    tasks: Vec<OverdueTaskReportItem>,
+    total_count: usize,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/material_excesses_report.html")]
+struct MaterialExcessesReportTemplate {
+    materials: Vec<MaterialExcessReportItem>,
+    total_cost_impact: f64,
+    total_count: usize,
+    current_page: usize,
+    total_pages: usize,
+}
+
+// Union type for report data
+#[derive(Serialize)]
+#[serde(tag = "type")]
+pub enum ReportData {
+    DepartmentSites(Vec<DepartmentSiteReportItem>),
+    DepartmentEquipment(Vec<DepartmentEquipmentReportItem>),
+    DepartmentTasks(Vec<DepartmentTaskReportItem>),
+    DepartmentMaterials(Vec<DepartmentMaterialReportItem>),
+    SiteSchedule(Vec<SiteScheduleReportItem>),
+    SiteMaterials(Vec<SiteMaterialReportItem>),
+    SiteEquipment(Vec<SiteEquipmentReportItem>),
+    SiteBrigades(Vec<SiteBrigadeReportItem>),
+    SiteConstruction(SiteConstructionReportItem),
+    BrigadeTasks(Vec<BrigadeTaskReportItem>),
+    BrigadeSites(Vec<BrigadeSiteReportItem>),
+    OverdueTasks(Vec<OverdueTaskReportItem>),
+    MaterialExcesses(Vec<MaterialExcessReportItem>),
+}
+
 // Page Endpoints
 async fn departments_reports_page(
     State(database): State<Database>,
+    Query(params): Query<ReportParams>,
 ) -> Html<String> {
     // Department reports page
     Html(String::new())
@@ -208,6 +404,7 @@ async fn departments_reports_page(
 
 async fn sites_reports_page(
     State(database): State<Database>,
+    Query(params): Query<ReportParams>,
 ) -> Html<String> {
     // Site reports page
     Html(String::new())
@@ -215,6 +412,7 @@ async fn sites_reports_page(
 
 async fn brigades_reports_page(
     State(database): State<Database>,
+    Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Brigade reports page
     Html(String::new())
