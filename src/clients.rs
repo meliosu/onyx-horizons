@@ -128,7 +128,9 @@ pub struct Site {
     pub site_type: String,
     pub status: String,
     pub area_name: Option<String>,
+    pub area_id: Option<i32>,
     pub department_name: Option<String>,
+    pub department_id: Option<i32>,
 }
 
 // Page Endpoints

@@ -39,6 +39,19 @@ impl FromStr for FuelType {
     }
 }
 
+// Update the FuelType enum implementation to better support templates
+impl std::fmt::Display for FuelType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FuelType::Diesel => write!(f, "Diesel"),
+            FuelType::Petrol => write!(f, "Petrol"),
+            FuelType::Electric => write!(f, "Electric"),
+            FuelType::Gas => write!(f, "Gas"),
+            FuelType::None => write!(f, "None"),
+        }
+    }
+}
+
 // Equipment types
 #[derive(Serialize, Deserialize)]
 pub struct Equipment {
