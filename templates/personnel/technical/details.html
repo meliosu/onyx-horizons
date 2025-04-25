@@ -1,0 +1,240 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">{{ personnel_details.technical_personnel.employee.first_name }} {{ personnel_details.technical_personnel.employee.last_name }}</h1>
+            <p class="text-gray-600">{{ personnel_details.technical_personnel.qualification | capitalize }}</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
+                <i class="fas fa-pencil mr-2"></i> Edit
+            </a>
+            <button class="px-4 py-2 bg-red-100 rounded-lg text-red-700 hover:bg-red-200"
+                    hx-delete="/api/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}"
+                    hx-confirm="Are you sure you want to delete this personnel record? This cannot be undone."
+                    hx-target="body">
+                <i class="fas fa-trash mr-2"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Personal Information Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-1">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Personal Information</h2>
+            </div>
+            <div class="p-6">
+                {% if personnel_details.technical_personnel.employee.photo %}
+                <div class="flex justify-center mb-6">
+                    <img src="{{ personnel_details.technical_personnel.employee.photo }}" alt="Employee Photo" class="rounded-full w-32 h-32 object-cover">
+                </div>
+                {% endif %}
+                
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ personnel_details.technical_personnel.employee.first_name }} 
+                            {{ personnel_details.technical_personnel.employee.middle_name | default(value="") }} 
+                            {{ personnel_details.technical_personnel.employee.last_name }}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Gender</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ personnel_details.technical_personnel.employee.gender | capitalize }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ personnel_details.technical_personnel.employee.phone_number }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Salary</dt>
+                        <dd class="mt-1 text-sm text-gray-900">${{ personnel_details.technical_personnel.employee.salary }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Professional Information Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-2">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">Professional Information</h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Qualification</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if personnel_details.technical_personnel.qualification == "engineer" %}bg-blue-100 text-blue-800
+                                {% elif personnel_details.technical_personnel.qualification == "technologist" %}bg-green-100 text-green-800
+                                {% elif personnel_details.technical_personnel.qualification == "technician" %}bg-purple-100 text-purple-800
+                                {% endif %}">
+                                {{ personnel_details.technical_personnel.qualification | capitalize }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Position</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if personnel_details.technical_personnel.position and personnel_details.technical_personnel.position != "none" %}
+                                {{ personnel_details.technical_personnel.position | capitalize }}
+                            {% else %}
+                                <span class="text-gray-400">No Position</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Department</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if department %}
+                                <a href="/departments/{{ department.id }}" class="text-blue-600 hover:underline">
+                                    {{ department.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400">Not assigned</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Area</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if area %}
+                                <a href="/areas/{{ area.id }}" class="text-blue-600 hover:underline">
+                                    {{ area.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400">Not assigned</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Education Level</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ personnel_details.technical_personnel.education_level }}</dd>
+                    </div>
+                    <div class="col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Project Manager</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if personnel_details.technical_personnel.is_project_manager %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    {% if personnel_details.technical_personnel.software_skills %}
+                    <div class="col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Software Skills</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% for skill in personnel_details.technical_personnel.software_skills %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1">
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Qualification-specific Card -->
+        <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-3">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-lg font-medium">{{ personnel_details.technical_personnel.qualification | capitalize }} Details</h2>
+            </div>
+            <div class="p-6">
+                {% match personnel_details.qualification_details %}
+                    {% when QualificationDetails::Technician(details) %}
+                        <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                            <div class="col-span-1">
+                                <dt class="text-sm font-medium text-gray-500">Safety Training Level</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ details.safety_training_level }}</dd>
+                            </div>
+                        </dl>
+                    {% when QualificationDetails::Technologist(details) %}
+                        <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                            <div class="col-span-3">
+                                <dt class="text-sm font-medium text-gray-500">Management Tools</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {% for tool in details.management_tools %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-1">
+                                            {{ tool }}
+                                        </span>
+                                    {% endfor %}
+                                </dd>
+                            </div>
+                        </dl>
+                    {% when QualificationDetails::Engineer(details) %}
+                        <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                            <div class="col-span-1">
+                                <dt class="text-sm font-medium text-gray-500">PE License ID</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ details.pe_license_id }}</dd>
+                            </div>
+                        </dl>
+                {% endmatch %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sites Section -->
+    {% if assigned_sites|length > 0 %}
+    <div class="mt-6">
+        <h2 class="text-lg font-medium mb-4">Assigned Sites</h2>
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for site in assigned_sites %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <a href="/sites/{{ site.id }}" class="text-blue-600 hover:underline font-medium">
+                                    {{ site.description }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if site.site_type == "power_plant" %}bg-purple-100 text-purple-800
+                                    {% elif site.site_type == "road" %}bg-blue-100 text-blue-800
+                                    {% elif site.site_type == "housing" %}bg-green-100 text-green-800
+                                    {% elif site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
+                                    {% elif site.site_type == "park" %}bg-indigo-100 text-indigo-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ site.site_type | replace(from="_", to=" ") | capitalize }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if site.status == "planned" %}bg-gray-100 text-gray-800
+                                    {% elif site.status == "in_progress" %}bg-blue-100 text-blue-800
+                                    {% elif site.status == "completed" %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ site.status | replace(from="_", to=" ") | capitalize }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <a href="/sites/{{ site.id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

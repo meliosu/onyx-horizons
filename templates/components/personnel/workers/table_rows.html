@@ -1,0 +1,69 @@
+{% if workers|length == 0 %}
+<tr>
+    <td colspan="6" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No workers found</p>
+    </td>
+</tr>
+{% else %}
+    {% for worker in workers %}
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/personnel/workers/{{ worker.employee.id }}" class="text-blue-600 hover:underline font-medium">
+                {{ worker.employee.first_name }} {{ worker.employee.last_name }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if worker.profession == "electrician" %}bg-blue-100 text-blue-800
+                {% elif worker.profession == "plumber" %}bg-green-100 text-green-800
+                {% elif worker.profession == "welder" %}bg-orange-100 text-orange-800
+                {% elif worker.profession == "driver" %}bg-purple-100 text-purple-800
+                {% elif worker.profession == "mason" %}bg-yellow-100 text-yellow-800
+                {% endif %}">
+                {{ worker.profession | capitalize }}
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {% if worker.brigade_name %}
+                <a href="/brigades/{{ worker.brigade_id }}" class="text-blue-600 hover:underline">
+                    Brigade #{{ worker.brigade_id }}
+                </a>
+            {% else %}
+                <span class="text-gray-400">Not assigned</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+            {% if worker.is_brigadier %}
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+            {% else %}
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ worker.employee.phone_number }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="flex justify-end space-x-2">
+                <a href="/personnel/workers/{{ worker.employee.id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a href="/personnel/workers/{{ worker.employee.id }}/edit" class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded">
+                    <i class="fas fa-pencil"></i>
+                </a>
+                <button class="px-2 py-1 text-red-600 hover:bg-red-100 rounded"
+                        hx-delete="/api/personnel/workers/{{ worker.employee.id }}"
+                        hx-confirm="Are you sure you want to delete this worker record? This cannot be undone."
+                        hx-target="closest tr"
+                        hx-swap="outerHTML">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information for parent component -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

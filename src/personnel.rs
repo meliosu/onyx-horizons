@@ -6,9 +6,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::departments::{Department, Area};
 
 // Enums for personnel types
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -354,6 +356,159 @@ pub struct WorkerFilter {
 #[derive(Deserialize)]
 pub struct ProfessionTypeQuery {
     pub profession: WorkerProfession,
+}
+
+// Template structs
+// Technical Personnel templates
+#[derive(Template)]
+#[template(path = "personnel/technical/index.html")]
+struct TechnicalPersonnelTemplate {
+    personnel: Vec<TechnicalPersonnel>,
+    filters: TechnicalPersonnelFilter,
+    departments: Vec<Department>,
+    areas: Vec<Area>,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/new.html")]
+struct TechnicalPersonnelNewTemplate {
+    departments: Vec<Department>,
+    areas: Vec<Area>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/details.html")]
+struct TechnicalPersonnelDetailsTemplate {
+    personnel_details: TechnicalPersonnelDetails,
+    department: Option<Department>,
+    area: Option<Area>,
+    assigned_sites: Vec<Site>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/edit.html")]
+struct TechnicalPersonnelEditTemplate {
+    personnel_details: TechnicalPersonnelDetails,
+    departments: Vec<Department>,
+    areas: Vec<Area>,
+}
+
+// Worker templates
+#[derive(Template)]
+#[template(path = "personnel/workers/index.html")]
+struct WorkersTemplate {
+    workers: Vec<Worker>,
+    filters: WorkerFilter,
+    brigades: Vec<Brigade>,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/new.html")]
+struct WorkerNewTemplate {
+    brigades: Vec<Brigade>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/details.html")]
+struct WorkerDetailsTemplate {
+    worker_details: WorkerDetails,
+    brigade: Option<Brigade>,
+    tasks_history: Vec<WorkerTask>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/edit.html")]
+struct WorkerEditTemplate {
+    worker_details: WorkerDetails,
+    brigades: Vec<Brigade>,
+}
+
+// HTMX component templates
+#[derive(Template)]
+#[template(path = "components/personnel/technical/table_rows.html")]
+struct TechnicalPersonnelRowsTemplate {
+    personnel: Vec<TechnicalPersonnel>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/technical/details.html")]
+struct TechnicalPersonnelDetailsComponentTemplate {
+    personnel_details: TechnicalPersonnelDetails,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/workers/table_rows.html")]
+struct WorkerRowsTemplate {
+    workers: Vec<Worker>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/workers/details.html")]
+struct WorkerDetailsComponentTemplate {
+    worker_details: WorkerDetails,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/qualifications.html")]
+struct QualificationsTemplate {
+    selected: Option<Qualification>,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/positions.html")]
+struct PositionsTemplate {
+    selected: Option<Position>,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/professions.html")]
+struct ProfessionsTemplate {
+    selected: Option<WorkerProfession>,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/profession_fields.html")]
+struct ProfessionFieldsTemplate {
+    profession: WorkerProfession,
+    details: Option<ProfessionDetails>,
+}
+
+// Additional models needed for templates
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Brigade {
+    pub id: i32,
+    pub brigadier_id: i32,
+    pub brigadier_name: String,
+    pub workers_count: i32,
+    pub current_site_id: Option<i32>,
+    pub current_site_name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Site {
+    pub id: i32,
+    pub description: String,
+    pub site_type: String,
+    pub status: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct WorkerTask {
+    pub id: i32,
+    pub name: String,
+    pub site_id: i32,
+    pub site_name: String,
+    pub period_start: String,
+    pub period_end: String,
+    pub status: String,
 }
 
 // Page Endpoints - Technical Personnel
