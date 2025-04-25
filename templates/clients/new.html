@@ -1,0 +1,76 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Add New Client</h1>
+        <p class="text-gray-600">Complete the form below to add a new client</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <form hx-post="/api/clients" hx-swap="outerHTML" class="client-form">
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                        <input type="text" name="name" id="name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <div class="validation-message text-xs text-red-500 mt-1"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="inn" class="block text-sm font-medium text-gray-700 mb-1">INN *</label>
+                        <input type="text" name="inn" id="inn" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                               hx-get="/api/clients/check-inn/" 
+                               hx-target="#inn-validation"
+                               hx-trigger="blur"
+                               hx-include="[name='inn']">
+                        <div id="inn-validation" class="text-xs mt-1"></div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                        <textarea name="address" id="address" required
+                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                                 rows="3"></textarea>
+                        <div class="validation-message text-xs text-red-500 mt-1"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="contact_person_name" class="block text-sm font-medium text-gray-700 mb-1">Contact Person Name *</label>
+                        <input type="text" name="contact_person_name" id="contact_person_name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <div class="validation-message text-xs text-red-500 mt-1"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="contact_person_email" class="block text-sm font-medium text-gray-700 mb-1">Contact Email *</label>
+                        <input type="email" name="contact_person_email" id="contact_person_email" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <div class="validation-message text-xs text-red-500 mt-1"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="is_vip" class="flex items-center mb-1">
+                            <input type="checkbox" name="is_vip" id="is_vip" value="true"
+                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            <span class="ml-2 text-sm font-medium text-gray-700">VIP Client</span>
+                        </label>
+                        <p class="text-xs text-gray-500">VIP clients receive priority service and special rates</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 text-right">
+                <a href="/clients" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary px-4 py-2 rounded-md">
+                    Add Client
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

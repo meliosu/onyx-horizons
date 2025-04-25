@@ -5,6 +5,7 @@ use axum::{
     Form, Router,
 };
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
@@ -59,6 +60,75 @@ pub struct ClientFilter {
 pub struct InnValidationResponse {
     pub is_unique: bool,
     pub message: Option<String>,
+}
+
+// Template structs
+#[derive(Template)]
+#[template(path = "clients/index.html")]
+struct ClientsTemplate {
+    clients: Vec<Client>,
+    filters: ClientFilter,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "clients/new.html")]
+struct ClientNewTemplate {}
+
+#[derive(Template)]
+#[template(path = "clients/details.html")]
+struct ClientDetailsTemplate {
+    client: Client,
+    sites: Vec<Site>,
+}
+
+#[derive(Template)]
+#[template(path = "clients/edit.html")]
+struct ClientEditTemplate {
+    client: Client,
+}
+
+// HTMX Component templates
+#[derive(Template)]
+#[template(path = "components/clients/table_rows.html")]
+struct ClientRowsTemplate {
+    clients: Vec<Client>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/clients/details.html")]
+struct ClientDetailsComponentTemplate {
+    client: Client,
+}
+
+#[derive(Template)]
+#[template(path = "components/clients/sites.html")]
+struct ClientSitesTemplate {
+    sites: Vec<Site>,
+    client_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/clients/inn_validation.html")]
+struct InnValidationTemplate {
+    is_unique: bool,
+    message: Option<String>,
+}
+
+// Additional model types needed for templates
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Site {
+    pub id: i32,
+    pub description: String,
+    pub site_type: String,
+    pub status: String,
+    pub area_name: Option<String>,
+    pub department_name: Option<String>,
 }
 
 // Page Endpoints
