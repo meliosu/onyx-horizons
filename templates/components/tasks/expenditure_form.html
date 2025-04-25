@@ -1,5 +1,5 @@
 <form class="p-6 space-y-4"
-      {% if expenditure %}
+      {% if let Some(_) = expenditure %}
       hx-put="/api/tasks/{{ task_id }}/materials/{{ material_id }}"
       {% else %}
       hx-post="/api/tasks/{{ task_id }}/materials"
@@ -8,7 +8,7 @@
       hx-swap="innerHTML"
       hx-on::after-request="closeMaterialModal()">
     
-    {% if not expenditure %}
+    {% if expenditure.is_none() %}
     <div>
         <label for="material_id" class="block text-sm font-medium text-gray-700 mb-1">Material *</label>
         <select name="material_id" id="material_id" required
@@ -27,10 +27,20 @@
         <label for="expected_amount" class="block text-sm font-medium text-gray-700 mb-1">Expected Amount *</label>
         <div class="flex">
             <input type="number" name="expected_amount" id="expected_amount" step="0.01" min="0.01" required
-                   value="{% if expenditure %}{{ expenditure.expected_amount }}{% endif %}"
+                   {% if let Some(exp) = expenditure %}value="{{ exp.expected_amount }}"{% endif %}
                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             <span class="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md">
-                <span id="material-unit-1">{{ expenditure.material_units if expenditure else "units" }}</span>
+                <span id="material-unit-1">
+                    {% if let Some(exp) = expenditure %}
+                        {% if let Some(units) = &exp.material_units %}
+                            {{ units }}
+                        {% else %}
+                            units
+                        {% endif %}
+                    {% else %}
+                        units
+                    {% endif %}
+                </span>
             </span>
         </div>
         <div class="validation-message text-xs text-red-500 mt-1"></div>
@@ -40,10 +50,24 @@
         <label for="actual_amount" class="block text-sm font-medium text-gray-700 mb-1">Actual Amount</label>
         <div class="flex">
             <input type="number" name="actual_amount" id="actual_amount" step="0.01" min="0"
-                   value="{% if expenditure and expenditure.actual_amount %}{{ expenditure.actual_amount }}{% endif %}"
+                   {% if let Some(exp) = expenditure %}
+                       {% if let Some(actual) = exp.actual_amount %}
+                           value="{{ actual }}"
+                       {% endif %}
+                   {% endif %}
                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             <span class="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md">
-                <span id="material-unit-2">{{ expenditure.material_units if expenditure else "units" }}</span>
+                <span id="material-unit-2">
+                    {% if let Some(exp) = expenditure %}
+                        {% if let Some(units) = &exp.material_units %}
+                            {{ units }}
+                        {% else %}
+                            units
+                        {% endif %}
+                    {% else %}
+                        units
+                    {% endif %}
+                </span>
             </span>
         </div>
         <p class="text-xs text-gray-500 mt-1">Leave blank if not yet measured</p>
@@ -54,7 +78,7 @@
             Cancel
         </button>
         <button type="submit" class="btn-primary px-4 py-2 rounded-md">
-            {% if expenditure %}
+            {% if expenditure.is_some() %}
                 Update Material
             {% else %}
                 Add Material

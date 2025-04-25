@@ -1,6 +1,6 @@
 <option value="">Any Fuel Type</option>
-<option value="diesel" {% if selected == "diesel" %}selected{% endif %}>Diesel</option>
-<option value="petrol" {% if selected == "petrol" %}selected{% endif %}>Petrol</option>
-<option value="electric" {% if selected == "electric" %}selected{% endif %}>Electric</option>
-<option value="gas" {% if selected == "gas" %}selected{% endif %}>Gas</option>
-<option value="none" {% if selected == "none" %}selected{% endif %}>None</option>
+<option value="diesel" {% if let Some(sel) = selected %}{% match sel %}{% when FuelType::Diesel %}selected{% else %}{% endmatch %}{% endif %}>Diesel</option>
+<option value="petrol" {% if let Some(sel) = selected %}{% match sel %}{% when FuelType::Petrol %}selected{% else %}{% endmatch %}{% endif %}>Petrol</option>
+<option value="electric" {% if let Some(sel) = selected %}{% match sel %}{% when FuelType::Electric %}selected{% else %}{% endmatch %}{% endif %}>Electric</option>
+<option value="gas" {% if let Some(sel) = selected %}{% match sel %}{% when FuelType::Gas %}selected{% else %}{% endmatch %}{% endif %}>Gas</option>
+<option value="none" {% if let Some(sel) = selected %}{% match sel %}{% when FuelType::None %}selected{% else %}{% endmatch %}{% endif %}>None</option>

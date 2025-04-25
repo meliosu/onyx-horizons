@@ -1,4 +1,4 @@
-{% if areas|length == 0 %}
+{% if areas.is_empty() %}
 <tr>
     <td colspan="5" class="px-6 py-4 text-center">
         <p class="text-gray-500">No areas found</p>
@@ -13,23 +13,27 @@
             </a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if area.department_name %}
+            {% if let Some(department_name) = &area.department_name %}
                 <a href="/departments/{{ area.department_id }}" class="text-blue-600 hover:underline">
-                    {{ area.department_name }}
+                    {{ department_name }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Unknown</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if area.supervisor_name %}
-                {{ area.supervisor_name }}
+            {% if let Some(supervisor_name) = &area.supervisor_name %}
+                {{ supervisor_name }}
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {{ area.sites_count | default(value="0") }}
+            {% if let Some(sites_count) = area.sites_count %}
+                {{ sites_count }}
+            {% else %}
+                0
+            {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">
             <div class="flex justify-end space-x-2">

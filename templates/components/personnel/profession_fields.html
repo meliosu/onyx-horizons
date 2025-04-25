@@ -7,7 +7,7 @@
                 <label for="voltage_specialization" class="block text-sm font-medium text-gray-700 mb-1">Voltage Specialization *</label>
                 <input type="text" name="voltage_specialization" id="voltage_specialization" required
                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                      value="{% if details %}{% match details %}{% when ProfessionDetails::Electrician(e) %}{{ e.voltage_specialization }}{% else %}{% endmatch %}{% endif %}">
+                      value="{% if let Some(ProfessionDetails::Electrician(e)) = details %}{{ e.voltage_specialization }}{% endif %}">
             </div>
             
         {% when WorkerProfession::Plumber %}
@@ -15,7 +15,7 @@
                 <label for="pipe_specialization" class="block text-sm font-medium text-gray-700 mb-1">Pipe Specialization *</label>
                 <input type="text" name="pipe_specialization" id="pipe_specialization" required
                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                      value="{% if details %}{% match details %}{% when ProfessionDetails::Plumber(p) %}{{ p.pipe_specialization }}{% else %}{% endmatch %}{% endif %}">
+                      value="{% if let Some(ProfessionDetails::Plumber(p)) = details %}{{ p.pipe_specialization }}{% endif %}">
             </div>
             
         {% when WorkerProfession::Welder %}
@@ -23,7 +23,7 @@
                 <label for="welding_machine" class="block text-sm font-medium text-gray-700 mb-1">Welding Machine *</label>
                 <input type="text" name="welding_machine" id="welding_machine" required
                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                      value="{% if details %}{% match details %}{% when ProfessionDetails::Welder(w) %}{{ w.welding_machine }}{% else %}{% endmatch %}{% endif %}">
+                      value="{% if let Some(ProfessionDetails::Welder(w)) = details %}{{ w.welding_machine }}{% endif %}">
             </div>
             
         {% when WorkerProfession::Driver %}
@@ -31,13 +31,13 @@
                 <label for="vehicle_type" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type *</label>
                 <input type="text" name="vehicle_type" id="vehicle_type" required
                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                      value="{% if details %}{% match details %}{% when ProfessionDetails::Driver(d) %}{{ d.vehicle_type }}{% else %}{% endmatch %}{% endif %}">
+                      value="{% if let Some(ProfessionDetails::Driver(d)) = details %}{{ d.vehicle_type }}{% endif %}">
             </div>
             <div>
                 <label for="number_of_accidents" class="block text-sm font-medium text-gray-700 mb-1">Number of Accidents *</label>
                 <input type="number" name="number_of_accidents" id="number_of_accidents" required
                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                      value="{% if details %}{% match details %}{% when ProfessionDetails::Driver(d) %}{{ d.number_of_accidents }}{% else %}{% endmatch %}{% else %}0{% endif %}">
+                      value="{% if let Some(ProfessionDetails::Driver(d)) = details %}{{ d.number_of_accidents }}{% else %}0{% endif %}">
             </div>
             
         {% when WorkerProfession::Mason %}
@@ -46,13 +46,13 @@
                 <div class="flex space-x-4 mt-1">
                     <label class="inline-flex items-center">
                         <input type="radio" name="hq_restoration_skills" value="true"
-                              {% if details %}{% match details %}{% when ProfessionDetails::Mason(m) %}{% if m.hq_restoration_skills %}checked{% endif %}{% else %}{% endmatch %}{% endif %}
+                              {% if let Some(ProfessionDetails::Mason(m)) = details %}{% if m.hq_restoration_skills %}checked{% endif %}{% endif %}
                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                         <span class="ml-2">Yes</span>
                     </label>
                     <label class="inline-flex items-center">
                         <input type="radio" name="hq_restoration_skills" value="false"
-                              {% if details %}{% match details %}{% when ProfessionDetails::Mason(m) %}{% if not m.hq_restoration_skills %}checked{% endif %}{% else %}{% endmatch %}{% else %}checked{% endif %}
+                              {% if let Some(ProfessionDetails::Mason(m)) = details %}{% if !m.hq_restoration_skills %}checked{% endif %}{% else %}checked{% endif %}
                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                         <span class="ml-2">No</span>
                     </label>

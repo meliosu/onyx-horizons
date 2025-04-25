@@ -1,4 +1,4 @@
-{% if workers|length == 0 %}
+{% if workers.is_empty() %}
 <tr>
     <td colspan="6" class="px-6 py-4 text-center">
         <p class="text-gray-500">No workers found</p>
@@ -14,27 +14,32 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                {% if worker.profession == "electrician" %}bg-blue-100 text-blue-800
-                {% elif worker.profession == "plumber" %}bg-green-100 text-green-800
-                {% elif worker.profession == "welder" %}bg-orange-100 text-orange-800
-                {% elif worker.profession == "driver" %}bg-purple-100 text-purple-800
-                {% elif worker.profession == "mason" %}bg-yellow-100 text-yellow-800
-                {% endif %}">
+                {% match worker.profession %}
+                {% when WorkerProfession::Electrician %}bg-blue-100 text-blue-800
+                {% when WorkerProfession::Plumber %}bg-green-100 text-green-800
+                {% when WorkerProfession::Welder %}bg-orange-100 text-orange-800
+                {% when WorkerProfession::Driver %}bg-purple-100 text-purple-800
+                {% when WorkerProfession::Mason %}bg-yellow-100 text-yellow-800
+                {% endmatch %}">
                 {{ worker.profession | capitalize }}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if worker.brigade_name %}
-                <a href="/brigades/{{ worker.brigade_id }}" class="text-blue-600 hover:underline">
-                    Brigade #{{ worker.brigade_id }}
+            {% if let Some(brigade_name) = &worker.brigade_name %}
+                <a href="/brigades/{{ worker.brigade_id.unwrap() }}" class="text-blue-600 hover:underline">
+                    Brigade #{{ worker.brigade_id.unwrap() }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
-            {% if worker.is_brigadier %}
-                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+            {% if let Some(is_brigadier) = worker.is_brigadier %}
+                {% if is_brigadier %}
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+                {% else %}
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+                {% endif %}
             {% else %}
                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
             {% endif %}

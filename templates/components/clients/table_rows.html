@@ -31,7 +31,11 @@
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {{ client.sites_count | default(value=0) }}
+            {% if let Some(count) = client.sites_count %}
+                {{ count }}
+            {% else %}
+                0
+            {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">
             <div class="flex justify-end space-x-2">

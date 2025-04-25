@@ -15,9 +15,9 @@
                     <select name="brigade_id" id="brigade_id" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                             onchange="updateReportUrl()">
-                        <option value="" disabled {% if not selected_brigade_id %}selected{% endif %}>Select Brigade</option>
+                        <option value="" disabled {% if selected_brigade_id.is_none() %}selected{% endif %}>Select Brigade</option>
                         {% for brigade in brigades %}
-                            <option value="{{ brigade.id }}" {% if selected_brigade_id == brigade.id %}selected{% endif %}>
+                            <option value="{{ brigade.id }}" {% if let Some(id) = selected_brigade_id %}{% if id == brigade.id %}selected{% endif %}{% endif %}>
                                 Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}
                             </option>
                         {% endfor %}
@@ -38,13 +38,13 @@
                 <!-- Date Range -->
                 <div class="mb-4">
                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ start_date | default(value="") }}"
+                    <input type="date" name="start_date" id="start_date" value="{% if let Some(date) = &start_date %}{{ date }}{% endif %}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 
                 <div class="mb-6">
                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ end_date | default(value="") }}"
+                    <input type="date" name="end_date" id="end_date" value="{% if let Some(date) = &end_date %}{{ date }}{% endif %}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 
@@ -66,17 +66,27 @@
         <!-- Report Content -->
         <div class="lg:col-span-3">
             <div id="report-content" class="bg-white rounded-lg shadow">
-                {% if not selected_brigade_id %}
+                {% if selected_brigade_id.is_none() %}
                     <div class="p-8 text-center">
                         <div class="text-gray-400 mb-2">
                             <i class="fas fa-hard-hat text-5xl"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-500">Select a brigade to generate a report</h3>
                     </div>
-                {% elif report_data and report_data.type == "BrigadeTasks" %}
-                    {% include "reports/components/brigade_tasks_report.html" %}
-                {% elif report_data and report_data.type == "BrigadeSites" %}
-                    {% include "reports/components/brigade_sites_report.html" %}
+                {% else %}
+                    {% if let Some(data) = &report_data %}
+                        {% match data %}
+                            {% when ReportData::BrigadeTasks(_) %}
+                                {% include "reports/components/brigade_tasks_report.html" %}
+                            {% when ReportData::BrigadeSites(_) %}
+                                {% include "reports/components/brigade_sites_report.html" %}
+                            {% else %}
+                                <!-- Unrecognized report type -->
+                                <div class="p-8 text-center">
+                                    <h3 class="text-lg font-medium text-gray-500">Unknown report type</h3>
+                                </div>
+                        {% endmatch %}
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

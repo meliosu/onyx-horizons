@@ -1,4 +1,4 @@
-{% if brigades|length == 0 %}
+{% if brigades.is_empty() %}
 <tr>
     <td colspan="6" class="px-6 py-4 text-center">
         <p class="text-gray-500">No brigades found</p>
@@ -13,28 +13,44 @@
             </a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if brigade.brigadier_name %}
-                {{ brigade.brigadier_name }}
+            {% if let Some(brigadier_name) = &brigade.brigadier_name %}
+                {{ brigadier_name }}
             {% else %}
                 <span class="text-gray-400">Unassigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {{ brigade.workers_count | default(value=0) }}
+            {% if let Some(count) = brigade.workers_count %}
+                {{ count }}
+            {% else %}
+                0
+            {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if brigade.current_site_id %}
-                <a href="/sites/{{ brigade.current_site_id }}" class="text-blue-600 hover:underline">
-                    {{ brigade.current_site_name }}
+            {% if let Some(site_id) = brigade.current_site_id %}
+                <a href="/sites/{{ site_id }}" class="text-blue-600 hover:underline">
+                    {% if let Some(site_name) = &brigade.current_site_name %}
+                        {{ site_name }}
+                    {% else %}
+                        Site #{{ site_id }}
+                    {% endif %}
                 </a>
             {% else %}
                 <span class="text-gray-400">Unassigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            <span class="text-gray-500">{{ brigade.active_tasks_count | default(value=0) }} active</span>
-            {% if brigade.completed_tasks_count %}
-                <span class="text-gray-400 ml-1">({{ brigade.completed_tasks_count }} completed)</span>
+            <span class="text-gray-500">
+                {% if let Some(count) = brigade.active_tasks_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %} active
+            </span>
+            {% if let Some(completed_count) = brigade.completed_tasks_count %}
+                {% if completed_count > 0 %}
+                    <span class="text-gray-400 ml-1">({{ completed_count }} completed)</span>
+                {% endif %}
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">

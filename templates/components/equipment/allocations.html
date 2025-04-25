@@ -8,19 +8,23 @@
     {% for allocation in allocations %}
     <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if allocation.department_name %}
+            {% if let Some(department_name) = allocation.department_name %}
                 <a href="/departments/{{ allocation.department_id }}" class="text-blue-600 hover:underline">
-                    {{ allocation.department_name }}
+                    {{ department_name }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Unknown</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if allocation.site_id and allocation.site_name %}
-                <a href="/sites/{{ allocation.site_id }}" class="text-blue-600 hover:underline">
-                    {{ allocation.site_name }}
-                </a>
+            {% if let Some(site_id) = allocation.site_id %}
+                {% if let Some(site_name) = allocation.site_name %}
+                    <a href="/sites/{{ site_id }}" class="text-blue-600 hover:underline">
+                        {{ site_name }}
+                    </a>
+                {% else %}
+                    <span class="text-gray-400">Unknown Site</span>
+                {% endif %}
             {% else %}
                 <span class="text-gray-400">Department level</span>
             {% endif %}

@@ -17,18 +17,30 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
                     <select name="qualification" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All Qualifications</option>
-                        <option value="technician" {% if filters.qualification == "technician" %}selected{% endif %}>Technician</option>
-                        <option value="technologist" {% if filters.qualification == "technologist" %}selected{% endif %}>Technologist</option>
-                        <option value="engineer" {% if filters.qualification == "engineer" %}selected{% endif %}>Engineer</option>
+                        {% if let Some(qualification) = filters.qualification %}
+                            <option value="technician" {% if qualification == Qualification::Technician %}selected{% endif %}>Technician</option>
+                            <option value="technologist" {% if qualification == Qualification::Technologist %}selected{% endif %}>Technologist</option>
+                            <option value="engineer" {% if qualification == Qualification::Engineer %}selected{% endif %}>Engineer</option>
+                        {% else %}
+                            <option value="technician">Technician</option>
+                            <option value="technologist">Technologist</option>
+                            <option value="engineer">Engineer</option>
+                        {% endif %}
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
                     <select name="position" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All Positions</option>
-                        <option value="master" {% if filters.position == "master" %}selected{% endif %}>Master</option>
-                        <option value="foreman" {% if filters.position == "foreman" %}selected{% endif %}>Foreman</option>
-                        <option value="none" {% if filters.position == "none" %}selected{% endif %}>No Position</option>
+                        {% if let Some(position) = filters.position %}
+                            <option value="master" {% if position == Position::Master %}selected{% endif %}>Master</option>
+                            <option value="foreman" {% if position == Position::Foreman %}selected{% endif %}>Foreman</option>
+                            <option value="none" {% if position == Position::None %}selected{% endif %}>No Position</option>
+                        {% else %}
+                            <option value="master">Master</option>
+                            <option value="foreman">Foreman</option>
+                            <option value="none">No Position</option>
+                        {% endif %}
                     </select>
                 </div>
                 <div>
@@ -37,7 +49,11 @@
                             hx-get="/api/selectors/areas-by-department" hx-target="#area-selector" hx-trigger="change">
                         <option value="">All Departments</option>
                         {% for dept in departments %}
-                            <option value="{{ dept.id }}" {% if filters.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% if let Some(dept_id) = filters.department_id %}
+                                <option value="{{ dept.id }}" {% if dept_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% else %}
+                                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
@@ -46,7 +62,11 @@
                     <select id="area-selector" name="area_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All Areas</option>
                         {% for area in areas %}
-                            <option value="{{ area.id }}" {% if filters.area_id == area.id %}selected{% endif %}>{{ area.name }}</option>
+                            {% if let Some(area_id) = filters.area_id %}
+                                <option value="{{ area.id }}" {% if area_id == area.id %}selected{% endif %}>{{ area.name }}</option>
+                            {% else %}
+                                <option value="{{ area.id }}">{{ area.name }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
@@ -54,8 +74,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Project Manager</label>
                     <select name="is_project_manager" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All</option>
-                        <option value="true" {% if filters.is_project_manager == true %}selected{% endif %}>Yes</option>
-                        <option value="false" {% if filters.is_project_manager == false %}selected{% endif %}>No</option>
+                        {% if let Some(is_pm) = filters.is_project_manager %}
+                            <option value="true" {% if is_pm %}selected{% endif %}>Yes</option>
+                            <option value="false" {% if !is_pm %}selected{% endif %}>No</option>
+                        {% else %}
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        {% endif %}
                     </select>
                 </div>
                 <div class="flex items-end">
@@ -126,9 +151,15 @@
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page | default(value=20) + 1 }}</span> to 
-                <span class="font-medium">{{ current_page * filters.pagination.per_page | default(value=20) }}</span> of 
-                <span class="font-medium">{{ total_pages * filters.pagination.per_page | default(value=20) }}</span> results
+                {% if let Some(per_page) = filters.pagination.per_page %}
+                    Showing <span class="font-medium">{{ (current_page - 1) * per_page + 1 }}</span> to 
+                    <span class="font-medium">{{ current_page * per_page }}</span> of 
+                    <span class="font-medium">{{ total_pages * per_page }}</span> results
+                {% else %}
+                    Showing <span class="font-medium">{{ (current_page - 1) * 20 + 1 }}</span> to 
+                    <span class="font-medium">{{ current_page * 20 }}</span> of 
+                    <span class="font-medium">{{ total_pages * 20 }}</span> results
+                {% endif %}
             </div>
             <div class="flex space-x-2">
                 {% if current_page > 1 %}

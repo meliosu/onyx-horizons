@@ -23,7 +23,7 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">Select a Supervisor (Optional)</option>
                         {% for supervisor in supervisors %}
-                            <option value="{{ supervisor.id }}">{{ supervisor.name }} - {{ supervisor.qualification }}{% if supervisor.position %}({{ supervisor.position }}){% endif %}</option>
+                            <option value="{{ supervisor.id }}">{{ supervisor.name }} - {{ supervisor.qualification }}{% if let Some(position) = supervisor.position %}({{ position }}){% endif %}</option>
                         {% endfor %}
                     </select>
                 </div>

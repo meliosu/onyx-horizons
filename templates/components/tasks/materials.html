@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-            {% if materials|length == 0 %}
+            {% if materials.is_empty() %}
             <tr>
                 <td colspan="6" class="px-6 py-4 text-center">
                     <p class="text-gray-500">No materials assigned to this task</p>
@@ -22,30 +22,62 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <a href="/materials/{{ material.material_id }}" class="text-blue-600 hover:underline font-medium">
-                            {{ material.material_name }}
+                            {% if let Some(name) = &material.material_name %}
+                                {{ name }}
+                            {% else %}
+                                Unknown Material
+                            {% endif %}
                         </a>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        ${{ material.material_cost }}
+                        {% if let Some(cost) = material.material_cost %}
+                            ${{ cost }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {{ material.expected_amount }} {{ material.material_units }}
+                        {{ material.expected_amount }} 
+                        {% if let Some(units) = &material.material_units %}
+                            {{ units }}
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if material.actual_amount %}
-                            {{ material.actual_amount }} {{ material.material_units }}
+                        {% if let Some(actual_amount) = material.actual_amount %}
+                            {{ actual_amount }} 
+                            {% if let Some(units) = &material.material_units %}
+                                {{ units }}
+                            {% endif %}
                         {% else %}
                             <span class="text-gray-400">Not recorded</span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if material.actual_amount and material.excess_amount %}
-                            {% if material.excess_amount > 0 %}
-                                <span class="text-red-600">+{{ material.excess_amount }} {{ material.material_units }} ({{ material.excess_percentage }}%)</span>
-                            {% elif material.excess_amount < 0 %}
-                                <span class="text-green-600">{{ material.excess_amount }} {{ material.material_units }} ({{ material.excess_percentage }}%)</span>
+                        {% if let Some(actual_amount) = material.actual_amount %}
+                            {% if let Some(excess_amount) = material.excess_amount %}
+                                {% if excess_amount > 0.0 %}
+                                    <span class="text-red-600">+{{ excess_amount }} 
+                                    {% if let Some(units) = &material.material_units %}
+                                        {{ units }}
+                                    {% endif %}
+                                    {% if let Some(excess_percentage) = material.excess_percentage %}
+                                        ({{ excess_percentage }}%)
+                                    {% endif %}
+                                    </span>
+                                {% elif excess_amount < 0.0 %}
+                                    <span class="text-green-600">{{ excess_amount }} 
+                                    {% if let Some(units) = &material.material_units %}
+                                        {{ units }}
+                                    {% endif %}
+                                    {% if let Some(excess_percentage) = material.excess_percentage %}
+                                        ({{ excess_percentage }}%)
+                                    {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-600">No variance</span>
+                                {% endif %}
                             {% else %}
-                                <span class="text-gray-600">No variance</span>
+                                <span class="text-gray-400">-</span>
                             {% endif %}
                         {% else %}
                             <span class="text-gray-400">-</span>
@@ -54,7 +86,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right">
                         <div class="flex justify-end space-x-2">
                             <button class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded"
-                                    onclick="editMaterial({{ material.material_id }}, '{{ material.material_name }}', {{ material.expected_amount }}, {% if material.actual_amount %}{{ material.actual_amount }}{% else %}null{% endif %}, '{{ material.material_units }}')">
+                                    onclick="editMaterial({{ material.material_id }}, '{% if let Some(name) = &material.material_name %}{{ name }}{% else %}Unknown{% endif %}', {{ material.expected_amount }}, {% if let Some(actual) = material.actual_amount %}{{ actual }}{% else %}null{% endif %}, '{% if let Some(units) = &material.material_units %}{{ units }}{% else %}units{% endif %}')">
                                 <i class="fas fa-pencil"></i>
                             </button>
                             <button class="px-2 py-1 text-red-600 hover:bg-red-100 rounded"
@@ -73,11 +105,18 @@
     </table>
 </div>
 
-{% if current_page and total_pages > 1 %}
+{% if current_page > 0 && total_pages > 1 %}
 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
     <div class="text-sm text-gray-700">
         Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
-        <span class="font-medium">{{ [current_page * 10, materials|length]|min }}</span> of 
+        <span class="font-medium">
+            {% let end = current_page * 10 %}
+            {% if end > materials.len() %}
+                {{ materials.len() }}
+            {% else %}
+                {{ end }}
+            {% endif %}
+        </span> of 
         <span class="font-medium">{{ total_pages * 10 }}</span> materials
     </div>
     <div class="flex space-x-2">
@@ -99,13 +138,13 @@
 {% endif %}
 
 <div class="p-6 flex justify-center" id="available-materials-container">
-    {% if available_materials|length > 0 %}
+    {% if !available_materials.is_empty() %}
     <div class="w-full p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
         <h3 class="text-sm font-medium text-gray-700 mb-2">Add Available Materials</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             {% for material in available_materials %}
             <button class="text-left px-3 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50"
-                    onclick="openMaterialModal(null, '{{ material.name }}', null, null, '{{ material.units }}')">
+                    onclick="openMaterialModal({{ material.id }}, '{{ material.name }}', null, null, '{{ material.units }}')">
                 <div class="font-medium">{{ material.name }}</div>
                 <div class="text-xs text-gray-500">${{ material.cost }}/{{ material.units }}</div>
             </button>

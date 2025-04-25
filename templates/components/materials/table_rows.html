@@ -1,4 +1,4 @@
-{% if materials|length == 0 %}
+{% if materials.is_empty() %}
 <tr>
     <td colspan="6" class="px-6 py-4 text-center">
         <p class="text-gray-500">No materials found</p>
@@ -19,15 +19,15 @@
             {{ material.units }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if material.total_usage %}
-                {{ material.total_usage }} {{ material.units }}
+            {% if let Some(total_usage) = material.total_usage %}
+                {{ total_usage }} {{ material.units }}
             {% else %}
                 <span class="text-gray-400">Not used</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if material.tasks_using_count %}
-                {{ material.tasks_using_count }}
+            {% if let Some(tasks_using_count) = material.tasks_using_count %}
+                {{ tasks_using_count }}
             {% else %}
                 <span class="text-gray-400">0</span>
             {% endif %}

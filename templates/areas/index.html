@@ -94,9 +94,9 @@
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page | default(value=20) + 1 }}</span> to 
-                <span class="font-medium">{{ current_page * filters.pagination.per_page | default(value=20) }}</span> of 
-                <span class="font-medium">{{ total_pages * filters.pagination.per_page | default(value=20) }}</span> results
+                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page.unwrap_or(20) + 1 }}</span> to 
+                <span class="font-medium">{{ current_page * filters.pagination.per_page.unwrap_or(20) }}</span> of 
+                <span class="font-medium">{{ total_pages * filters.pagination.per_page.unwrap_or(20) }}</span> results
             </div>
             <div class="flex space-x-2">
                 {% if current_page > 1 %}

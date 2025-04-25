@@ -6,8 +6,8 @@
         hx-trigger="load-areas from:body"
         hx-target="this"
         {% endif %}>
-    {% if placeholder %}
-    <option value="" disabled {% if options | filter(attribute="selected", value=true) | length == 0 %}selected{% endif %}>{{ placeholder }}</option>
+    {% if let Some(placeholder_text) = placeholder %}
+    <option value="" disabled {% if !options.iter().any(|opt| opt.selected) %}selected{% endif %}>{{ placeholder_text }}</option>
     {% endif %}
     {% for option in options %}
     <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}</option>

@@ -5,7 +5,11 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold">{{ personnel_details.technical_personnel.employee.first_name }} {{ personnel_details.technical_personnel.employee.last_name }}</h1>
-            <p class="text-gray-600">{{ personnel_details.technical_personnel.qualification | capitalize }}</p>
+            <p class="text-gray-600">{% match personnel_details.technical_personnel.qualification %}
+                {% when Qualification::Technician %}Technician
+                {% when Qualification::Technologist %}Technologist
+                {% when Qualification::Engineer %}Engineer
+            {% endmatch %}</p>
         </div>
         <div class="flex space-x-2">
             <a href="/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
@@ -27,9 +31,9 @@
                 <h2 class="text-lg font-medium">Personal Information</h2>
             </div>
             <div class="p-6">
-                {% if personnel_details.technical_personnel.employee.photo %}
+                {% if let Some(photo) = personnel_details.technical_personnel.employee.photo %}
                 <div class="flex justify-center mb-6">
-                    <img src="{{ personnel_details.technical_personnel.employee.photo }}" alt="Employee Photo" class="rounded-full w-32 h-32 object-cover">
+                    <img src="{{ photo }}" alt="Employee Photo" class="rounded-full w-32 h-32 object-cover">
                 </div>
                 {% endif %}
                 
@@ -38,13 +42,18 @@
                         <dt class="text-sm font-medium text-gray-500">Full Name</dt>
                         <dd class="mt-1 text-sm text-gray-900">
                             {{ personnel_details.technical_personnel.employee.first_name }} 
-                            {{ personnel_details.technical_personnel.employee.middle_name | default(value="") }} 
+                            {% if let Some(middle_name) = personnel_details.technical_personnel.employee.middle_name %}
+                                {{ middle_name }}
+                            {% endif %}
                             {{ personnel_details.technical_personnel.employee.last_name }}
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Gender</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ personnel_details.technical_personnel.employee.gender | capitalize }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{% match personnel_details.technical_personnel.employee.gender %}
+                            {% when Gender::Male %}Male
+                            {% when Gender::Female %}Female
+                        {% endmatch %}</dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
@@ -69,19 +78,29 @@
                         <dt class="text-sm font-medium text-gray-500">Qualification</dt>
                         <dd class="mt-1 text-sm text-gray-900">
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {% if personnel_details.technical_personnel.qualification == "engineer" %}bg-blue-100 text-blue-800
-                                {% elif personnel_details.technical_personnel.qualification == "technologist" %}bg-green-100 text-green-800
-                                {% elif personnel_details.technical_personnel.qualification == "technician" %}bg-purple-100 text-purple-800
-                                {% endif %}">
-                                {{ personnel_details.technical_personnel.qualification | capitalize }}
+                                {% match personnel_details.technical_personnel.qualification %}
+                                    {% when Qualification::Engineer %}bg-blue-100 text-blue-800
+                                    {% when Qualification::Technologist %}bg-green-100 text-green-800
+                                    {% when Qualification::Technician %}bg-purple-100 text-purple-800
+                                {% endmatch %}">
+                                {% match personnel_details.technical_personnel.qualification %}
+                                    {% when Qualification::Technician %}Technician
+                                    {% when Qualification::Technologist %}Technologist
+                                    {% when Qualification::Engineer %}Engineer
+                                {% endmatch %}
                             </span>
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Position</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if personnel_details.technical_personnel.position and personnel_details.technical_personnel.position != "none" %}
-                                {{ personnel_details.technical_personnel.position | capitalize }}
+                            {% if let Some(position) = personnel_details.technical_personnel.position %}
+                                {% match position %}
+                                    {% when Position::None %}
+                                        <span class="text-gray-400">No Position</span>
+                                    {% when Position::Master %}Master
+                                    {% when Position::Foreman %}Foreman
+                                {% endmatch %}
                             {% else %}
                                 <span class="text-gray-400">No Position</span>
                             {% endif %}
@@ -90,7 +109,7 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Department</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if department %}
+                            {% if let Some(department) = department %}
                                 <a href="/departments/{{ department.id }}" class="text-blue-600 hover:underline">
                                     {{ department.name }}
                                 </a>
@@ -102,7 +121,7 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Area</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if area %}
+                            {% if let Some(area) = area %}
                                 <a href="/areas/{{ area.id }}" class="text-blue-600 hover:underline">
                                     {{ area.name }}
                                 </a>
@@ -125,11 +144,11 @@
                             {% endif %}
                         </dd>
                     </div>
-                    {% if personnel_details.technical_personnel.software_skills %}
+                    {% if let Some(skills) = personnel_details.technical_personnel.software_skills %}
                     <div class="col-span-2">
                         <dt class="text-sm font-medium text-gray-500">Software Skills</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% for skill in personnel_details.technical_personnel.software_skills %}
+                            {% for skill in skills %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1">
                                     {{ skill }}
                                 </span>
@@ -144,7 +163,12 @@
         <!-- Qualification-specific Card -->
         <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-3">
             <div class="px-6 py-4 bg-gray-50 border-b">
-                <h2 class="text-lg font-medium">{{ personnel_details.technical_personnel.qualification | capitalize }} Details</h2>
+                <h2 class="text-lg font-medium">
+                {% match personnel_details.technical_personnel.qualification %}
+                    {% when Qualification::Technician %}Technician
+                    {% when Qualification::Technologist %}Technologist
+                    {% when Qualification::Engineer %}Engineer
+                {% endmatch %} Details</h2>
             </div>
             <div class="p-6">
                 {% match personnel_details.qualification_details %}
@@ -181,7 +205,7 @@
     </div>
 
     <!-- Sites Section -->
-    {% if assigned_sites|length > 0 %}
+    {% if assigned_sites.len() > 0 %}
     <div class="mt-6">
         <h2 class="text-lg font-medium mb-4">Assigned Sites</h2>
         <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -205,22 +229,26 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if site.site_type == "power_plant" %}bg-purple-100 text-purple-800
-                                    {% elif site.site_type == "road" %}bg-blue-100 text-blue-800
-                                    {% elif site.site_type == "housing" %}bg-green-100 text-green-800
-                                    {% elif site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
-                                    {% elif site.site_type == "park" %}bg-indigo-100 text-indigo-800
-                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ site.site_type | replace(from="_", to=" ") | capitalize }}
+                                    {% match site.site_type %}
+                                        {% when "power_plant" %}bg-purple-100 text-purple-800
+                                        {% when "road" %}bg-blue-100 text-blue-800
+                                        {% when "housing" %}bg-green-100 text-green-800
+                                        {% when "bridge" %}bg-yellow-100 text-yellow-800
+                                        {% when "park" %}bg-indigo-100 text-indigo-800
+                                        {% when _ %}bg-gray-100 text-gray-800
+                                    {% endmatch %}">
+                                    {{ site.site_type }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if site.status == "planned" %}bg-gray-100 text-gray-800
-                                    {% elif site.status == "in_progress" %}bg-blue-100 text-blue-800
-                                    {% elif site.status == "completed" %}bg-green-100 text-green-800
-                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ site.status | replace(from="_", to=" ") | capitalize }}
+                                    {% match site.status %}
+                                        {% when "planned" %}bg-gray-100 text-gray-800
+                                        {% when "in_progress" %}bg-blue-100 text-blue-800
+                                        {% when "completed" %}bg-green-100 text-green-800
+                                        {% when _ %}bg-gray-100 text-gray-800
+                                    {% endmatch %}">
+                                    {{ site.status }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">

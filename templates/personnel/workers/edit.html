@@ -26,19 +26,20 @@
                         </div>
                         <div>
                             <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
-                            <input type="text" name="employee.middle_name" id="middle_name" value="{{ worker_details.worker.employee.middle_name | default(value="") }}"
+                            <input type="text" name="employee.middle_name" id="middle_name" 
+                                  {% if let Some(middle_name) = worker_details.worker.employee.middle_name %}value="{{ middle_name }}"{% endif %}
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
                             <div class="flex space-x-4 mt-1">
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="employee.gender" value="male" {% if worker_details.worker.employee.gender == "male" %}checked{% endif %}
+                                    <input type="radio" name="employee.gender" value="male" {% if worker_details.worker.employee.gender == Gender::Male %}checked{% endif %}
                                           class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                     <span class="ml-2">Male</span>
                                 </label>
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="employee.gender" value="female" {% if worker_details.worker.employee.gender == "female" %}checked{% endif %}
+                                    <input type="radio" name="employee.gender" value="female" {% if worker_details.worker.employee.gender == Gender::Female %}checked{% endif %}
                                           class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                     <span class="ml-2">Female</span>
                                 </label>
@@ -56,7 +57,8 @@
                         </div>
                         <div>
                             <label for="photo" class="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
-                            <input type="text" name="employee.photo" id="photo" value="{{ worker_details.worker.employee.photo | default(value="") }}"
+                            <input type="text" name="employee.photo" id="photo" 
+                                  {% if let Some(photo) = worker_details.worker.employee.photo %}value="{{ photo }}"{% endif %}
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         </div>
                     </div>
@@ -68,13 +70,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="profession" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
-                            <input type="text" id="profession" value="{{ worker_details.worker.profession | capitalize }}" disabled
+                            <input type="text" id="profession" 
+                                  value="{% match worker_details.worker.profession %}{% when WorkerProfession::Electrician %}Electrician{% when WorkerProfession::Plumber %}Plumber{% when WorkerProfession::Welder %}Welder{% when WorkerProfession::Driver %}Driver{% when WorkerProfession::Mason %}Mason{% endmatch %}" 
+                                  disabled
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50">
                             <p class="text-xs text-gray-500 mt-1">Profession cannot be changed after creation</p>
                         </div>
                         <div>
                             <label for="union_name" class="block text-sm font-medium text-gray-700 mb-1">Union Name</label>
-                            <input type="text" name="union_name" id="union_name" value="{{ worker_details.worker.union_name | default(value="") }}"
+                            <input type="text" name="union_name" id="union_name" 
+                                  {% if let Some(union_name) = worker_details.worker.union_name %}value="{{ union_name }}"{% endif %}
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         </div>
                         <div>
@@ -83,7 +88,7 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                                 <option value="">No Brigade Assignment</option>
                                 {% for brigade in brigades %}
-                                <option value="{{ brigade.id }}" {% if worker_details.worker.brigade_id == brigade.id %}selected{% endif %}>
+                                <option value="{{ brigade.id }}" {% if let Some(brigade_id) = worker_details.worker.brigade_id %}{% if brigade_id == brigade.id %}selected{% endif %}{% endif %}>
                                     Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}
                                 </option>
                                 {% endfor %}
@@ -91,7 +96,8 @@
                         </div>
                         <div>
                             <label for="is_brigadier" class="flex items-center mb-1">
-                                <input type="checkbox" name="is_brigadier" id="is_brigadier" value="true" {% if worker_details.worker.is_brigadier %}checked{% endif %}
+                                <input type="checkbox" name="is_brigadier" id="is_brigadier" value="true" 
+                                      {% if let Some(is_brigadier) = worker_details.worker.is_brigadier %}{% if is_brigadier %}checked{% endif %}{% endif %}
                                       class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                                 <span class="ml-2 text-sm font-medium text-gray-700">Brigadier</span>
                             </label>
@@ -102,7 +108,15 @@
 
                 <!-- Profession-specific Fields -->
                 <div class="pb-6">
-                    <h2 class="text-lg font-medium mb-4">{{ worker_details.worker.profession | capitalize }} Details</h2>
+                    <h2 class="text-lg font-medium mb-4">
+                    {% match worker_details.worker.profession %}
+                        {% when WorkerProfession::Electrician %}Electrician
+                        {% when WorkerProfession::Plumber %}Plumber
+                        {% when WorkerProfession::Welder %}Welder
+                        {% when WorkerProfession::Driver %}Driver
+                        {% when WorkerProfession::Mason %}Mason
+                    {% endmatch %} Details
+                    </h2>
                     
                     {% match worker_details.profession_details %}
                         {% when ProfessionDetails::Electrician(details) %}
@@ -157,7 +171,7 @@
                                             <span class="ml-2">Yes</span>
                                         </label>
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="hq_restoration_skills" value="false" {% if not details.hq_restoration_skills %}checked{% endif %}
+                                            <input type="radio" name="hq_restoration_skills" value="false" {% if !details.hq_restoration_skills %}checked{% endif %}
                                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                                             <span class="ml-2">No</span>
                                         </label>

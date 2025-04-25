@@ -10,7 +10,7 @@
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-            {% if tasks|length == 0 %}
+            {% if tasks.is_empty() %}
             <tr>
                 <td colspan="5" class="px-6 py-4 text-center">
                     <p class="text-gray-500">No tasks assigned to this brigade</p>
@@ -25,9 +25,9 @@
                         </a>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if task.site_name %}
+                        {% if let Some(site_name) = &task.site_name %}
                             <a href="/sites/{{ task.site_id }}" class="text-blue-600 hover:underline">
-                                {{ task.site_name }}
+                                {{ site_name }}
                             </a>
                         {% else %}
                             <span class="text-gray-400">Unknown site</span>
@@ -36,7 +36,11 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         {{ task.period_start }} to 
                         {% if task.is_completed %}
-                            {{ task.actual_period_end }}
+                            {% if let Some(end_date) = &task.actual_period_end %}
+                                {{ end_date }}
+                            {% else %}
+                                {{ task.expected_period_end }}
+                            {% endif %}
                         {% else %}
                             {{ task.expected_period_end }}
                         {% endif %}
@@ -46,14 +50,22 @@
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                 Completed
                             </span>
-                        {% elif task.is_overdue %}
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                Overdue
-                            </span>
                         {% else %}
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                In Progress
-                            </span>
+                            {% if let Some(is_overdue) = task.is_overdue %}
+                                {% if is_overdue %}
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Overdue
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        In Progress
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    In Progress
+                                </span>
+                            {% endif %}
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right">
@@ -70,11 +82,11 @@
     </table>
 </div>
 
-{% if current_page and total_pages > 1 %}
+{% if current_page > 0 && total_pages > 1 %}
 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
     <div class="text-sm text-gray-700">
         Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
-        <span class="font-medium">{{ [current_page * 10, tasks|length]|min }}</span> of 
+        <span class="font-medium">{{ current_page * 10.min(tasks.len()) }}</span> of 
         <span class="font-medium">{{ total_pages * 10 }}</span> tasks
     </div>
     <div class="flex space-x-2">

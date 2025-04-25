@@ -7,8 +7,8 @@
         <div class="col-span-1">
             <p class="text-sm font-medium text-gray-500">Supervisor</p>
             <p class="mt-1 text-lg">
-                {% if department.supervisor_name %}
-                    {{ department.supervisor_name }}
+                {% if let Some(supervisor_name) = &department.supervisor_name %}
+                    {{ supervisor_name }}
                 {% else %}
                     <span class="text-gray-400">Not assigned</span>
                 {% endif %}
@@ -16,15 +16,33 @@
         </div>
         <div class="col-span-1">
             <p class="text-sm font-medium text-gray-500">Number of Areas</p>
-            <p class="mt-1 text-lg">{{ department.areas_count | default(value="0") }}</p>
+            <p class="mt-1 text-lg">
+                {% if let Some(areas_count) = department.areas_count %}
+                    {{ areas_count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
         </div>
         <div class="col-span-1">
             <p class="text-sm font-medium text-gray-500">Number of Sites</p>
-            <p class="mt-1 text-lg">{{ department.sites_count | default(value="0") }}</p>
+            <p class="mt-1 text-lg">
+                {% if let Some(sites_count) = department.sites_count %}
+                    {{ sites_count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
         </div>
         <div class="col-span-1">
             <p class="text-sm font-medium text-gray-500">Personnel Count</p>
-            <p class="mt-1 text-lg">{{ department.personnel_count | default(value="0") }}</p>
+            <p class="mt-1 text-lg">
+                {% if let Some(personnel_count) = department.personnel_count %}
+                    {{ personnel_count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
         </div>
     </div>
 </div>

@@ -1,7 +1,7 @@
 <form hx-post="/api/brigades/{{ brigade_id }}/workers" hx-target="#workers-content" hx-swap="innerHTML" class="p-6">
     <p class="text-sm text-gray-500 mb-4">Select a worker to add to this brigade:</p>
     
-    {% if workers|length == 0 %}
+    {% if workers.is_empty() %}
         <div class="bg-gray-50 p-4 rounded text-center">
             <p class="text-gray-500">No available workers to add</p>
         </div>
@@ -34,11 +34,17 @@
                             {{ worker.employee.first_name }} {{ worker.employee.last_name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            {{ worker.profession | capitalize }}
+                            {% match worker.profession %}
+                                {% when WorkerProfession::Electrician %} Electrician
+                                {% when WorkerProfession::Plumber %} Plumber
+                                {% when WorkerProfession::Welder %} Welder
+                                {% when WorkerProfession::Driver %} Driver
+                                {% when WorkerProfession::Mason %} Mason
+                            {% endmatch %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            {% if worker.brigade_id %}
-                                Brigade #{{ worker.brigade_id }}
+                            {% if let Some(brigade_id) = worker.brigade_id %}
+                                Brigade #{{ brigade_id }}
                             {% else %}
                                 <span class="text-gray-400">Unassigned</span>
                             {% endif %}
@@ -54,7 +60,7 @@
         <button type="button" onclick="closeAddWorkerModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
             Cancel
         </button>
-        <button type="submit" class="btn-primary px-4 py-2 rounded-md" {% if workers|length == 0 %}disabled{% endif %}>
+        <button type="submit" class="btn-primary px-4 py-2 rounded-md" {% if workers.is_empty() %}disabled{% endif %}>
             Add Worker
         </button>
     </div>

@@ -1,4 +1,4 @@
-{% if personnel|length == 0 %}
+{% if personnel.is_empty() %}
 <tr>
     <td colspan="7" class="px-6 py-4 text-center">
         <p class="text-gray-500">No technical personnel found</p>
@@ -14,26 +14,31 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                {% if person.qualification == "engineer" %}bg-blue-100 text-blue-800
-                {% elif person.qualification == "technologist" %}bg-green-100 text-green-800
-                {% elif person.qualification == "technician" %}bg-purple-100 text-purple-800
-                {% endif %}">
+                {% match person.qualification %}
+                {% when Qualification::Engineer %}bg-blue-100 text-blue-800
+                {% when Qualification::Technologist %}bg-green-100 text-green-800
+                {% when Qualification::Technician %}bg-purple-100 text-purple-800
+                {% endmatch %}">
                 {{ person.qualification | capitalize }}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if person.position and person.position != "none" %}
-                {{ person.position | capitalize }}
+            {% if let Some(position) = person.position %}
+                {% if position != Position::None %}
+                    {{ position | capitalize }}
+                {% else %}
+                    <span class="text-gray-400">-</span>
+                {% endif %}
             {% else %}
                 <span class="text-gray-400">-</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if person.department_name %}
-                <a href="/departments/{{ person.department_id }}" class="text-blue-600 hover:underline">{{ person.department_name }}</a>
-                {% if person.area_name %} / <a href="/areas/{{ person.area_id }}" class="text-blue-600 hover:underline">{{ person.area_name }}</a>{% endif %}
-            {% elif person.area_name %}
-                <a href="/areas/{{ person.area_id }}" class="text-blue-600 hover:underline">{{ person.area_name }}</a>
+            {% if let Some(department_name) = &person.department_name %}
+                <a href="/departments/{{ person.department_id.unwrap() }}" class="text-blue-600 hover:underline">{{ department_name }}</a>
+                {% if let Some(area_name) = &person.area_name %} / <a href="/areas/{{ person.area_id.unwrap() }}" class="text-blue-600 hover:underline">{{ area_name }}</a>{% endif %}
+            {% elif let Some(area_name) = &person.area_name %}
+                <a href="/areas/{{ person.area_id.unwrap() }}" class="text-blue-600 hover:underline">{{ area_name }}</a>
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
             {% endif %}

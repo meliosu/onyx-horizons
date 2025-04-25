@@ -57,19 +57,19 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Total Usage</dt>
                         <dd class="mt-1 text-xl font-semibold">
-                            {{ material.total_usage | default(value=0) }} {{ material.units }}
+                            {{ material.total_usage.unwrap_or(0) }} {{ material.units }}
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Tasks Using</dt>
                         <dd class="mt-1 text-xl font-semibold">
-                            {{ material.tasks_using_count | default(value=0) }}
+                            {{ material.tasks_using_count.unwrap_or(0) }}
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Total Value</dt>
                         <dd class="mt-1 text-xl font-semibold">
-                            ${{ material.total_usage | default(value=0) * material.cost }}
+                            ${{ material.total_usage.unwrapp_or(0) * material.cost }}
                         </dd>
                     </div>
                 </dl>

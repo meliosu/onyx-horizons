@@ -35,7 +35,7 @@
                     <dt class="text-sm font-medium text-gray-500">Supervisor</dt>
                     <dd class="mt-1 text-sm text-gray-900">
                         {% if supervisor %}
-                            {{ supervisor.name }} ({{ supervisor.qualification }}{% if supervisor.position %}, {{ supervisor.position }}{% endif %})
+                            {{ supervisor.name }} ({{ supervisor.qualification }}{% if let Some(position) = supervisor.position %}, {{ position }}{% endif %})
                         {% else %}
                             <span class="text-gray-500">Not assigned</span>
                         {% endif %}
@@ -43,11 +43,11 @@
                 </div>
                 <div class="col-span-1">
                     <dt class="text-sm font-medium text-gray-500">Number of Areas</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ department.areas_count | default(value=0) }}</dd>
+                    <dd class="mt-1 text-sm text-gray-900">{{ department.areas_count.unwrap_or(0) }}</dd>
                 </div>
                 <div class="col-span-1">
                     <dt class="text-sm font-medium text-gray-500">Number of Sites</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ department.sites_count | default(value=0) }}</dd>
+                    <dd class="mt-1 text-sm text-gray-900">{{ department.sites_count.unwrap_or(0) }}</dd>
                 </div>
             </dl>
         </div>

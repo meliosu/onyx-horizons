@@ -41,8 +41,8 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Available Amount</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if equipment.available_amount %}
-                                {{ equipment.available_amount }}
+                            {% if let Some(available_amount) = equipment.available_amount %}
+                                {{ available_amount }}
                             {% else %}
                                 {{ equipment.amount }}
                             {% endif %}
@@ -59,8 +59,8 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Fuel Type</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if equipment.fuel_type %}
-                                {{ equipment.fuel_type | capitalize }}
+                            {% if let Some(fuel_type) =equipment.fuel_type %}
+                                {{ fuel_type | capitalize }}
                             {% else %}
                                 None
                             {% endif %}

@@ -3,16 +3,16 @@
         <h2 class="text-xl font-bold">Department Sites Report</h2>
         <div class="text-sm text-gray-500">
             <span>{{ department_name }}</span>
-            {% if start_date and end_date %}
+            {% if start_date.is_some() && end_date.is_some() %}
                 <span class="mx-1">•</span>
-                <span>{{ start_date }} to {{ end_date }}</span>
+                <span>{{ start_date.as_ref().unwrap() }} to {{ end_date.as_ref().unwrap() }}</span>
             {% endif %}
         </div>
     </div>
 </div>
 
 <div class="p-6">
-    {% if sites|length == 0 %}
+    {% if sites.is_empty() %}
         <div class="text-center py-8">
             <p class="text-gray-500">No sites found for this department in the specified date range.</p>
         </div>
@@ -21,21 +21,21 @@
             <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Sites</div>
-                    <div class="text-2xl font-bold">{{ sites|length }}</div>
+                    <div class="text-2xl font-bold">{{ sites.len() }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Active Sites</div>
                     <div class="text-2xl font-bold">
-                        {{ sites|filter(attribute="status", value="in_progress")|length }}
+                        {{ sites.iter().filter(|s| s.status == "in_progress").count() }}
                     </div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Materials Cost</div>
-                    <div class="text-2xl font-bold">${{ sites|map(attribute="materials_cost")|sum }}</div>
+                    <div class="text-2xl font-bold">${{ sites.iter().fold(0.0, |sum, site| sum + site.materials_cost) }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Brigades</div>
-                    <div class="text-2xl font-bold">{{ sites|map(attribute="current_brigades_count")|sum }}</div>
+                    <div class="text-2xl font-bold">{{ sites.iter().fold(0, |sum, site| sum + site.current_brigades_count) }}</div>
                 </div>
             </div>
         </div>
@@ -72,18 +72,30 @@
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <a href="/sites/{{ site.site_id }}" class="text-blue-600 hover:underline font-medium">
-                                {{ site.site_name | default(value="Site #" ~ site.site_id) }}
+                                {% if let Some(name) = &site.site_name %}
+                                    {{ name }}
+                                {% else %}
+                                    Site #{{ site.site_id }}
+                                {% endif %}
                             </a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {% if site.site_type == "power_plant" %}bg-purple-100 text-purple-800
-                                {% elif site.site_type == "road" %}bg-blue-100 text-blue-800
-                                {% elif site.site_type == "housing" %}bg-green-100 text-green-800
-                                {% elif site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
-                                {% elif site.site_type == "park" %}bg-indigo-100 text-indigo-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                {{ site.site_type | replace(from="_", to=" ") | capitalize }}
+                                {% match site.site_type %}
+                                    {% when SiteType::PowerPlant %}bg-purple-100 text-purple-800
+                                    {% when SiteType::Road %}bg-blue-100 text-blue-800
+                                    {% when SiteType::Housing %}bg-green-100 text-green-800
+                                    {% when SiteType::Bridge %}bg-yellow-100 text-yellow-800
+                                    {% when SiteType::Park %}bg-indigo-100 text-indigo-800
+                                    {% else %}bg-gray-100 text-gray-800
+                                {% endmatch %}">
+                                {% match site.site_type %}
+                                    {% when SiteType::PowerPlant %}Power Plant
+                                    {% when SiteType::Road %}Road
+                                    {% when SiteType::Housing %}Housing
+                                    {% when SiteType::Bridge %}Bridge
+                                    {% when SiteType::Park %}Park
+                                {% endmatch %}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

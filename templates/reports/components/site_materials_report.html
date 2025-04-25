@@ -3,16 +3,16 @@
         <h2 class="text-xl font-bold">Site Materials Report</h2>
         <div class="text-sm text-gray-500">
             <span>{{ site_name }}</span>
-            {% if start_date and end_date %}
+            {% if start_date.is_some() && end_date.is_some() %}
                 <span class="mx-1">•</span>
-                <span>{{ start_date }} to {{ end_date }}</span>
+                <span>{{ start_date.as_ref().unwrap() }} to {{ end_date.as_ref().unwrap() }}</span>
             {% endif %}
         </div>
     </div>
 </div>
 
 <div class="p-6">
-    {% if materials|length == 0 %}
+    {% if materials.is_empty() %}
         <div class="text-center py-8">
             <p class="text-gray-500">No materials found for this site in the specified date range.</p>
         </div>
@@ -21,15 +21,15 @@
             <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Materials</div>
-                    <div class="text-2xl font-bold">{{ materials|length }}</div>
+                    <div class="text-2xl font-bold">{{ materials.len() }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Materials with Recorded Usage</div>
-                    <div class="text-2xl font-bold">{{ materials|filter(attribute="actual_amount", filter="is_some")|length }}</div>
+                    <div class="text-2xl font-bold">{{ materials.iter().filter(|m| m.actual_amount.is_some()).count() }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Cost</div>
-                    <div class="text-2xl font-bold">${{ materials|map(attribute="total_cost")|sum }}</div>
+                    <div class="text-2xl font-bold">${{ materials.iter().fold(0.0, |sum, material| sum + material.total_cost) }}</div>
                 </div>
             </div>
         </div>
@@ -79,18 +79,18 @@
                             {{ material.expected_amount }} {{ material.units }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            {% if material.actual_amount %}
-                                {{ material.actual_amount }} {{ material.units }}
+                            {% if let Some(amount) = material.actual_amount %}
+                                {{ amount }} {{ material.units }}
                             {% else %}
                                 <span class="text-gray-400">Not recorded</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            {% if material.difference_amount and material.difference_percentage %}
-                                {% if material.difference_amount > 0 %}
-                                    <span class="text-red-600">+{{ material.difference_amount }} {{ material.units }} ({{ material.difference_percentage }}%)</span>
-                                {% elif material.difference_amount < 0 %}
-                                    <span class="text-green-600">{{ material.difference_amount }} {{ material.units }} ({{ material.difference_percentage }}%)</span>
+                            {% if let (Some(diff_amount), Some(diff_pct)) = (material.difference_amount, material.difference_percentage) %}
+                                {% if diff_amount > 0.0 %}
+                                    <span class="text-red-600">+{{ diff_amount }} {{ material.units }} ({{ diff_pct }}%)</span>
+                                {% elif diff_amount < 0.0 %}
+                                    <span class="text-green-600">{{ diff_amount }} {{ material.units }} ({{ diff_pct }}%)</span>
                                 {% else %}
                                     <span class="text-gray-500">No difference</span>
                                 {% endif %}

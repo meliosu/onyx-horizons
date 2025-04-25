@@ -61,8 +61,8 @@
                                         {{ worker.profession | capitalize }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        {% if worker.brigade_id %}
-                                            Brigade #{{ worker.brigade_id }}
+                                        {% if let Some(brigade_id) = worker.brigade_id %}
+                                            Brigade #{{ brigade_id }}
                                         {% else %}
                                             <span class="text-gray-400">Unassigned</span>
                                         {% endif %}

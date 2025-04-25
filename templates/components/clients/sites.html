@@ -14,28 +14,30 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                {% if site.site_type == "power_plant" %}bg-purple-100 text-purple-800
-                {% elif site.site_type == "road" %}bg-blue-100 text-blue-800
-                {% elif site.site_type == "housing" %}bg-green-100 text-green-800
-                {% elif site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
-                {% elif site.site_type == "park" %}bg-indigo-100 text-indigo-800
-                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {{ site.site_type | replace(from="_", to=" ") | capitalize }}
+                {% match site.site_type %}
+                    {% when "power_plant" %}bg-purple-100 text-purple-800
+                    {% when "road" %}bg-blue-100 text-blue-800
+                    {% when "housing" %}bg-green-100 text-green-800
+                    {% when "bridge" %}bg-yellow-100 text-yellow-800
+                    {% when "park" %}bg-indigo-100 text-indigo-800
+                    {% else %}bg-gray-100 text-gray-800
+                {% endmatch %}">
+                {{ site.site_type | capitalize }}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if site.area_name %}
+            {% if let Some(area_name) = site.area_name %}
                 <a href="/areas/{{ site.area_id }}" class="text-blue-600 hover:underline">
-                    {{ site.area_name }}
+                    {{ area_name }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if site.department_name %}
+            {% if let Some(department_name) = site.department_name %}
                 <a href="/departments/{{ site.department_id }}" class="text-blue-600 hover:underline">
-                    {{ site.department_name }}
+                    {{ department_name }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
@@ -43,11 +45,13 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                {% if site.status == "completed" %}bg-green-100 text-green-800
-                {% elif site.status == "in_progress" %}bg-blue-100 text-blue-800
-                {% elif site.status == "planned" %}bg-gray-100 text-gray-800
-                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {{ site.status | replace(from="_", to=" ") | capitalize }}
+                {% match site.status %}
+                    {% when "completed" %}bg-green-100 text-green-800
+                    {% when "in_progress" %}bg-blue-100 text-blue-800
+                    {% when "planned" %}bg-gray-100 text-gray-800
+                    {% else %}bg-gray-100 text-gray-800
+                {% endmatch %}">
+                {{ site.status }}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">

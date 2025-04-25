@@ -25,7 +25,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                             <option value="" disabled selected>Select Site</option>
                             {% for site in sites %}
-                            <option value="{{ site.id }}">{{ site.description }}</option>
+                            <option value="{{ site.id }}">{{ site.description.unwrap_or_default() }}</option>
                             {% endfor %}
                         </select>
                         <div class="validation-message text-xs text-red-500 mt-1"></div>
@@ -37,7 +37,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                             <option value="">No Brigade Assigned</option>
                             {% for brigade in brigades %}
-                            <option value="{{ brigade.id }}">Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}</option>
+                            <option value="{{ brigade.id }}">Brigade #{{ brigade.id }} - {{ brigade.brigadier_name.unwrap_or("No Brigadier".into()) }}</option>
                             {% endfor %}
                         </select>
                     </div>

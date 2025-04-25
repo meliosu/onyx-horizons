@@ -5,7 +5,7 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold">{{ worker_details.worker.employee.first_name }} {{ worker_details.worker.employee.last_name }}</h1>
-            <p class="text-gray-600">{{ worker_details.worker.profession | capitalize }}</p>
+            <p class="text-gray-600">{% match worker_details.worker.profession %}{% when WorkerProfession::Electrician %}Electrician{% when WorkerProfession::Plumber %}Plumber{% when WorkerProfession::Welder %}Welder{% when WorkerProfession::Driver %}Driver{% when WorkerProfession::Mason %}Mason{% endmatch %}</p>
         </div>
         <div class="flex space-x-2">
             <a href="/personnel/workers/{{ worker_details.worker.employee.id }}/edit" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
@@ -27,9 +27,9 @@
                 <h2 class="text-lg font-medium">Personal Information</h2>
             </div>
             <div class="p-6">
-                {% if worker_details.worker.employee.photo %}
+                {% if let Some(photo) = worker_details.worker.employee.photo %}
                 <div class="flex justify-center mb-6">
-                    <img src="{{ worker_details.worker.employee.photo }}" alt="Worker Photo" class="rounded-full w-32 h-32 object-cover">
+                    <img src="{{ photo }}" alt="Worker Photo" class="rounded-full w-32 h-32 object-cover">
                 </div>
                 {% endif %}
                 
@@ -38,13 +38,13 @@
                         <dt class="text-sm font-medium text-gray-500">Full Name</dt>
                         <dd class="mt-1 text-sm text-gray-900">
                             {{ worker_details.worker.employee.first_name }} 
-                            {{ worker_details.worker.employee.middle_name | default(value="") }} 
+                            {% if let Some(middle_name) = worker_details.worker.employee.middle_name %}{{ middle_name }} {% endif %}
                             {{ worker_details.worker.employee.last_name }}
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Gender</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ worker_details.worker.employee.gender | capitalize }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{% match worker_details.worker.employee.gender %}{% when Gender::Male %}Male{% when Gender::Female %}Female{% endmatch %}</dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
@@ -69,21 +69,28 @@
                         <dt class="text-sm font-medium text-gray-500">Profession</dt>
                         <dd class="mt-1 text-sm text-gray-900">
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {% if worker_details.worker.profession == "electrician" %}bg-blue-100 text-blue-800
-                                {% elif worker_details.worker.profession == "plumber" %}bg-green-100 text-green-800
-                                {% elif worker_details.worker.profession == "welder" %}bg-orange-100 text-orange-800
-                                {% elif worker_details.worker.profession == "driver" %}bg-purple-100 text-purple-800
-                                {% elif worker_details.worker.profession == "mason" %}bg-yellow-100 text-yellow-800
-                                {% endif %}">
-                                {{ worker_details.worker.profession | capitalize }}
+                                {% match worker_details.worker.profession %}
+                                {% when WorkerProfession::Electrician %}bg-blue-100 text-blue-800
+                                {% when WorkerProfession::Plumber %}bg-green-100 text-green-800
+                                {% when WorkerProfession::Welder %}bg-orange-100 text-orange-800
+                                {% when WorkerProfession::Driver %}bg-purple-100 text-purple-800
+                                {% when WorkerProfession::Mason %}bg-yellow-100 text-yellow-800
+                                {% endmatch %}">
+                                {% match worker_details.worker.profession %}
+                                {% when WorkerProfession::Electrician %}Electrician
+                                {% when WorkerProfession::Plumber %}Plumber
+                                {% when WorkerProfession::Welder %}Welder
+                                {% when WorkerProfession::Driver %}Driver
+                                {% when WorkerProfession::Mason %}Mason
+                                {% endmatch %}
                             </span>
                         </dd>
                     </div>
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Union Name</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if worker_details.worker.union_name %}
-                                {{ worker_details.worker.union_name }}
+                            {% if let Some(union_name) = worker_details.worker.union_name %}
+                                {{ union_name }}
                             {% else %}
                                 <span class="text-gray-400">Not a member of any union</span>
                             {% endif %}
@@ -92,9 +99,9 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Brigade</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if brigade %}
+                            {% if let Some(brigade) = brigade %}
                                 <a href="/brigades/{{ brigade.id }}" class="text-blue-600 hover:underline">
-                                    Brigade #{{ brigade.id }}{% if brigade.current_site_name %} ({{ brigade.current_site_name }}){% endif %}
+                                    Brigade #{{ brigade.id }}{% if let Some(site_name) = brigade.current_site_name %} ({{ site_name }}){% endif %}
                                 </a>
                             {% else %}
                                 <span class="text-gray-400">Not assigned to any brigade</span>
@@ -104,8 +111,12 @@
                     <div class="col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Brigadier</dt>
                         <dd class="mt-1 text-sm text-gray-900">
-                            {% if worker_details.worker.is_brigadier %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+                            {% if let Some(is_brigadier) = worker_details.worker.is_brigadier %}
+                                {% if is_brigadier %}
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+                                {% else %}
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+                                {% endif %}
                             {% else %}
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
                             {% endif %}
@@ -118,7 +129,14 @@
         <!-- Profession-specific Card -->
         <div class="bg-white rounded-lg shadow overflow-hidden lg:col-span-3">
             <div class="px-6 py-4 bg-gray-50 border-b">
-                <h2 class="text-lg font-medium">{{ worker_details.worker.profession | capitalize }} Details</h2>
+                <h2 class="text-lg font-medium">
+                {% match worker_details.worker.profession %}
+                {% when WorkerProfession::Electrician %}Electrician
+                {% when WorkerProfession::Plumber %}Plumber
+                {% when WorkerProfession::Welder %}Welder
+                {% when WorkerProfession::Driver %}Driver
+                {% when WorkerProfession::Mason %}Mason
+                {% endmatch %} Details</h2>
             </div>
             <div class="p-6">
                 {% match worker_details.profession_details %}
@@ -158,7 +176,7 @@
                         <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
                             <div class="col-span-1">
                                 <dt class="text-sm font-medium text-gray-500">HQ Restoration Skills</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ details.hq_restoration_skills | string | capitalize }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{% if details.hq_restoration_skills %}Yes{% else %}No{% endif %}</dd>
                             </div>
                         </dl>
                 {% endmatch %}
@@ -167,7 +185,7 @@
     </div>
 
     <!-- Tasks History Section -->
-    {% if tasks_history|length > 0 %}
+    {% if !tasks_history.is_empty() %}
     <div class="mt-6">
         <h2 class="text-lg font-medium mb-4">Task History</h2>
         <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -204,7 +222,7 @@
                                     {% elif task.status == "in_progress" %}bg-blue-100 text-blue-800
                                     {% elif task.status == "overdue" %}bg-red-100 text-red-800
                                     {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ task.status | replace(from="_", to=" ") | capitalize }}
+                                    {{ task.status.replace("_", " ") }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">

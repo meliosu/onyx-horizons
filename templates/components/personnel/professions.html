@@ -1,6 +1,6 @@
-<option value="" {% if not selected %}selected{% endif %}>Select Profession</option>
-<option value="electrician" {% if selected == "electrician" %}selected{% endif %}>Electrician</option>
-<option value="plumber" {% if selected == "plumber" %}selected{% endif %}>Plumber</option>
-<option value="welder" {% if selected == "welder" %}selected{% endif %}>Welder</option>
-<option value="driver" {% if selected == "driver" %}selected{% endif %}>Driver</option>
-<option value="mason" {% if selected == "mason" %}selected{% endif %}>Mason</option>
+<option value="" {% if selected.is_none() %}selected{% endif %}>Select Profession</option>
+<option value="electrician" {% if let Some(WorkerProfession::Electrician) = selected %}selected{% endif %}>Electrician</option>
+<option value="plumber" {% if let Some(WorkerProfession::Plumber) = selected %}selected{% endif %}>Plumber</option>
+<option value="welder" {% if let Some(WorkerProfession::Welder) = selected %}selected{% endif %}>Welder</option>
+<option value="driver" {% if let Some(WorkerProfession::Driver) = selected %}selected{% endif %}>Driver</option>
+<option value="mason" {% if let Some(WorkerProfession::Mason) = selected %}selected{% endif %}>Mason</option>

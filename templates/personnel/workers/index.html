@@ -17,11 +17,11 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
                     <select name="profession" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All Professions</option>
-                        <option value="electrician" {% if filters.profession == "electrician" %}selected{% endif %}>Electrician</option>
-                        <option value="plumber" {% if filters.profession == "plumber" %}selected{% endif %}>Plumber</option>
-                        <option value="welder" {% if filters.profession == "welder" %}selected{% endif %}>Welder</option>
-                        <option value="driver" {% if filters.profession == "driver" %}selected{% endif %}>Driver</option>
-                        <option value="mason" {% if filters.profession == "mason" %}selected{% endif %}>Mason</option>
+                        <option value="electrician" {% if let Some(profession) = filters.profession %}{% if profession == WorkerProfession::Electrician %}selected{% endif %}{% endif %}>Electrician</option>
+                        <option value="plumber" {% if let Some(profession) = filters.profession %}{% if profession == WorkerProfession::Plumber %}selected{% endif %}{% endif %}>Plumber</option>
+                        <option value="welder" {% if let Some(profession) = filters.profession %}{% if profession == WorkerProfession::Welder %}selected{% endif %}{% endif %}>Welder</option>
+                        <option value="driver" {% if let Some(profession) = filters.profession %}{% if profession == WorkerProfession::Driver %}selected{% endif %}{% endif %}>Driver</option>
+                        <option value="mason" {% if let Some(profession) = filters.profession %}{% if profession == WorkerProfession::Mason %}selected{% endif %}{% endif %}>Mason</option>
                     </select>
                 </div>
                 <div>
@@ -29,7 +29,9 @@
                     <select name="brigade_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All Brigades</option>
                         {% for brigade in brigades %}
-                            <option value="{{ brigade.id }}" {% if filters.brigade_id == brigade.id %}selected{% endif %}>Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}</option>
+                            <option value="{{ brigade.id }}" {% if let Some(brigade_id) = filters.brigade_id %}{% if brigade_id == brigade.id %}selected{% endif %}{% endif %}>
+                                Brigade #{{ brigade.id }} - {{ brigade.brigadier_name }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -37,8 +39,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Brigadier</label>
                     <select name="is_brigadier" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="">All</option>
-                        <option value="true" {% if filters.is_brigadier == true %}selected{% endif %}>Yes</option>
-                        <option value="false" {% if filters.is_brigadier == false %}selected{% endif %}>No</option>
+                        <option value="true" {% if let Some(is_brigadier) = filters.is_brigadier %}{% if is_brigadier %}selected{% endif %}{% endif %}>Yes</option>
+                        <option value="false" {% if let Some(is_brigadier) = filters.is_brigadier %}{% if !is_brigadier %}selected{% endif %}{% endif %}>No</option>
                     </select>
                 </div>
                 <div class="flex items-end">
@@ -106,9 +108,9 @@
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page | default(value=20) + 1 }}</span> to 
-                <span class="font-medium">{{ current_page * filters.pagination.per_page | default(value=20) }}</span> of 
-                <span class="font-medium">{{ total_pages * filters.pagination.per_page | default(value=20) }}</span> results
+                Showing <span class="font-medium">{{ (current_page - 1) * filters.pagination.per_page.unwrap_or(20) + 1 }}</span> to 
+                <span class="font-medium">{{ current_page * filters.pagination.per_page.unwrap_or(20) }}</span> of 
+                <span class="font-medium">{{ total_pages * filters.pagination.per_page.unwrap_or(20) }}</span> results
             </div>
             <div class="flex space-x-2">
                 {% if current_page > 1 %}

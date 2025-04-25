@@ -2,13 +2,13 @@
     <div class="flex justify-between items-center">
         <h2 class="text-xl font-bold">Overdue Tasks Report</h2>
         <div class="text-sm text-gray-500">
-            <span class="text-red-600 font-medium">{{ tasks|length }}</span> overdue tasks found
+            <span class="text-red-600 font-medium">{{ tasks.len() }}</span> overdue tasks found
         </div>
     </div>
 </div>
 
 <div class="p-6">
-    {% if tasks|length == 0 %}
+    {% if tasks.is_empty() %}
         <div class="text-center py-8">
             <div class="text-green-500 mb-2">
                 <i class="fas fa-check-circle text-5xl"></i>
@@ -21,19 +21,25 @@
             <div class="stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Total Overdue Tasks</div>
-                    <div class="text-2xl font-bold text-red-600">{{ tasks|length }}</div>
+                    <div class="text-2xl font-bold text-red-600">{{ tasks.len() }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Average Days Overdue</div>
-                    <div class="text-2xl font-bold">{{ (tasks|map(attribute="days_overdue")|sum / tasks|length)|round(1) }}</div>
+                    <div class="text-2xl font-bold">
+                    {% if !tasks.is_empty() %}
+                        {{ tasks.iter().fold(0, |sum, task| sum + task.days_overdue) as f64 / tasks.len() as f64 }}
+                    {% else %}
+                        0
+                    {% endif %}
+                    </div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Without Brigade</div>
-                    <div class="text-2xl font-bold">{{ tasks|filter(attribute="brigade_assigned", value=false)|length }}</div>
+                    <div class="text-2xl font-bold">{{ tasks.iter().filter(|task| !task.brigade_assigned).count() }}</div>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="text-sm text-gray-500 uppercase">Without Materials</div>
-                    <div class="text-2xl font-bold">{{ tasks|filter(attribute="materials_allocated", value=false)|length }}</div>
+                    <div class="text-2xl font-bold">{{ tasks.iter().filter(|task| !task.materials_allocated).count() }}</div>
                 </div>
             </div>
         </div>
@@ -57,18 +63,18 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Group by department and calculate stats -->
-                        {% for dept_name in tasks|map(attribute="department_name")|unique %}
-                        {% set dept_tasks = tasks|filter(attribute="department_name", value=dept_name) %}
+                        <!-- Use Rust to get unique departments and their stats -->
+                        {% let departments = get_unique_departments(tasks) %}
+                        {% for dept in departments %}
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ dept_name }}
+                                {{ dept.name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                {{ dept_tasks|length }}
+                                {{ dept.task_count }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                {{ (dept_tasks|map(attribute="days_overdue")|sum / dept_tasks|length)|round(1) }}
+                                {{ dept.avg_days_overdue }}
                             </td>
                         </tr>
                         {% endfor %}
@@ -106,7 +112,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    {% for task in tasks|sort(attribute="days_overdue", reverse=true) %}
+                    {% for task in sorted_tasks_by_overdue_days(tasks) %}
                     <tr class="{% if task.days_overdue > 14 %}bg-red-50{% endif %}">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <a href="/tasks/{{ task.task_id }}" class="text-blue-600 hover:underline font-medium">
@@ -119,13 +125,15 @@
                                     {{ task.site_name }}
                                 </a>
                                 <span class="ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if task.site_type == "power_plant" %}bg-purple-100 text-purple-800
-                                    {% elif task.site_type == "road" %}bg-blue-100 text-blue-800
-                                    {% elif task.site_type == "housing" %}bg-green-100 text-green-800
-                                    {% elif task.site_type == "bridge" %}bg-yellow-100 text-yellow-800
-                                    {% elif task.site_type == "park" %}bg-indigo-100 text-indigo-800
-                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ task.site_type | replace(from="_", to=" ") | capitalize }}
+                                    {% match task.site_type %}
+                                        {% when "power_plant" %}bg-purple-100 text-purple-800
+                                        {% when "road" %}bg-blue-100 text-blue-800
+                                        {% when "housing" %}bg-green-100 text-green-800
+                                        {% when "bridge" %}bg-yellow-100 text-yellow-800
+                                        {% when "park" %}bg-indigo-100 text-indigo-800
+                                        {% else %}bg-gray-100 text-gray-800
+                                    {% endmatch %}">
+                                    {{ format_site_type(task.site_type) }}
                                 </span>
                             </div>
                         </td>
@@ -143,9 +151,9 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            {% if task.brigade_name %}
+                            {% if let Some(brigade_name) = &task.brigade_name %}
                                 <a href="/brigades/{{ task.brigade_id }}" class="text-blue-600 hover:underline">
-                                    {{ task.brigade_name }}
+                                    {{ brigade_name }}
                                 </a>
                             {% elif task.brigade_assigned %}
                                 <span class="text-gray-400">Assigned</span>
@@ -174,7 +182,7 @@
         <div class="mt-6 flex items-center justify-between">
             <div class="text-sm text-gray-700">
                 Showing <span class="font-medium">{{ (current_page - 1) * 20 + 1 }}</span> to 
-                <span class="font-medium">{{ [current_page * 20, total_count]|min }}</span> of 
+                <span class="font-medium">{{ current_page * 20.min(total_count) }}</span> of 
                 <span class="font-medium">{{ total_count }}</span> overdue tasks
             </div>
             <div class="flex-1 flex justify-between sm:justify-end">

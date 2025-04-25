@@ -36,7 +36,7 @@
                         <option value="">Select a Supervisor (Optional)</option>
                         {% for supervisor in supervisors %}
                             <option value="{{ supervisor.id }}" {% if area.supervisor_id == supervisor.id %}selected{% endif %}>
-                                {{ supervisor.name }} - {{ supervisor.qualification }}{% if supervisor.position %}({{ supervisor.position }}){% endif %}
+                                {{ supervisor.name }} - {{ supervisor.qualification }}{% if let Some(position) = supervisor.position %}({{ position }}){% endif %}
                             </option>
                         {% endfor %}
                     </select>

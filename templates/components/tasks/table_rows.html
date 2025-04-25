@@ -1,4 +1,4 @@
-{% if tasks|length == 0 %}
+{% if tasks.is_empty() %}
 <tr>
     <td colspan="7" class="px-6 py-4 text-center">
         <p class="text-gray-500">No tasks found</p>
@@ -13,19 +13,23 @@
             </a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if task.site_name %}
+            {% if let Some(site_name) = &task.site_name %}
                 <a href="/sites/{{ task.site_id }}" class="text-blue-600 hover:underline">
-                    {{ task.site_name }}
+                    {{ site_name }}
                 </a>
             {% else %}
                 <span class="text-gray-400">Unknown site</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if task.brigade_id and task.brigade_name %}
-                <a href="/brigades/{{ task.brigade_id }}" class="text-blue-600 hover:underline">
-                    {{ task.brigade_name }}
-                </a>
+            {% if let Some(brigade_id) = task.brigade_id %}
+                {% if let Some(brigade_name) = &task.brigade_name %}
+                    <a href="/brigades/{{ brigade_id }}" class="text-blue-600 hover:underline">
+                        {{ brigade_name }}
+                    </a>
+                {% else %}
+                    <span class="text-gray-400">Unassigned</span>
+                {% endif %}
             {% else %}
                 <span class="text-gray-400">Unassigned</span>
             {% endif %}
@@ -33,7 +37,11 @@
         <td class="px-6 py-4 whitespace-nowrap">
             {{ task.period_start }} - 
             {% if task.is_completed %}
-                {{ task.actual_period_end }}
+                {% if let Some(actual_end) = &task.actual_period_end %}
+                    {{ actual_end }}
+                {% else %}
+                    {{ task.expected_period_end }}
+                {% endif %}
             {% else %}
                 {{ task.expected_period_end }}
             {% endif %}
@@ -54,11 +62,11 @@
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if task.completion_percentage is not none %}
+            {% if let Some(completion_percentage) = task.completion_percentage %}
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-primary h-2.5 rounded-full" style="width: {{ task.completion_percentage }}%"></div>
+                    <div class="bg-primary h-2.5 rounded-full" style="width: {{ completion_percentage }}%"></div>
                 </div>
-                <p class="text-xs mt-1 text-gray-500">{{ task.completion_percentage }}%</p>
+                <p class="text-xs mt-1 text-gray-500">{{ completion_percentage }}%</p>
             {% else %}
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                     <div class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>

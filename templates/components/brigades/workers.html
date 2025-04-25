@@ -10,7 +10,7 @@
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-            {% if workers|length == 0 %}
+            {% if workers.is_empty() %}
             <tr>
                 <td colspan="5" class="px-6 py-4 text-center">
                     <p class="text-gray-500">No workers assigned to this brigade</p>
@@ -26,13 +26,20 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            {% if worker.worker.profession == "electrician" %}bg-blue-100 text-blue-800
-                            {% elif worker.worker.profession == "plumber" %}bg-green-100 text-green-800
-                            {% elif worker.worker.profession == "welder" %}bg-orange-100 text-orange-800
-                            {% elif worker.worker.profession == "driver" %}bg-purple-100 text-purple-800
-                            {% elif worker.worker.profession == "mason" %}bg-yellow-100 text-yellow-800
-                            {% endif %}">
-                            {{ worker.worker.profession | capitalize }}
+                            {% match worker.worker.profession %}
+                                {% when WorkerProfession::Electrician %} bg-blue-100 text-blue-800
+                                {% when WorkerProfession::Plumber %} bg-green-100 text-green-800
+                                {% when WorkerProfession::Welder %} bg-orange-100 text-orange-800
+                                {% when WorkerProfession::Driver %} bg-purple-100 text-purple-800
+                                {% when WorkerProfession::Mason %} bg-yellow-100 text-yellow-800
+                            {% endmatch %}">
+                            {% match worker.worker.profession %}
+                                {% when WorkerProfession::Electrician %} Electrician
+                                {% when WorkerProfession::Plumber %} Plumber
+                                {% when WorkerProfession::Welder %} Welder
+                                {% when WorkerProfession::Driver %} Driver
+                                {% when WorkerProfession::Mason %} Mason
+                            {% endmatch %}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -66,11 +73,11 @@
     </table>
 </div>
 
-{% if current_page and total_pages > 1 %}
+{% if current_page > 0 && total_pages > 1 %}
 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
     <div class="text-sm text-gray-700">
         Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
-        <span class="font-medium">{{ [current_page * 10, workers|length]|min }}</span> of 
+        <span class="font-medium">{{ current_page * 10.min(workers.len()) }}</span> of 
         <span class="font-medium">{{ total_pages * 10 }}</span> workers
     </div>
     <div class="flex space-x-2">

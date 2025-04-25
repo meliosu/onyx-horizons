@@ -16,8 +16,8 @@
             {{ item.amount }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if item.available_amount %}
-                {{ item.available_amount }}
+            {% if let Some(available_amount) = item.available_amount %}
+                {{ available_amount }}
             {% else %}
                 {{ item.amount }}
             {% endif %}
@@ -26,8 +26,19 @@
             {{ item.purchase_date }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if item.fuel_type %}
-                {{ item.fuel_type | capitalize }}
+            {% if let Some(fuel_type) = item.fuel_type %}
+                {% match fuel_type %}
+                    {% when FuelType::Diesel %}
+                        Diesel
+                    {% when FuelType::Petrol %}
+                        Petrol
+                    {% when FuelType::Electric %}
+                        Electric
+                    {% when FuelType::Gas %}
+                        Gas
+                    {% when FuelType::None %}
+                        None
+                {% endmatch %}
             {% else %}
                 <span class="text-gray-400">None</span>
             {% endif %}

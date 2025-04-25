@@ -1,4 +1,4 @@
-{% if departments|length == 0 %}
+{% if departments.is_empty() %}
 <tr>
     <td colspan="5" class="px-6 py-4 text-center">
         <p class="text-gray-500">No departments found</p>
@@ -13,17 +13,25 @@
             </a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if department.supervisor_name %}
-                {{ department.supervisor_name }}
+            {% if let Some(supervisor_name) = &department.supervisor_name %}
+                {{ supervisor_name }}
             {% else %}
                 <span class="text-gray-400">Not assigned</span>
             {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {{ department.areas_count | default(value="0") }}
+            {% if let Some(areas_count) = department.areas_count %}
+                {{ areas_count }}
+            {% else %}
+                0
+            {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {{ department.sites_count | default(value="0") }}
+            {% if let Some(sites_count) = department.sites_count %}
+                {{ sites_count }}
+            {% else %}
+                0
+            {% endif %}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">
             <div class="flex justify-end space-x-2">

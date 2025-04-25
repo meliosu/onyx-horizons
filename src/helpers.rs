@@ -134,6 +134,17 @@ struct MaterialSelectorTemplate {
 }
 
 #[derive(Template)]
+#[template(path = "components/selectors/supervisors.html")]
+struct SupervisorSelectorTemplate {
+    options: Vec<SelectOption>,
+    name: String,
+    id: String,
+    placeholder: Option<String>,
+    required: bool,
+    disabled: bool,
+}
+
+#[derive(Template)]
 #[template(path = "components/validation/field_validation.html")]
 struct ValidationMessageTemplate {
     field: String,
@@ -447,6 +458,42 @@ async fn material_selector(
     Html(template.render().unwrap_or_else(|_| String::from("Error rendering material selector")))
 }
 
+// Supervisor selector
+async fn supervisor_selector(
+    State(database): State<Database>,
+    Query(params): Query<SelectorParams>,
+) -> Html<String> {
+    // In a real implementation, fetch supervisors from the database
+    let options = vec![
+        SelectOption { 
+            value: "1".to_string(), 
+            label: "Alex Johnson - Senior Foreman".to_string(), 
+            selected: params.selected.as_ref().map_or(false, |s| s == "1") 
+        },
+        SelectOption { 
+            value: "2".to_string(), 
+            label: "Sarah Williams - Project Lead".to_string(), 
+            selected: params.selected.as_ref().map_or(false, |s| s == "2") 
+        },
+        SelectOption { 
+            value: "3".to_string(), 
+            label: "Michael Chen - Site Manager".to_string(), 
+            selected: params.selected.as_ref().map_or(false, |s| s == "3") 
+        },
+    ];
+    
+    let template = SupervisorSelectorTemplate {
+        options,
+        name: "supervisor_id".to_string(),
+        id: "supervisor-selector".to_string(),
+        placeholder: Some("Select Supervisor".to_string()),
+        required: false,
+        disabled: false,
+    };
+    
+    Html(template.render().unwrap_or_else(|_| String::from("Error rendering supervisor selector")))
+}
+
 // Form validation
 async fn validate_form_field(
     State(database): State<Database>,
@@ -509,6 +556,7 @@ pub fn router() -> Router<Database> {
         .route("/api/selectors/brigades", get(brigade_selector))
         .route("/api/selectors/sites", get(site_selector))
         .route("/api/selectors/materials", get(material_selector))
+        .route("/api/selectors/supervisors", get(supervisor_selector))
         // Validation Endpoints
         .route("/api/validation/form/:form_type", get(validate_form_field))
 }

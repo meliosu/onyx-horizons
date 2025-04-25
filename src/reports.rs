@@ -393,6 +393,51 @@ pub enum ReportData {
     MaterialExcesses(Vec<MaterialExcessReportItem>),
 }
 
+// Helper structures for template use
+pub struct DepartmentSummary {
+    pub name: String,
+    pub task_count: usize,
+    pub avg_days_overdue: f64,
+}
+
+// Helper functions for templates
+pub fn get_unique_departments(tasks: &[OverdueTaskReportItem]) -> Vec<DepartmentSummary> {
+    let mut departments = std::collections::HashMap::new();
+    
+    for task in tasks {
+        let entry = departments.entry(task.department_name.clone()).or_insert_with(|| {
+            (0, 0)
+        });
+        entry.0 += 1;
+        entry.1 += task.days_overdue as usize;
+    }
+    
+    departments.into_iter().map(|(name, (count, total_days))| {
+        DepartmentSummary {
+            name,
+            task_count: count,
+            avg_days_overdue: if count > 0 { total_days as f64 / count as f64 } else { 0.0 },
+        }
+    }).collect()
+}
+
+pub fn sorted_tasks_by_overdue_days(tasks: &[OverdueTaskReportItem]) -> Vec<&OverdueTaskReportItem> {
+    let mut sorted_tasks: Vec<&OverdueTaskReportItem> = tasks.iter().collect();
+    sorted_tasks.sort_by(|a, b| b.days_overdue.cmp(&a.days_overdue));
+    sorted_tasks
+}
+
+pub fn format_site_type(site_type: &str) -> String {
+    match site_type {
+        "power_plant" => "Power Plant".to_string(),
+        "road" => "Road".to_string(),
+        "housing" => "Housing".to_string(),
+        "bridge" => "Bridge".to_string(),
+        "park" => "Park".to_string(),
+        _ => site_type.to_string(),
+    }
+}
+
 // Page Endpoints
 async fn departments_reports_page(
     State(database): State<Database>,

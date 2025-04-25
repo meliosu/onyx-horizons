@@ -9,7 +9,7 @@
     <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
             <a href="/sites/{{ site.id }}" class="text-blue-600 hover:underline font-medium">
-                {{ site.description }}
+                {{ site.description.unwrap_or_default() }}
             </a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
@@ -20,7 +20,7 @@
                 {% elif site.site_type == "bridge" %}bg-yellow-100 text-yellow-800
                 {% elif site.site_type == "park" %}bg-indigo-100 text-indigo-800
                 {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {{ site.site_type | replace(from="_", to=" ") | capitalize }}
+                {{ site.site_type | capitalize }}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">

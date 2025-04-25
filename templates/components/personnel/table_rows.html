@@ -1,4 +1,4 @@
-{% if personnel|length == 0 %}
+{% if personnel.is_empty() %}
 <tr>
     <td colspan="5" class="px-6 py-4 text-center">
         <p class="text-gray-500">No personnel found</p>
@@ -16,8 +16,8 @@
             {{ person.qualification }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            {% if person.position %}
-                {{ person.position }}
+            {% if let Some(position) = person.position %}
+                {{ position }}
             {% else %}
                 <span class="text-gray-400">-</span>
             {% endif %}

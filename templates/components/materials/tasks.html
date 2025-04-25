@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-            {% if tasks|length == 0 %}
+            {% if tasks.is_empty() %}
             <tr>
                 <td colspan="6" class="px-6 py-4 text-center">
                     <p class="text-gray-500">No tasks using this material</p>
@@ -27,21 +27,35 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <a href="/sites/{{ task.site_id }}" class="text-blue-600 hover:underline">
-                            {{ task.site_name }}
+                            {% if let Some(site_name) = &task.site_name %}
+                                {{ site_name }}
+                            {% else %}
+                                Unknown Site
+                            {% endif %}
                         </a>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {{ task.expected_amount }} {{ task.material_units }}
+                        {{ task.expected_amount }} 
+                        {% if let Some(units) = &task.material_units %}
+                            {{ units }}
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if task.actual_amount %}
-                            {{ task.actual_amount }} {{ task.material_units }}
+                        {% if let Some(actual_amount) = task.actual_amount %}
+                            {{ actual_amount }} 
+                            {% if let Some(units) = &task.material_units %}
+                                {{ units }}
+                            {% endif %}
                         {% else %}
                             <span class="text-gray-400">Not recorded</span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        ${{ (task.expected_amount * task.material_cost) | round(2) }}
+                        {% if let Some(cost) = task.material_cost %}
+                            ${{ task.expected_amount * cost }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         {% if task.is_completed %}
@@ -65,11 +79,18 @@
     </table>
 </div>
 
-{% if current_page and total_pages > 1 %}
+{% if current_page > 0 && total_pages > 1 %}
 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
     <div class="text-sm text-gray-700">
         Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
-        <span class="font-medium">{{ [current_page * 10, tasks|length]|min }}</span> of 
+        <span class="font-medium">
+            {% let end = current_page * 10 %}
+            {% if end > tasks.len() %}
+                {{ tasks.len() }}
+            {% else %}
+                {{ end }}
+            {% endif %}
+        </span> of 
         <span class="font-medium">{{ total_pages * 10 }}</span> tasks
     </div>
     <div class="flex space-x-2">
