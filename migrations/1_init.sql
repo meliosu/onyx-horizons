@@ -63,6 +63,7 @@ CREATE TABLE area (
 
 CREATE TABLE site (
     id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
     area_id INTEGER NOT NULL REFERENCES area(id),
     client_id INTEGER NOT NULL REFERENCES client(id),
     type site_type NOT NULL,

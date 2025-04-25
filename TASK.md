@@ -83,6 +83,7 @@ The database should have the following tables and table fields:
 
 * site (A single construction site)
   * id (primary key)
+  * name (name of the site, text)
   * area_id (references area)
   * client_id (references client)
   * type (one of power_plant, road, housing, bridge, park)
