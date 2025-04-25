@@ -1,0 +1,58 @@
+{% if sites|length == 0 %}
+<tr>
+    <td colspan="6" class="px-6 py-4 text-center">
+        <p class="text-gray-500">No sites found</p>
+    </td>
+</tr>
+{% else %}
+    {% for site in sites %}
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/sites/{{ site.id }}" class="text-blue-600 hover:underline font-medium">
+                {{ site.description }}
+            </a>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if site.type_ == 'power_plant' %}bg-purple-100 text-purple-800
+                {% elif site.type_ == 'road' %}bg-blue-100 text-blue-800
+                {% elif site.type_ == 'housing' %}bg-green-100 text-green-800
+                {% elif site.type_ == 'bridge' %}bg-yellow-100 text-yellow-800
+                {% elif site.type_ == 'park' %}bg-indigo-100 text-indigo-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ site.type_ | capitalize }}
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ site.area_name }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ site.client_name }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if site.status == 'planned' %}bg-gray-100 text-gray-800
+                {% elif site.status == 'in_progress' %}bg-blue-100 text-blue-800
+                {% elif site.status == 'completed' %}bg-green-100 text-green-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ site.status | replace(from="_", to=" ") | capitalize }}
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+            <div class="flex justify-end space-x-2">
+                <a href="/sites/{{ site.id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a href="/sites/{{ site.id }}/edit" class="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded">
+                    <i class="fas fa-pencil"></i>
+                </a>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- Pagination information - will be used by parent pagination control -->
+    <tr class="hidden">
+        <td id="pagination-info" data-current-page="{{ current_page }}" data-total-pages="{{ total_pages }}"></td>
+    </tr>
+{% endif %}

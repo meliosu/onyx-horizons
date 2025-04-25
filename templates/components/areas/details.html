@@ -1,0 +1,38 @@
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+        <div class="col-span-1">
+            <p class="text-sm font-medium text-gray-500">Area Name</p>
+            <p class="mt-1 text-lg">{{ area.name }}</p>
+        </div>
+        <div class="col-span-1">
+            <p class="text-sm font-medium text-gray-500">Department</p>
+            <p class="mt-1 text-lg">
+                {% if area.department_name %}
+                    <a href="/departments/{{ area.department_id }}" class="text-blue-600 hover:underline">
+                        {{ area.department_name }}
+                    </a>
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-span-1">
+            <p class="text-sm font-medium text-gray-500">Supervisor</p>
+            <p class="mt-1 text-lg">
+                {% if area.supervisor_name %}
+                    {{ area.supervisor_name }}
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-span-1">
+            <p class="text-sm font-medium text-gray-500">Number of Sites</p>
+            <p class="mt-1 text-lg">{{ area.sites_count | default(value="0") }}</p>
+        </div>
+        <div class="col-span-1">
+            <p class="text-sm font-medium text-gray-500">Personnel Count</p>
+            <p class="mt-1 text-lg">{{ area.personnel_count | default(value="0") }}</p>
+        </div>
+    </div>
+</div>

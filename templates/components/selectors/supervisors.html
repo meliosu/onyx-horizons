@@ -1,0 +1,6 @@
+<option value="">Select a Supervisor (Optional)</option>
+{% for supervisor in supervisors %}
+    <option value="{{ supervisor.id }}" {% if selected_id == supervisor.id %}selected{% endif %}>
+        {{ supervisor.name }} - {{ supervisor.qualification }}{% if supervisor.position %}({{ supervisor.position }}){% endif %}
+    </option>
+{% endfor %}

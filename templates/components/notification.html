@@ -1,0 +1,29 @@
+<div class="p-4 mb-4 rounded-md {% if notification_type == 'success' %}bg-green-50 text-green-800{% elif notification_type == 'error' %}bg-red-50 text-red-800{% elif notification_type == 'warning' %}bg-yellow-50 text-yellow-800{% else %}bg-blue-50 text-blue-800{% endif %}"
+     hx-swap-oob="true"
+     id="notification-container">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            {% if notification_type == 'success' %}
+                <i class="fas fa-check-circle text-green-500"></i>
+            {% elif notification_type == 'error' %}
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+            {% elif notification_type == 'warning' %}
+                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+            {% else %}
+                <i class="fas fa-info-circle text-blue-500"></i>
+            {% endif %}
+        </div>
+        <div class="ml-3">
+            <p class="text-sm font-medium">{{ message }}</p>
+        </div>
+        <div class="ml-auto pl-3">
+            <div class="-mx-1.5 -my-1.5">
+                <button type="button" 
+                        class="inline-flex rounded-md p-1.5 {% if notification_type == 'success' %}text-green-500 hover:bg-green-100{% elif notification_type == 'error' %}text-red-500 hover:bg-red-100{% elif notification_type == 'warning' %}text-yellow-500 hover:bg-yellow-100{% else %}text-blue-500 hover:bg-blue-100{% endif %}"
+                        onclick="this.closest('#notification-container').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
