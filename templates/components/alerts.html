@@ -1,4 +1,4 @@
-{% if alerts|length == 0 %}
+{% if alerts.len() == 0 %}
 <div class="text-center py-4">
     <p class="text-gray-500">No alerts at this time</p>
 </div>
@@ -7,11 +7,11 @@
     {% for alert in alerts %}
     <li class="py-3">
         <div class="flex items-start">
-            {% if alert.type == "warning" %}
+            {% if alert.type_ == "warning" %}
             <div class="flex-shrink-0 mt-1">
                 <span class="w-2 h-2 bg-yellow-400 rounded-full inline-block"></span>
             </div>
-            {% elif alert.type == "error" %}
+            {% elif alert.type_ == "error" %}
             <div class="flex-shrink-0 mt-1">
                 <span class="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
             </div>
@@ -24,8 +24,8 @@
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-900">{{ alert.title }}</p>
                 <p class="text-sm text-gray-500">{{ alert.message }}</p>
-                {% if alert.link %}
-                <a href="{{ alert.link }}" class="text-sm text-blue-600 hover:underline">View details</a>
+                {% if let Some(link) = alert.link %}
+                <a href="{{ link }}" class="text-sm text-blue-600 hover:underline">View details</a>
                 {% endif %}
             </div>
         </div>
