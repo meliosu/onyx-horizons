@@ -1,0 +1,92 @@
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profession</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Brigadier</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% if workers|length == 0 %}
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center">
+                    <p class="text-gray-500">No workers assigned to this brigade</p>
+                </td>
+            </tr>
+            {% else %}
+                {% for worker in workers %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="/personnel/workers/{{ worker.worker_id }}" class="text-blue-600 hover:underline font-medium">
+                            {{ worker.worker.employee.first_name }} {{ worker.worker.employee.last_name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if worker.worker.profession == "electrician" %}bg-blue-100 text-blue-800
+                            {% elif worker.worker.profession == "plumber" %}bg-green-100 text-green-800
+                            {% elif worker.worker.profession == "welder" %}bg-orange-100 text-orange-800
+                            {% elif worker.worker.profession == "driver" %}bg-purple-100 text-purple-800
+                            {% elif worker.worker.profession == "mason" %}bg-yellow-100 text-yellow-800
+                            {% endif %}">
+                            {{ worker.worker.profession | capitalize }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ worker.worker.employee.phone_number }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        {% if worker.is_brigadier %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Brigadier</span>
+                        {% else %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <div class="flex justify-end space-x-2">
+                            <a href="/personnel/workers/{{ worker.worker_id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="px-2 py-1 text-red-600 hover:bg-red-100 rounded"
+                                    hx-delete="/api/brigades/{{ brigade_id }}/workers/{{ worker.worker_id }}"
+                                    hx-confirm="Are you sure you want to remove this worker from the brigade?"
+                                    hx-target="#workers-content"
+                                    hx-swap="innerHTML">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if current_page and total_pages > 1 %}
+<div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+    <div class="text-sm text-gray-700">
+        Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
+        <span class="font-medium">{{ [current_page * 10, workers|length]|min }}</span> of 
+        <span class="font-medium">{{ total_pages * 10 }}</span> workers
+    </div>
+    <div class="flex space-x-2">
+        {% if current_page > 1 %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/brigades/{{ brigade_id }}/workers?page={{ current_page - 1 }}" hx-target="#workers-content">
+            Previous
+        </a>
+        {% endif %}
+        
+        {% if current_page < total_pages %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/brigades/{{ brigade_id }}/workers?page={{ current_page + 1 }}" hx-target="#workers-content">
+            Next
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

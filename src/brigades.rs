@@ -5,10 +5,12 @@ use axum::{
     Form, Router,
 };
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
 use crate::personnel::Worker;
+use crate::sites::Site;
 
 // Brigade types
 #[derive(Serialize, Deserialize)]
@@ -92,6 +94,90 @@ pub struct BrigadierOption {
     pub id: i32,
     pub name: String,
     pub profession: String,
+}
+
+// Template structs
+#[derive(Template)]
+#[template(path = "brigades/index.html")]
+struct BrigadesTemplate {
+    brigades: Vec<Brigade>,
+    filters: BrigadeFilter,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "brigades/new.html")]
+struct BrigadeNewTemplate {
+    brigadiers: Vec<BrigadierOption>,
+    workers: Vec<Worker>,
+}
+
+#[derive(Template)]
+#[template(path = "brigades/details.html")]
+struct BrigadeDetailsTemplate {
+    brigade: Brigade,
+    brigadier: Option<Worker>,
+    workers: Vec<BrigadeWorker>,
+    tasks: Vec<BrigadeTask>,
+    sites: Vec<BrigadeSite>,
+}
+
+#[derive(Template)]
+#[template(path = "brigades/edit.html")]
+struct BrigadeEditTemplate {
+    brigade: Brigade,
+    brigadiers: Vec<BrigadierOption>,
+}
+
+// HTMX Component templates
+#[derive(Template)]
+#[template(path = "components/brigades/table_rows.html")]
+struct BrigadeRowsTemplate {
+    brigades: Vec<Brigade>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/brigades/workers.html")]
+struct BrigadeWorkersTemplate {
+    workers: Vec<BrigadeWorker>,
+    brigade_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/brigades/tasks.html")]
+struct BrigadeTasksTemplate {
+    tasks: Vec<BrigadeTask>,
+    brigade_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/brigades/sites.html")]
+struct BrigadeSitesTemplate {
+    sites: Vec<BrigadeSite>,
+    brigade_id: i32,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/brigades/available_workers.html")]
+struct AvailableWorkersTemplate {
+    workers: Vec<Worker>,
+    brigade_id: i32,
+}
+
+#[derive(Template)]
+#[template(path = "components/brigades/brigadiers.html")]
+struct BrigadiersTemplate {
+    brigadiers: Vec<BrigadierOption>,
+    selected_id: Option<i32>,
 }
 
 // Page Endpoints

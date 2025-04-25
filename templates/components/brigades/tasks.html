@@ -1,0 +1,96 @@
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% if tasks|length == 0 %}
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center">
+                    <p class="text-gray-500">No tasks assigned to this brigade</p>
+                </td>
+            </tr>
+            {% else %}
+                {% for task in tasks %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="/tasks/{{ task.id }}" class="text-blue-600 hover:underline font-medium">
+                            {{ task.name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if task.site_name %}
+                            <a href="/sites/{{ task.site_id }}" class="text-blue-600 hover:underline">
+                                {{ task.site_name }}
+                            </a>
+                        {% else %}
+                            <span class="text-gray-400">Unknown site</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ task.period_start }} to 
+                        {% if task.is_completed %}
+                            {{ task.actual_period_end }}
+                        {% else %}
+                            {{ task.expected_period_end }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if task.is_completed %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Completed
+                            </span>
+                        {% elif task.is_overdue %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                Overdue
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                In Progress
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <div class="flex justify-end space-x-2">
+                            <a href="/tasks/{{ task.id }}" class="px-2 py-1 text-blue-600 hover:bg-blue-100 rounded">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if current_page and total_pages > 1 %}
+<div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+    <div class="text-sm text-gray-700">
+        Showing <span class="font-medium">{{ (current_page - 1) * 10 + 1 }}</span> to 
+        <span class="font-medium">{{ [current_page * 10, tasks|length]|min }}</span> of 
+        <span class="font-medium">{{ total_pages * 10 }}</span> tasks
+    </div>
+    <div class="flex space-x-2">
+        {% if current_page > 1 %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/brigades/{{ brigade_id }}/tasks?page={{ current_page - 1 }}" hx-target="#tasks-content">
+            Previous
+        </a>
+        {% endif %}
+        
+        {% if current_page < total_pages %}
+        <a href="#" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+           hx-get="/api/brigades/{{ brigade_id }}/tasks?page={{ current_page + 1 }}" hx-target="#tasks-content">
+            Next
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

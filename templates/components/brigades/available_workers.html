@@ -1,0 +1,61 @@
+<form hx-post="/api/brigades/{{ brigade_id }}/workers" hx-target="#workers-content" hx-swap="innerHTML" class="p-6">
+    <p class="text-sm text-gray-500 mb-4">Select a worker to add to this brigade:</p>
+    
+    {% if workers|length == 0 %}
+        <div class="bg-gray-50 p-4 rounded text-center">
+            <p class="text-gray-500">No available workers to add</p>
+        </div>
+    {% else %}
+        <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-md">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Select
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Profession
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Current Brigade
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for worker in workers %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input type="radio" name="worker_id" value="{{ worker.employee.id }}" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ worker.employee.first_name }} {{ worker.employee.last_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ worker.profession | capitalize }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if worker.brigade_id %}
+                                Brigade #{{ worker.brigade_id }}
+                            {% else %}
+                                <span class="text-gray-400">Unassigned</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <div class="mt-6 flex justify-end space-x-3">
+        <button type="button" onclick="closeAddWorkerModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            Cancel
+        </button>
+        <button type="submit" class="btn-primary px-4 py-2 rounded-md" {% if workers|length == 0 %}disabled{% endif %}>
+            Add Worker
+        </button>
+    </div>
+</form>
