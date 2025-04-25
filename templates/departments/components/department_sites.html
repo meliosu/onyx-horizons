@@ -1,0 +1,119 @@
+<div>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Sites in Department</h2>
+        <a href="/sites/new?department={{ department_id }}" class="bg-amber text-onyx py-1 px-3 rounded-md text-sm hover:bg-yellow-600">
+            <i class="fas fa-plus-circle mr-1"></i> Add Site
+        </a>
+    </div>
+    
+    <table class="min-w-full">
+        <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+            <tr>
+                <th class="py-3 px-6 text-left">Site Name</th>
+                <th class="py-3 px-6 text-left">Area</th>
+                <th class="py-3 px-6 text-center">Type</th>
+                <th class="py-3 px-6 text-center">Risk Level</th>
+                <th class="py-3 px-6 text-center">Status</th>
+                <th class="py-3 px-6 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm">
+            {% for site in sites %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6 text-left">
+                    <span class="font-medium">{{ site.name }}</span>
+                </td>
+                <td class="py-3 px-6 text-left">
+                    {% if let Some(area_name) = site.area_name %}
+                        {{ area_name }}
+                    {% else %}
+                        <span class="text-gray-400">Unknown</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    {% match site.site_type %}
+                        {% when SiteType::PowerPlant %}
+                            <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full">Power Plant</span>
+                        {% when SiteType::Road %}
+                            <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full">Road</span>
+                        {% when SiteType::Housing %}
+                            <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Housing</span>
+                        {% when SiteType::Bridge %}
+                            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Bridge</span>
+                        {% when SiteType::Park %}
+                            <span class="bg-emerald-100 text-emerald-600 py-1 px-2 rounded-full">Park</span>
+                        {% else %}
+                            <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">Other</span>
+                    {% endmatch %}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    {% match site.risk_level %}
+                        {% when RiskLevel::High %}
+                            <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full">High</span>
+                        {% when RiskLevel::Medium %}
+                            <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Medium</span>
+                        {% when RiskLevel::Low %}
+                            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Low</span>
+                        {% else %}
+                            <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">Unknown</span>
+                    {% endmatch %}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    {% if let Some(status) = site.status %}
+                        {% match status.as_str() %}
+                            {% when "planned" %}
+                                <span class="bg-purple-100 text-purple-600 py-1 px-2 rounded-full">Planned</span>
+                            {% when "in_progress" %}
+                                <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full">In Progress</span>
+                            {% when "completed" %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Completed</span>
+                            {% else %}
+                                <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">{{ status }}</span>
+                        {% endmatch %}
+                    {% else %}
+                        <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">N/A</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    <div class="flex justify-center space-x-2">
+                        <a href="/sites/{{ site.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/sites/{{ site.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="py-4 px-6 text-center text-gray-500">No sites found in this department</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/departments/{{ department_id }}/sites?page={{ current_page - 1 }}" hx-target="#tab-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/departments/{{ department_id }}/sites?page={{ current_page + 1 }}" hx-target="#tab-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

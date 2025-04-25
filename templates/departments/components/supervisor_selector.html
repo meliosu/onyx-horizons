@@ -1,0 +1,6 @@
+<option value="">Select a supervisor (optional)</option>
+{% for supervisor in supervisors %}
+<option value="{{ supervisor.id }}">
+    {{ supervisor.name }} ({{ supervisor.qualification }}{% if let Some(position) = supervisor.position %}, {{ position }}{% endif %})
+</option>
+{% endfor %}

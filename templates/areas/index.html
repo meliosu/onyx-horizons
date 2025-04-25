@@ -1,0 +1,100 @@
+{% extends "general/index.html" %}
+
+{% block title %}Areas - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Area Management</h1>
+    <a href="/areas/new" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+        <i class="fas fa-plus-circle mr-2"></i> New Area
+    </a>
+</div>
+
+<div class="bg-white p-6 rounded-md shadow-md mb-6">
+    <!-- Filter Form -->
+    <form class="mb-6" hx-get="/api/areas" hx-target="#areas-table-body" hx-trigger="submit" hx-indicator="#loading">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Area Name</label>
+                <input type="text" name="name" placeholder="Search by name..." 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                       {% if let Some(f) = filter %}{% if let Some(n) = f.name %}value="{{ n }}"{% endif %}{% endif %}>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select name="department_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if let Some(f) = filter %}{% if f.department_id == Some(*dept.id) %}selected{% endif %}{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Supervisor</label>
+                <select name="supervisor_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                        hx-get="/api/areas/supervisors" hx-trigger="load" hx-target="this">
+                    <option value="">All Supervisors</option>
+                    <!-- Supervisors will be loaded via HTMX -->
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    <i class="fas fa-filter mr-1"></i> Filter
+                </button>
+                <button type="reset" class="ml-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300" 
+                        hx-get="/api/areas" hx-target="#areas-table-body">
+                    <i class="fas fa-times mr-1"></i> Clear
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Areas Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Area Name</th>
+                    <th class="py-3 px-6 text-left">Department</th>
+                    <th class="py-3 px-6 text-left">Supervisor</th>
+                    <th class="py-3 px-6 text-center">Sites</th>
+                    <th class="py-3 px-6 text-center">Personnel</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="areas-table-body" class="text-gray-600 text-sm">
+                {% include "areas/components/area_rows.html" %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/areas?page={{ current_page - 1 }}" hx-target="#areas-table-body">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/areas?page={{ current_page + 1 }}" hx-target="#areas-table-body">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" class="htmx-indicator flex justify-center py-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "general/index.html" %}
+
+{% block title %}{{ area.name }} - Area Details - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/areas" class="text-amber hover:underline">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Areas
+    </a>
+</div>
+
+<div id="notification-area"></div>
+
+<!-- Area Information Card -->
+<div class="bg-white p-6 rounded-md shadow-md mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold">{{ area.name }}</h1>
+        <a href="/areas/{{ area.id }}/edit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+            <i class="fas fa-edit mr-1"></i> Edit
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Department:</span> 
+                {% if let Some(name) = area.department_name %}
+                    {{ name }}
+                {% else %}
+                    <span class="text-gray-400">Unknown</span>
+                {% endif %}
+            </p>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Supervisor:</span> 
+                {% if let Some(name) = area.supervisor_name %}
+                    {{ name }}
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Sites:</span> 
+                {% if let Some(count) = area.sites_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+            <p class="text-gray-600"><span class="font-semibold">Personnel:</span> 
+                {% if let Some(count) = area.personnel_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="border-b border-gray-200 mb-6">
+    <ul class="flex flex-wrap -mb-px">
+        <li class="mr-2">
+            <a href="/areas/{{ area.id }}?tab=sites" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "sites" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-building mr-1"></i> Sites
+            </a>
+        </li>
+        <li>
+            <a href="/areas/{{ area.id }}?tab=personnel" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "personnel" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-users mr-1"></i> Personnel
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="bg-white p-6 rounded-md shadow-md">
+    <div id="tab-content" class="overflow-x-auto">
+        {% if active_tab == "sites" %}
+            <div hx-get="/api/areas/{{ area.id }}/sites" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% elif active_tab == "personnel" %}
+            <div hx-get="/api/areas/{{ area.id }}/personnel" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% else %}
+            <div hx-get="/api/areas/{{ area.id }}/sites" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

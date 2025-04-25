@@ -1,0 +1,51 @@
+<div class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Area Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Area Name:</span> {{ area.name }}</p>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Department:</span> 
+                {% if let Some(name) = area.department_name %}
+                    <a href="/departments/{{ area.department_id }}" class="text-amber hover:underline">{{ name }}</a>
+                {% else %}
+                    <span class="text-gray-400">Unknown</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Supervisor:</span> 
+                {% if let Some(name) = area.supervisor_name %}
+                    {{ name }}
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Sites:</span> 
+                {% if let Some(count) = area.sites_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+            <p class="text-gray-600"><span class="font-semibold">Personnel:</span> 
+                {% if let Some(count) = area.personnel_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div class="flex justify-between mt-4">
+        <div>
+            <a href="/areas/{{ area.id }}" class="text-amber hover:underline">
+                View all details
+            </a>
+        </div>
+        <div>
+            <a href="/areas/{{ area.id }}/edit" class="text-amber hover:underline">
+                <i class="fas fa-edit mr-1"></i> Edit area
+            </a>
+        </div>
+    </div>
+</div>

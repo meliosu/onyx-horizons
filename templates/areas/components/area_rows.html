@@ -1,0 +1,55 @@
+{% for area in areas %}
+<tr class="hover:bg-gray-50">
+    <td class="py-3 px-6 text-left">
+        <span class="font-medium">{{ area.name }}</span>
+    </td>
+    <td class="py-3 px-6 text-left">
+        {% if let Some(name) = area.department_name %}
+            {{ name }}
+        {% else %}
+            <span class="text-gray-400">Unknown</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-left">
+        {% if let Some(name) = area.supervisor_name %}
+            {{ name }}
+        {% else %}
+            <span class="text-gray-400">Not assigned</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-center">
+        {% if let Some(count) = area.sites_count %}
+            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">{{ count }}</span>
+        {% else %}
+            <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">0</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-center">
+        {% if let Some(count) = area.personnel_count %}
+            <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full">{{ count }}</span>
+        {% else %}
+            <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">0</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-center">
+        <div class="flex justify-center space-x-2">
+            <a href="/areas/{{ area.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                <i class="fas fa-eye"></i>
+            </a>
+            <a href="/areas/{{ area.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                <i class="fas fa-edit"></i>
+            </a>
+            <button class="text-red-500 hover:text-red-700" title="Delete"
+                    hx-delete="/api/areas/{{ area.id }}" 
+                    hx-confirm="Are you sure you want to delete this area?" 
+                    hx-target="#notification-area">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="6" class="py-4 px-6 text-center text-gray-500">No areas found</td>
+</tr>
+{% endfor %}

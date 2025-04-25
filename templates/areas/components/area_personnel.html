@@ -1,0 +1,95 @@
+<div>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Personnel in Area</h2>
+        <a href="/personnel/technical/new?area={{ area_id }}" class="bg-amber text-onyx py-1 px-3 rounded-md text-sm hover:bg-yellow-600">
+            <i class="fas fa-plus-circle mr-1"></i> Add Personnel
+        </a>
+    </div>
+    
+    <table class="min-w-full">
+        <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+            <tr>
+                <th class="py-3 px-6 text-left">Name</th>
+                <th class="py-3 px-6 text-left">Qualification</th>
+                <th class="py-3 px-6 text-left">Position</th>
+                <th class="py-3 px-6 text-center">Education</th>
+                <th class="py-3 px-6 text-center">Project Manager</th>
+                <th class="py-3 px-6 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm">
+            {% for person in personnel %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6 text-left">
+                    <span class="font-medium">{{ person.full_name }}</span>
+                </td>
+                <td class="py-3 px-6 text-left">
+                    {% match person.qualification %}
+                        {% when Qualification::Engineer %}
+                            Engineer
+                        {% when Qualification::Technologist %}
+                            Technologist
+                        {% when Qualification::Technician %}
+                            Technician
+                        {% else %}
+                            {{ person.qualification }}
+                    {% endmatch %}
+                </td>
+                <td class="py-3 px-6 text-left">
+                    {% if let Some(position) = person.position %}
+                        {{ position }}
+                    {% else %}
+                        <span class="text-gray-400">Not assigned</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-6 text-center">{{ person.education_level }}</td>
+                <td class="py-3 px-6 text-center">
+                    {% if person.is_project_manager %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Yes</span>
+                    {% else %}
+                        <span class="bg-gray-200 text-gray-500 py-1 px-2 rounded-full">No</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    <div class="flex justify-center space-x-2">
+                        <a href="/personnel/technical/{{ person.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/personnel/technical/{{ person.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="py-4 px-6 text-center text-gray-500">No personnel found in this area</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/areas/{{ area_id }}/personnel?page={{ current_page - 1 }}" hx-target="#tab-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/areas/{{ area_id }}/personnel?page={{ current_page + 1 }}" hx-target="#tab-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

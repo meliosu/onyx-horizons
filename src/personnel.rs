@@ -83,6 +83,16 @@ impl FromStr for Qualification {
     }
 }
 
+impl std::fmt::Display for Qualification {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Qualification::Technician => write!(f, "Technician"),
+            Qualification::Technologist => write!(f, "Technologist"),
+            Qualification::Engineer => write!(f, "Engineer"),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Position {

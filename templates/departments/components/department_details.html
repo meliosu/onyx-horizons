@@ -1,0 +1,38 @@
+<div class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Department Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Department Name:</span> {{ department.name }}</p>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Supervisor:</span> 
+                {% if let Some(name) = department.supervisor_name %}
+                    {{ name }}
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Areas:</span> 
+                {% if let Some(count) = department.areas_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+            <p class="text-gray-600 mb-2"><span class="font-semibold">Sites:</span> 
+                {% if let Some(count) = department.sites_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+            <p class="text-gray-600"><span class="font-semibold">Personnel:</span> 
+                {% if let Some(count) = department.personnel_count %}
+                    {{ count }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>

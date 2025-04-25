@@ -28,7 +28,7 @@ pub struct SearchParams {
 
 // Template data types
 #[derive(Template)]
-#[template(path = "dashboard.html")]
+#[template(path = "general/dashboard.html")]
 pub struct DashboardTemplate {
     pub active_sites: usize,
     pub total_departments: usize,
@@ -38,34 +38,34 @@ pub struct DashboardTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "errors/404.html")]
+#[template(path = "general/errors/404.html")]
 pub struct NotFoundTemplate {}
 
 #[derive(Template)]
-#[template(path = "errors/500.html")]
+#[template(path = "general/errors/500.html")]
 pub struct ServerErrorTemplate {}
 
 // Component template data types
 #[derive(Template)]
-#[template(path = "components/alerts.html")]
+#[template(path = "general/components/alerts.html")]
 pub struct AlertsTemplate {
     pub alerts: Vec<Alert>,
 }
 
 #[derive(Template)]
-#[template(path = "components/stats.html")]
+#[template(path = "general/components/stats.html")]
 pub struct StatsTemplate {
     pub stats: Vec<Stat>,
 }
 
 #[derive(Template)]
-#[template(path = "components/activity.html")]
+#[template(path = "general/components/activity.html")]
 pub struct ActivityTemplate {
     pub activities: Vec<ActivityItem>,
 }
 
 #[derive(Template)]
-#[template(path = "components/search_results.html")]
+#[template(path = "general/components/search_results.html")]
 pub struct SearchResultsTemplate {
     pub results: Vec<SearchResult>,
     pub query: Option<String>,
