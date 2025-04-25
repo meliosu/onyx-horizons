@@ -5,13 +5,14 @@ use axum::{
     Form, Json, Router,
 };
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::{PaginationParams, SearchParams};
 
 // Types for Department Management
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Department {
     pub id: i32,
     pub supervisor_id: Option<i32>,
@@ -22,19 +23,19 @@ pub struct Department {
     pub personnel_count: Option<i32>,    // Count of personnel
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DepartmentCreate {
     pub name: String,
     pub supervisor_id: Option<i32>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DepartmentUpdate {
     pub name: String,
     pub supervisor_id: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Area {
     pub id: i32,
     pub department_id: i32,
@@ -46,21 +47,21 @@ pub struct Area {
     pub personnel_count: Option<i32>,    // Count of personnel
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct AreaCreate {
     pub name: String,
     pub department_id: i32,
     pub supervisor_id: Option<i32>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct AreaUpdate {
     pub name: String,
     pub department_id: i32,
     pub supervisor_id: Option<i32>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Supervisor {
     pub id: i32,
     pub name: String,      // Concatenated first_name + last_name
@@ -83,6 +84,171 @@ pub struct AreaFilter {
     pub supervisor_id: Option<i32>,
     #[serde(flatten)]
     pub pagination: PaginationParams,
+}
+
+// Define Templates for Departments
+#[derive(Template)]
+#[template(path = "departments/index.html")]
+struct DepartmentsTemplate {
+    departments: Vec<Department>,
+    filters: DepartmentFilter,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "departments/new.html")]
+struct DepartmentNewTemplate {
+    supervisors: Vec<Supervisor>,
+}
+
+#[derive(Template)]
+#[template(path = "departments/details.html")]
+struct DepartmentDetailsTemplate {
+    department: Department,
+    supervisor: Option<Supervisor>,
+}
+
+#[derive(Template)]
+#[template(path = "departments/edit.html")]
+struct DepartmentEditTemplate {
+    department: Department,
+    supervisors: Vec<Supervisor>,
+}
+
+// Define Templates for Areas
+#[derive(Template)]
+#[template(path = "areas/index.html")]
+struct AreasTemplate {
+    areas: Vec<Area>,
+    filters: AreaFilter,
+    departments: Vec<Department>,
+    total_pages: usize,
+    current_page: usize,
+}
+
+#[derive(Template)]
+#[template(path = "areas/new.html")]
+struct AreaNewTemplate {
+    departments: Vec<Department>,
+    supervisors: Vec<Supervisor>,
+}
+
+#[derive(Template)]
+#[template(path = "areas/details.html")]
+struct AreaDetailsTemplate {
+    area: Area,
+    department: Department,
+    supervisor: Option<Supervisor>,
+}
+
+#[derive(Template)]
+#[template(path = "areas/edit.html")]
+struct AreaEditTemplate {
+    area: Area,
+    departments: Vec<Department>,
+    supervisors: Vec<Supervisor>,
+}
+
+// Define Templates for HTMX Components
+#[derive(Template)]
+#[template(path = "components/departments/table_rows.html")]
+struct DepartmentRowsTemplate {
+    departments: Vec<Department>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/departments/details.html")]
+struct DepartmentDetailsComponentTemplate {
+    department: Department,
+}
+
+#[derive(Template)]
+#[template(path = "components/areas/table_rows.html")]
+struct AreaRowsTemplate {
+    areas: Vec<Area>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/areas/details.html")]
+struct AreaDetailsComponentTemplate {
+    area: Area,
+}
+
+#[derive(Template)]
+#[template(path = "components/notification.html")]
+struct NotificationTemplate {
+    message: String,
+    notification_type: String, // "success", "error", "warning"
+}
+
+#[derive(Template)]
+#[template(path = "components/selectors/supervisors.html")]
+struct SupervisorSelectorTemplate {
+    supervisors: Vec<Supervisor>,
+    selected_id: Option<i32>,
+}
+
+#[derive(Template)]
+#[template(path = "components/equipment/table_rows.html")]
+struct EquipmentRowsTemplate {
+    equipment: Vec<Equipment>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/sites/table_rows.html")]
+struct SiteRowsTemplate {
+    sites: Vec<Site>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/personnel/table_rows.html")]
+struct PersonnelRowsTemplate {
+    personnel: Vec<Personnel>,
+    current_page: usize,
+    total_pages: usize,
+}
+
+// Additional model types needed for related data
+#[derive(Debug, Clone, Serialize)]
+pub struct Equipment {
+    pub id: i32,
+    pub name: String,
+    pub amount: i32,
+    pub available_amount: i32,
+    pub purchase_date: String,
+    pub purchase_cost: f64,
+    pub fuel_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Site {
+    pub id: i32,
+    pub description: String,
+    pub type_: String,
+    pub area_name: String,
+    pub department_name: String,
+    pub client_name: String,
+    pub status: String,
+    pub risk_level: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Personnel {
+    pub id: i32,
+    pub name: String,
+    pub qualification: String,
+    pub position: Option<String>,
+    pub education_level: String,
+    pub is_project_manager: bool,
 }
 
 // Page Endpoints

@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="py-8 px-8 ml-64">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Create New Department</h1>
+        <p class="text-gray-600">Complete the form below to create a new department</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <form hx-post="/api/departments" hx-swap="outerHTML">
+            <div class="p-6 space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Department Name *</label>
+                    <input type="text" name="name" id="name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <div class="validation-message text-xs text-red-500 mt-1"></div>
+                </div>
+
+                <div>
+                    <label for="supervisor_id" class="block text-sm font-medium text-gray-700 mb-1">Supervisor</label>
+                    <select name="supervisor_id" id="supervisor_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <option value="">Select a Supervisor (Optional)</option>
+                        {% for supervisor in supervisors %}
+                            <option value="{{ supervisor.id }}">{{ supervisor.name }} - {{ supervisor.qualification }}{% if supervisor.position %}({{ supervisor.position }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 text-right">
+                <a href="/departments" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary px-4 py-2 rounded-md">
+                    Create Department
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
