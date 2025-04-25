@@ -1,0 +1,41 @@
+{% for stat in stats %}
+<div class="bg-white p-4 rounded-md shadow-md">
+    <div class="flex justify-between items-center">
+        <h3 class="text-gray-500 text-sm">{{ stat.title }}</h3>
+        <span class="text-xl p-2 rounded-md bg-amber bg-opacity-20 text-amber">
+            <i class="{{ stat.icon }}"></i>
+        </span>
+    </div>
+    <div class="mt-2">
+        <p class="text-2xl font-semibold">{{ stat.value }}</p>
+        {% if let Some(change_percentage) = stat.change_percentage %}
+            {% if let Some(change_direction) = stat.change_direction %}
+                <p class="flex items-center text-xs mt-1
+                    {% match change_direction %}
+                        {% when ChangeDirection::Up %}
+                            text-green-500
+                        {% when ChangeDirection::Down %}
+                            text-red-500
+                        {% when ChangeDirection::Neutral %}
+                            text-gray-500
+                    {% endmatch %}">
+                    {% match change_direction %}
+                        {% when ChangeDirection::Up %}
+                            <i class="fas fa-arrow-up mr-1"></i>
+                        {% when ChangeDirection::Down %}
+                            <i class="fas fa-arrow-down mr-1"></i>
+                        {% when ChangeDirection::Neutral %}
+                            <i class="fas fa-minus mr-1"></i>
+                    {% endmatch %}
+                    {{ change_percentage }}% from last month
+                </p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if let Some(link) = stat.link %}
+    <div class="mt-3">
+        <a href="{{ link }}" class="text-xs text-amber hover:underline">View details</a>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}

@@ -1,0 +1,155 @@
+{% extends "index.html" %}
+
+{% block title %}Dashboard - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold mb-2">Dashboard</h1>
+    <p class="text-gray-600">Welcome to the Onyx Horizons Construction Management System</p>
+</div>
+
+<!-- Quick Stats Section -->
+<div class="mb-8">
+    <h2 class="text-xl font-semibold mb-4">Quick Stats</h2>
+    <div id="stats-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+         hx-get="/components/stats" 
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <div class="animate-pulse bg-white p-4 rounded-md shadow-md">
+            <div class="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
+            <div class="h-10 bg-gray-300 rounded w-1/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="animate-pulse bg-white p-4 rounded-md shadow-md">
+            <div class="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
+            <div class="h-10 bg-gray-300 rounded w-1/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="animate-pulse bg-white p-4 rounded-md shadow-md">
+            <div class="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
+            <div class="h-10 bg-gray-300 rounded w-1/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+        <div class="animate-pulse bg-white p-4 rounded-md shadow-md">
+            <div class="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
+            <div class="h-10 bg-gray-300 rounded w-1/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Alerts Section -->
+    <div class="col-span-1 lg:col-span-2">
+        <div class="bg-white p-4 rounded-md shadow-md mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Alerts</h2>
+                <span class="text-sm text-gray-500">Last 24 hours</span>
+            </div>
+            <div id="alerts-container" 
+                 hx-get="/components/alerts" 
+                 hx-trigger="load" 
+                 hx-swap="innerHTML">
+                <div class="animate-pulse space-y-3">
+                    <div class="h-12 bg-gray-200 rounded-md"></div>
+                    <div class="h-12 bg-gray-200 rounded-md"></div>
+                    <div class="h-12 bg-gray-200 rounded-md"></div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Recent Activity Section -->
+        <div class="bg-white p-4 rounded-md shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Recent Activity</h2>
+                <a href="#" class="text-amber-600 text-sm hover:underline">View All</a>
+            </div>
+            <div id="activity-container" 
+                 hx-get="/components/activity" 
+                 hx-trigger="load" 
+                 hx-swap="innerHTML">
+                <div class="animate-pulse space-y-4">
+                    <div class="flex">
+                        <div class="h-10 w-10 rounded-full bg-gray-300 mr-3"></div>
+                        <div class="space-y-2 flex-1">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="h-10 w-10 rounded-full bg-gray-300 mr-3"></div>
+                        <div class="space-y-2 flex-1">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="h-10 w-10 rounded-full bg-gray-300 mr-3"></div>
+                        <div class="space-y-2 flex-1">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="col-span-1">
+        <div class="bg-white p-4 rounded-md shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Quick Access</h2>
+            <div class="space-y-2">
+                <a href="/sites/new" class="block bg-amber hover:bg-yellow-600 text-onyx font-semibold p-3 rounded-md text-center">
+                    <i class="fas fa-plus-circle mr-2"></i> Create New Site
+                </a>
+                <a href="/personnel/workers/new" class="block bg-gray-100 hover:bg-gray-200 p-3 rounded-md text-center">
+                    <i class="fas fa-user-plus mr-2"></i> Add New Worker
+                </a>
+                <a href="/equipment/new" class="block bg-gray-100 hover:bg-gray-200 p-3 rounded-md text-center">
+                    <i class="fas fa-truck-loading mr-2"></i> Register Equipment
+                </a>
+                <a href="/tasks/new" class="block bg-gray-100 hover:bg-gray-200 p-3 rounded-md text-center">
+                    <i class="fas fa-clipboard-list mr-2"></i> Create New Task
+                </a>
+                <a href="/reports/sites" class="block bg-gray-100 hover:bg-gray-200 p-3 rounded-md text-center">
+                    <i class="fas fa-file-alt mr-2"></i> Generate Site Report
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-md shadow-md mt-6">
+            <h2 class="text-xl font-semibold mb-4">Key Statistics</h2>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Task Completion Rate</span>
+                        <span class="text-sm font-medium">75%</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-200 rounded-full">
+                        <div class="h-2 bg-amber rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Material Budget Usage</span>
+                        <span class="text-sm font-medium">62%</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-200 rounded-full">
+                        <div class="h-2 bg-amber rounded-full" style="width: 62%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Equipment Utilization</span>
+                        <span class="text-sm font-medium">{{ equipment_utilization }}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-200 rounded-full">
+                        <div class="h-2 bg-amber rounded-full" style="width: {{ equipment_utilization }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
