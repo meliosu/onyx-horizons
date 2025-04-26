@@ -1,0 +1,183 @@
+<div class="p-6">
+    <!-- Add Material Form (Hidden by default) -->
+    <div id="add-material-form" class="hidden mb-6 bg-gray-50 p-4 rounded-md border border-gray-200">
+        <h3 class="font-medium mb-3">Add Material to Task</h3>
+        <form hx-post="/api/tasks/{{ task_id }}/materials" hx-target="#materials-content" hx-indicator="#add-loading">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label for="material_id" class="block text-sm font-medium text-gray-700 mb-1">Material <span class="text-red-500">*</span></label>
+                    <select id="material_id" name="material_id" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="">Select Material</option>
+                        {% for material in available_materials %}
+                        <option value="{{ material.id }}">{{ material.name }} ({{ material.units }} @ ${{ material.cost }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="expected_amount" class="block text-sm font-medium text-gray-700 mb-1">Expected Amount <span class="text-red-500">*</span></label>
+                    <input type="number" id="expected_amount" name="expected_amount" min="0.01" step="0.01" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div class="flex items-end">
+                    <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                        <i class="fas fa-plus mr-1"></i> Add Material
+                    </button>
+                </div>
+            </div>
+            <div id="add-loading" class="htmx-indicator flex justify-center py-2">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+
+    {% if expenditures.is_empty() %}
+    <div class="text-center py-6 text-gray-500">
+        <p>No materials have been added to this task yet.</p>
+        <p class="text-sm mt-2">Click the "Add Material" button above to start adding materials.</p>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Material</th>
+                    <th class="py-3 px-6 text-center">Expected Amount</th>
+                    <th class="py-3 px-6 text-center">Actual Amount</th>
+                    <th class="py-3 px-6 text-center">Units</th>
+                    <th class="py-3 px-6 text-right">Cost per Unit</th>
+                    <th class="py-3 px-6 text-right">Total Cost</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in expenditures %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-6 text-left">
+                        {% if let Some(material_name) = &exp.material_name %}
+                            <a href="/materials/{{ exp.material_id }}" class="text-amber hover:underline">{{ material_name }}</a>
+                        {% else %}
+                            Material #{{ exp.material_id }}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">{{ exp.expected_amount }}</td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(actual_amount) = exp.actual_amount %}
+                            {{ actual_amount }}
+                        {% else %}
+                            <span class="text-gray-400">Not recorded</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">{{ exp.material_units.as_ref().unwrap_or(&"units".to_string()) }}</td>
+                    <td class="py-3 px-6 text-right">${{ exp.material_cost.unwrap_or(0.0) }}</td>
+                    <td class="py-3 px-6 text-right">
+                        {% if let Some(actual_amount) = exp.actual_amount %}
+                            {% if let Some(cost) = exp.material_cost %}
+                                ${{ actual_amount * cost }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% else %}
+                            {% if let Some(cost) = exp.material_cost %}
+                                ${{ exp.expected_amount * cost }} <span class="text-xs text-gray-400">(est.)</span>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(excess_percentage) = exp.excess_percentage %}
+                            {% if *excess_percentage > 0.0 %}
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">
+                                    +{{ excess_percentage }}% excess
+                                </span>
+                            {% elif *excess_percentage < 0.0 %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">
+                                    {{ excess_percentage }}% under
+                                </span>
+                            {% else %}
+                                <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
+                                    On target
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">
+                                Planned
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex justify-center space-x-2">
+                            <button class="text-amber hover:text-yellow-600" title="Edit"
+                                    onclick="document.getElementById('edit-material-{{ exp.material_id }}').classList.toggle('hidden')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-700" title="Delete"
+                                    hx-delete="/api/tasks/{{ task_id }}/materials/{{ exp.material_id }}"
+                                    hx-confirm="Are you sure you want to remove this material from the task?"
+                                    hx-target="#materials-content">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Edit Material Form (Hidden by default) -->
+                        <div id="edit-material-{{ exp.material_id }}" class="hidden mt-3 bg-gray-50 p-3 rounded-md text-left">
+                            <form hx-put="/api/tasks/{{ task_id }}/materials/{{ exp.material_id }}" hx-target="#materials-content">
+                                <div class="mb-2">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Expected Amount</label>
+                                    <input type="number" name="expected_amount" value="{{ exp.expected_amount }}" min="0.01" step="0.01" required
+                                           class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Actual Amount</label>
+                                    <input type="number" name="actual_amount" value="{% if let Some(amount) = exp.actual_amount %}{{ amount }}{% endif %}" min="0" step="0.01"
+                                           class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                                    <p class="text-xs text-gray-500 mt-1">Leave blank if not yet used</p>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <button type="button" class="text-xs bg-gray-200 text-gray-700 py-1 px-2 rounded-md hover:bg-gray-300"
+                                            onclick="document.getElementById('edit-material-{{ exp.material_id }}').classList.add('hidden')">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="text-xs bg-amber text-onyx py-1 px-2 rounded-md hover:bg-yellow-600">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/tasks/{{ task_id }}/materials?page={{ current_page - 1 }}" 
+                    hx-target="#materials-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/tasks/{{ task_id }}/materials?page={{ current_page + 1 }}" 
+                    hx-target="#materials-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

@@ -1,0 +1,38 @@
+<div class="space-y-4">
+    <div>
+        <p class="text-sm text-gray-500">Name</p>
+        <p class="font-medium">{{ material.name }}</p>
+    </div>
+    
+    <div>
+        <p class="text-sm text-gray-500">Cost per Unit</p>
+        <p>${{ material.cost }}</p>
+    </div>
+    
+    <div>
+        <p class="text-sm text-gray-500">Units of Measurement</p>
+        <p>{{ material.units }}</p>
+    </div>
+    
+    <div>
+        <p class="text-sm text-gray-500">Total Usage</p>
+        <p>
+            {% if let Some(usage) = material.total_usage %}
+                {{ usage }} {{ material.units }}
+            {% else %}
+                <span class="text-gray-400">Not used yet</span>
+            {% endif %}
+        </p>
+    </div>
+    
+    <div>
+        <p class="text-sm text-gray-500">Tasks Using</p>
+        <p>
+            {% if let Some(count) = material.tasks_using_count %}
+                {{ count }} tasks
+            {% else %}
+                No tasks
+            {% endif %}
+        </p>
+    </div>
+</div>

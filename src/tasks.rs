@@ -6,9 +6,12 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
+use crate::sites::Site;
+use crate::brigades::Brigade;
 
 // Task types
 #[derive(Serialize, Deserialize)]
@@ -49,6 +52,8 @@ pub struct Expenditure {
     pub material_id: i32,
     pub expected_amount: f64,
     pub actual_amount: Option<f64>,
+    pub site_id: Option<i32>,
+    pub site_name: Option<String>,
     // Joined fields for display
     pub material_name: Option<String>,
     pub material_cost: Option<f64>,
@@ -130,12 +135,130 @@ pub struct MaterialFilter {
     pub pagination: PaginationParams,
 }
 
+// Template types for Task pages
+#[derive(Template)]
+#[template(path = "tasks/index.html")]
+pub struct TasksPageTemplate {
+    pub tasks: Vec<Task>,
+    pub filter: Option<TaskFilter>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    pub sites: Vec<Site>,
+    pub brigades: Vec<Brigade>,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/new.html")]
+pub struct TaskNewPageTemplate {
+    pub sites: Vec<Site>,
+    pub brigades: Vec<Brigade>,
+    pub site_id: Option<i32>,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/details.html")]
+pub struct TaskDetailsPageTemplate {
+    pub task: Task,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/edit.html")]
+pub struct TaskEditPageTemplate {
+    pub task: Task,
+    pub sites: Vec<Site>,
+    pub brigades: Vec<Brigade>,
+}
+
+// Template types for Material pages
+#[derive(Template)]
+#[template(path = "materials/index.html")]
+pub struct MaterialsPageTemplate {
+    pub materials: Vec<Material>,
+    pub filter: Option<MaterialFilter>,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "materials/new.html")]
+pub struct MaterialNewPageTemplate {}
+
+#[derive(Template)]
+#[template(path = "materials/details.html")]
+pub struct MaterialDetailsPageTemplate {
+    pub material: Material,
+}
+
+#[derive(Template)]
+#[template(path = "materials/edit.html")]
+pub struct MaterialEditPageTemplate {
+    pub material: Material,
+}
+
+// Template types for HTMX components - Tasks
+#[derive(Template)]
+#[template(path = "tasks/components/task_rows.html")]
+pub struct TaskRowsTemplate {
+    pub tasks: Vec<Task>,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/components/task_details.html")]
+pub struct TaskDetailsTemplate {
+    pub task: Task,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/components/task_materials.html")]
+pub struct TaskMaterialsTemplate {
+    pub task_id: i32,
+    pub expenditures: Vec<Expenditure>,
+    pub available_materials: Vec<Material>,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "tasks/components/complete_task_form.html")]
+pub struct CompleteTaskFormTemplate {
+    pub task_id: i32,
+}
+
+// Template types for HTMX components - Materials
+#[derive(Template)]
+#[template(path = "materials/components/material_rows.html")]
+pub struct MaterialRowsTemplate {
+    pub materials: Vec<Material>,
+}
+
+#[derive(Template)]
+#[template(path = "materials/components/material_details.html")]
+pub struct MaterialDetailsTemplate {
+    pub material: Material,
+}
+
+#[derive(Template)]
+#[template(path = "materials/components/material_usage.html")]
+pub struct MaterialUsageTemplate {
+    pub material_id: i32,
+    pub expenditures: Vec<Expenditure>,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "components/success_notification.html")]
+pub struct SuccessNotificationTemplate {
+    pub message: String,
+}
+
 // Page Endpoints - Tasks
 async fn tasks_page(
     State(database): State<Database>,
     Query(params): Query<TaskFilter>,
 ) -> Html<String> {
     // Tasks listing page
+    // Return rendered TasksPageTemplate
     Html(String::new())
 }
 
@@ -143,6 +266,7 @@ async fn task_new_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // New task form
+    // Return rendered TaskNewPageTemplate
     Html(String::new())
 }
 
@@ -151,6 +275,7 @@ async fn task_details_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Task details page
+    // Return rendered TaskDetailsPageTemplate
     Html(String::new())
 }
 
@@ -159,6 +284,7 @@ async fn task_edit_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Edit task form
+    // Return rendered TaskEditPageTemplate
     Html(String::new())
 }
 
@@ -168,6 +294,7 @@ async fn materials_page(
     Query(params): Query<MaterialFilter>,
 ) -> Html<String> {
     // Materials listing page
+    // Return rendered MaterialsPageTemplate
     Html(String::new())
 }
 
@@ -175,6 +302,7 @@ async fn material_new_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // New material form
+    // Return rendered MaterialNewPageTemplate
     Html(String::new())
 }
 
@@ -183,6 +311,7 @@ async fn material_details_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Material details page
+    // Return rendered MaterialDetailsPageTemplate
     Html(String::new())
 }
 
@@ -191,6 +320,7 @@ async fn material_edit_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Edit material form
+    // Return rendered MaterialEditPageTemplate
     Html(String::new())
 }
 
@@ -200,6 +330,7 @@ async fn fetch_tasks(
     Query(params): Query<TaskFilter>,
 ) -> Html<String> {
     // Fetch tasks with filters
+    // Return rendered TaskRowsTemplate
     Html(String::new())
 }
 
@@ -208,6 +339,7 @@ async fn create_task(
     Form(task): Form<TaskCreate>,
 ) -> Html<String> {
     // Create new task
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -216,6 +348,7 @@ async fn fetch_task_details(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Fetch task details
+    // Return rendered TaskDetailsTemplate
     Html(String::new())
 }
 
@@ -225,6 +358,7 @@ async fn update_task(
     Form(task): Form<TaskUpdate>,
 ) -> Html<String> {
     // Update task
+    // Return rendered TaskDetailsTemplate
     Html(String::new())
 }
 
@@ -233,6 +367,7 @@ async fn delete_task(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Delete task
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -242,6 +377,7 @@ async fn complete_task(
     Form(task): Form<TaskCompleteUpdate>,
 ) -> Html<String> {
     // Mark task as completed
+    // Return rendered TaskDetailsTemplate
     Html(String::new())
 }
 
@@ -251,6 +387,7 @@ async fn fetch_task_materials(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch materials for task
+    // Return rendered TaskMaterialsTemplate
     Html(String::new())
 }
 
@@ -260,6 +397,7 @@ async fn add_material_to_task(
     Form(expenditure): Form<ExpenditureCreate>,
 ) -> Html<String> {
     // Add material to task
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -269,6 +407,7 @@ async fn update_task_material(
     Form(expenditure): Form<ExpenditureUpdate>,
 ) -> Html<String> {
     // Update material usage for task
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -277,6 +416,7 @@ async fn remove_material_from_task(
     Path((task_id, material_id)): Path<(i32, i32)>,
 ) -> Html<String> {
     // Remove material from task
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -286,6 +426,7 @@ async fn fetch_tasks_by_site(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch tasks by site
+    // Return rendered TaskRowsTemplate
     Html(String::new())
 }
 
@@ -295,6 +436,7 @@ async fn fetch_tasks_by_brigade(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch tasks by brigade
+    // Return rendered TaskRowsTemplate
     Html(String::new())
 }
 
@@ -303,6 +445,7 @@ async fn fetch_overdue_tasks(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch overdue tasks
+    // Return rendered TaskRowsTemplate
     Html(String::new())
 }
 
@@ -312,6 +455,7 @@ async fn fetch_materials(
     Query(params): Query<MaterialFilter>,
 ) -> Html<String> {
     // Fetch materials with filters
+    // Return rendered MaterialRowsTemplate
     Html(String::new())
 }
 
@@ -320,6 +464,7 @@ async fn create_material(
     Form(material): Form<MaterialCreate>,
 ) -> Html<String> {
     // Create new material
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -328,6 +473,7 @@ async fn fetch_material_details(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Fetch material details
+    // Return rendered MaterialDetailsTemplate
     Html(String::new())
 }
 
@@ -337,6 +483,7 @@ async fn update_material(
     Form(material): Form<MaterialUpdate>,
 ) -> Html<String> {
     // Update material
+    // Return rendered MaterialDetailsTemplate
     Html(String::new())
 }
 
@@ -345,6 +492,7 @@ async fn delete_material(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Delete material
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -353,6 +501,7 @@ async fn fetch_materials_with_excesses(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch materials with estimate excesses
+    // Return rendered MaterialRowsTemplate
     Html(String::new())
 }
 

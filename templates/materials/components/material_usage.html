@@ -1,0 +1,99 @@
+<div>
+    {% if expenditures.is_empty() %}
+    <div class="text-center py-6 text-gray-500">
+        <p>This material hasn't been used on any tasks yet.</p>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Task Name</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-center">Expected Amount</th>
+                    <th class="py-3 px-6 text-center">Actual Amount</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in expenditures %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-6 text-left">
+                        <a href="/tasks/{{ exp.task_id }}" class="text-amber hover:underline">
+                            Task #{{ exp.task_id }}
+                        </a>
+                    </td>
+                    <td class="py-3 px-6 text-left">
+                        {% if let Some(site_id) = exp.site_id %}
+                            <a href="/sites/{{ site_id }}" class="text-amber hover:underline">
+                                {% if let Some(site_name) = &exp.site_name %}
+                                    {{ site_name }}
+                                {% else %}
+                                    Site #{{ site_id }}
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <span class="text-gray-400">Unknown Site</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">{{ exp.expected_amount }} {{ material_id }}</td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(actual_amount) = exp.actual_amount %}
+                            {{ actual_amount }} {{ material_id }}
+                        {% else %}
+                            <span class="text-gray-400">Not recorded</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(excess_percentage) = exp.excess_percentage %}
+                            {% if *excess_percentage > 0.0 %}
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">
+                                    +{{ excess_percentage }}% excess
+                                </span>
+                            {% elif *excess_percentage < 0.0 %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">
+                                    {{ excess_percentage }}% under
+                                </span>
+                            {% else %}
+                                <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
+                                    On target
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">
+                                Planned
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/materials/{{ material_id }}/usage?page={{ current_page - 1 }}" 
+                    hx-target="#material-usage">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/materials/{{ material_id }}/usage?page={{ current_page + 1 }}" 
+                    hx-target="#material-usage">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>

@@ -1,0 +1,98 @@
+{% extends "general/index.html" %}
+
+{% block title %}Create New Task - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="/tasks" class="text-amber hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
+        </a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">Create New Task</h1>
+        
+        <div id="notification-area"></div>
+        
+        <form hx-post="/api/tasks" hx-target="#notification-area" hx-indicator="#form-loading">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Task Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div>
+                    <label for="site_id" class="block text-sm font-medium text-gray-700 mb-1">Site <span class="text-red-500">*</span></label>
+                    <select id="site_id" name="site_id" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="">Select Site</option>
+                        {% for site in sites %}
+                        <option value="{{ site.id }}" {% if let Some(selected_site_id) = site_id %}{% if *selected_site_id == site.id %}selected{% endif %}{% endif %}>
+                            {{ site.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="brigade_id" class="block text-sm font-medium text-gray-700 mb-1">Brigade</label>
+                    <select id="brigade_id" name="brigade_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="">Select Brigade (Optional)</option>
+                        {% for brigade in brigades %}
+                        <option value="{{ brigade.id }}">
+                            Brigade #{{ brigade.id }} {% if let Some(name) = &brigade.brigadier_name %}({{ name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="period_start" class="block text-sm font-medium text-gray-700 mb-1">Start Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="period_start" name="period_start" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div>
+                    <label for="expected_period_end" class="block text-sm font-medium text-gray-700 mb-1">Expected End Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="expected_period_end" name="expected_period_end" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="button" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                        onclick="window.location.href='/tasks'">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    <i class="fas fa-save mr-1"></i> Create Task
+                </button>
+            </div>
+            
+            <div id="form-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="mt-6 bg-white p-6 rounded-md shadow-md">
+        <h2 class="text-lg font-semibold mb-4">What happens next?</h2>
+        <p class="text-gray-700 mb-3">After creating a task:</p>
+        <ol class="list-decimal list-inside text-gray-700 space-y-2 ml-4">
+            <li>You can add materials and their expected amounts to the task</li>
+            <li>You can assign a brigade if you haven't already done so</li>
+            <li>Monitor progress and update the actual material usage</li>
+            <li>Mark the task as completed when it's done</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "general/index.html" %}
+
+{% block title %}{{ task.name }} - Task Details - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="/tasks" class="text-amber hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
+        </a>
+    </div>
+    
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-onyx">{{ task.name }}</h1>
+        <div class="flex space-x-2">
+            <a href="/tasks/{{ task.id }}/edit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+            <button class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                    hx-delete="/api/tasks/{{ task.id }}" 
+                    hx-confirm="Are you sure you want to delete this task? This will also remove all material records."
+                    hx-target="#notification-area"
+                    hx-push-url="/tasks">
+                <i class="fas fa-trash mr-1"></i> Delete
+            </button>
+            {% if !task.is_completed %}
+            <button class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
+                    hx-get="#" 
+                    onclick="document.getElementById('complete-task-form').classList.toggle('hidden')">
+                <i class="fas fa-check-circle mr-1"></i> Complete Task
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Task Status Banner -->
+    <div class="mb-6 {% if task.is_completed %}bg-green-100 text-green-800{% elif task.is_overdue %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %} rounded-md p-4 flex items-center justify-between">
+        <div class="flex items-center">
+            <i class="{% if task.is_completed %}fas fa-check-circle{% elif task.is_overdue %}fas fa-exclamation-triangle{% else %}fas fa-clock{% endif %} text-2xl mr-3"></i>
+            <div>
+                <span class="font-semibold">
+                    {% if task.is_completed %}
+                        Task Completed
+                    {% elif task.is_overdue %}
+                        Task Overdue
+                    {% else %}
+                        Task In Progress
+                    {% endif %}
+                </span>
+                <div class="text-sm mt-1">
+                    {% if task.is_completed %}
+                        Completed on {{ task.actual_period_end.unwrap() }} 
+                        {% if task.is_overdue %}({{ (task.actual_period_end.unwrap().signed_duration_since(*task.expected_period_end)).num_days() }} days late){% endif %}
+                    {% elif task.is_overdue %}
+                        Expected completion was {{ task.expected_period_end }}
+                    {% else %}
+                        Due on {{ task.expected_period_end }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if let Some(percentage) = task.completion_percentage %}
+        <div class="flex items-center">
+            <div class="w-32 bg-white rounded-full h-4 mr-3">
+                <div class="{% if task.is_completed %}bg-green-500{% elif task.is_overdue %}bg-red-500{% else %}bg-amber{% endif %} h-4 rounded-full" style="width: {{ percentage }}%"></div>
+            </div>
+            <span class="font-semibold">{{ percentage }}%</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Complete Task Form (Hidden by default) -->
+    <div id="complete-task-form" class="hidden mb-6 bg-white rounded-md shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-4">Mark Task as Complete</h3>
+        <form hx-put="/api/tasks/{{ task.id }}/complete" hx-target="#notification-area" hx-indicator="#complete-loading">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="actual_period_end" class="block text-sm font-medium text-gray-700 mb-1">Actual Completion Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="actual_period_end" name="actual_period_end" value="{{ task.expected_period_end }}" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div class="flex items-end">
+                    <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                        <i class="fas fa-check-circle mr-1"></i> Confirm Completion
+                    </button>
+                </div>
+            </div>
+            <div id="complete-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Task Information Card -->
+        <div class="bg-white rounded-md shadow-md overflow-hidden lg:col-span-1">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-onyx">Task Information</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Name</p>
+                        <p class="font-medium">{{ task.name }}</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-gray-500">Site</p>
+                        <p>
+                            {% if let Some(site_name) = &task.site_name %}
+                                <a href="/sites/{{ task.site_id }}" class="text-amber hover:underline">{{ site_name }}</a>
+                            {% else %}
+                                Site #{{ task.site_id }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-gray-500">Brigade</p>
+                        <p>
+                            {% if let Some(brigade_id) = task.brigade_id %}
+                                {% if let Some(brigade_name) = &task.brigade_name %}
+                                    <a href="/brigades/{{ brigade_id }}" class="text-amber hover:underline">{{ brigade_name }}</a>
+                                {% else %}
+                                    <a href="/brigades/{{ brigade_id }}" class="text-amber hover:underline">Brigade #{{ brigade_id }}</a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">Not assigned</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-gray-500">Start Date</p>
+                        <p>{{ task.period_start }}</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-gray-500">Expected End Date</p>
+                        <p>{{ task.expected_period_end }}</p>
+                    </div>
+                    
+                    {% if let Some(actual_end) = task.actual_period_end %}
+                    <div>
+                        <p class="text-sm text-gray-500">Actual End Date</p>
+                        <p>{{ actual_end }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if let Some(description) = &task.description %}
+                    <div>
+                        <p class="text-sm text-gray-500">Description</p>
+                        <p>{{ description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Materials Section -->
+        <div class="bg-white rounded-md shadow-md overflow-hidden lg:col-span-2">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-onyx">Materials</h2>
+                <button class="bg-amber text-onyx py-1 px-3 rounded-md hover:bg-yellow-600 text-sm"
+                        hx-get="#" 
+                        onclick="document.getElementById('add-material-form').classList.toggle('hidden')">
+                    <i class="fas fa-plus-circle mr-1"></i> Add Material
+                </button>
+            </div>
+            
+            <div id="materials-content" hx-get="/api/tasks/{{ task.id }}/materials" hx-trigger="load" hx-indicator="#materials-loading">
+                <div id="materials-loading" class="flex justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification-area" class="mt-6"></div>
+</div>
+{% endblock %}
