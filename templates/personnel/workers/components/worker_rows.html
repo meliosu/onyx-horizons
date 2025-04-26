@@ -1,0 +1,75 @@
+{% if workers.is_empty() %}
+<tr>
+    <td colspan="6" class="py-6 px-6 text-center text-gray-500">No workers found matching your criteria</td>
+</tr>
+{% else %}
+{% for worker in workers %}
+<tr class="hover:bg-gray-50">
+    <td class="py-3 px-6 text-left">
+        <div class="flex items-center">
+            {% if let Some(photo) = worker.employee.photo %}
+            <img class="h-8 w-8 rounded-full object-cover mr-3" src="{{ photo }}" alt="{{ worker.employee.first_name }} {{ worker.employee.last_name }}">
+            {% else %}
+            <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 mr-3">
+                <i class="fas fa-user"></i>
+            </div>
+            {% endif %}
+            <div>
+                <span class="font-medium">{{ worker.employee.first_name }} {{ worker.employee.last_name }}</span>
+                <div class="text-xs text-gray-500">{{ worker.employee.phone_number }}</div>
+            </div>
+        </div>
+    </td>
+    <td class="py-3 px-6 text-center">
+        {% match worker.profession %}
+            {% when WorkerProfession::Electrician %}Electrician
+            {% when WorkerProfession::Plumber %}Plumber
+            {% when WorkerProfession::Welder %}Welder
+            {% when WorkerProfession::Driver %}Driver
+            {% when WorkerProfession::Mason %}Mason
+        {% endmatch %}
+    </td>
+    <td class="py-3 px-6 text-center">
+        {% if let Some(brigade_name) = worker.brigade_name %}
+            {% if let Some(brigade_id) = worker.brigade_id %}
+            <a href="/brigades/{{ brigade_id }}" class="text-amber hover:underline">
+                {{ brigade_name }}
+            </a>
+            {% else %}
+                {{ brigade_name }}
+            {% endif %}
+        {% else %}
+            <span class="text-gray-400">Not assigned</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-center">
+        {% if let Some(is_brigadier) = worker.is_brigadier %}
+            {% if is_brigadier %}
+            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Yes</span>
+            {% else %}
+            <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No</span>
+            {% endif %}
+        {% else %}
+            <span class="text-gray-400">N/A</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-6 text-right">${{ worker.employee.salary }}</td>
+    <td class="py-3 px-6 text-center">
+        <div class="flex justify-center space-x-2">
+            <a href="/personnel/workers/{{ worker.employee.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                <i class="fas fa-eye"></i>
+            </a>
+            <a href="/personnel/workers/{{ worker.employee.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                <i class="fas fa-edit"></i>
+            </a>
+            <button class="text-red-500 hover:text-red-700" title="Delete"
+                    hx-delete="/api/personnel/workers/{{ worker.employee.id }}" 
+                    hx-confirm="Are you sure you want to delete this worker? This action cannot be undone."
+                    hx-target="#notification-area">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </td>
+</tr>
+{% endfor %}
+{% endif %}

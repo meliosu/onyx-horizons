@@ -1,0 +1,6 @@
+<option value="">Select profession</option>
+<option value="electrician" {% if let Some(profession) = selected_profession %}{% if *profession == WorkerProfession::Electrician %}selected{% endif %}{% endif %}>Electrician</option>
+<option value="plumber" {% if let Some(profession) = selected_profession %}{% if *profession == WorkerProfession::Plumber %}selected{% endif %}{% endif %}>Plumber</option>
+<option value="welder" {% if let Some(profession) = selected_profession %}{% if *profession == WorkerProfession::Welder %}selected{% endif %}{% endif %}>Welder</option>
+<option value="driver" {% if let Some(profession) = selected_profession %}{% if *profession == WorkerProfession::Driver %}selected{% endif %}{% endif %}>Driver</option>
+<option value="mason" {% if let Some(profession) = selected_profession %}{% if *profession == WorkerProfession::Mason %}selected{% endif %}{% endif %}>Mason</option>

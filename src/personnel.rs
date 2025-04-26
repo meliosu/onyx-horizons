@@ -5,6 +5,7 @@ use axum::{
     Form, Router,
 };
 use serde::{Deserialize, Serialize};
+use askama::Template;
 use std::str::FromStr;
 
 use crate::database::Database;
@@ -45,6 +46,18 @@ pub enum WorkerProfession {
     Welder,
     Driver,
     Mason,
+}
+
+impl std::fmt::Display for WorkerProfession {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkerProfession::Electrician => write!(f, "Electrician"),
+            WorkerProfession::Plumber => write!(f, "Plumber"),
+            WorkerProfession::Welder => write!(f, "Welder"),
+            WorkerProfession::Driver => write!(f, "Driver"),
+            WorkerProfession::Mason => write!(f, "Mason"),
+        }
+    }
 }
 
 impl FromStr for WorkerProfession {
@@ -366,12 +379,176 @@ pub struct ProfessionTypeQuery {
     pub profession: WorkerProfession,
 }
 
+// Additional types needed for templates
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Department {
+    pub id: i32,
+    pub name: String,
+    pub supervisor_id: Option<i32>,
+    pub supervisor_name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Area {
+    pub id: i32,
+    pub name: String,
+    pub department_id: i32,
+    pub department_name: Option<String>,
+    pub supervisor_id: Option<i32>,
+    pub supervisor_name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Brigade {
+    pub id: i32,
+    pub brigadier_id: Option<i32>,
+    pub brigadier_name: Option<String>,
+    pub workers_count: i32,
+}
+
+// Template types for Technical Personnel pages
+#[derive(Template)]
+#[template(path = "personnel/technical/index.html")]
+pub struct TechnicalPersonnelPageTemplate {
+    pub personnel: Vec<TechnicalPersonnel>,
+    pub filter: Option<TechnicalPersonnelFilter>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    pub departments: Vec<Department>, // For filter dropdown
+    pub areas: Vec<Area>, // For filter dropdown
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/new.html")]
+pub struct TechnicalPersonnelNewPageTemplate {
+    pub departments: Vec<Department>, // For assignment dropdown
+    pub areas: Vec<Area>, // For assignment dropdown
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/details.html")]
+pub struct TechnicalPersonnelDetailsPageTemplate {
+    pub personnel_details: TechnicalPersonnelDetails,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/edit.html")]
+pub struct TechnicalPersonnelEditPageTemplate {
+    pub personnel_details: TechnicalPersonnelDetails,
+    pub departments: Vec<Department>, // For assignment dropdown
+    pub areas: Vec<Area>, // For assignment dropdown
+}
+
+// Template types for Worker pages
+#[derive(Template)]
+#[template(path = "personnel/workers/index.html")]
+pub struct WorkersPageTemplate {
+    pub workers: Vec<Worker>,
+    pub filter: Option<WorkerFilter>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    pub brigades: Vec<Brigade>, // For filter dropdown
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/new.html")]
+pub struct WorkerNewPageTemplate {
+    pub brigades: Vec<Brigade>, // For assignment dropdown
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/details.html")]
+pub struct WorkerDetailsPageTemplate {
+    pub worker_details: WorkerDetails,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/edit.html")]
+pub struct WorkerEditPageTemplate {
+    pub worker_details: WorkerDetails,
+    pub brigades: Vec<Brigade>, // For assignment dropdown
+}
+
+// Template types for HTMX components - Technical Personnel
+#[derive(Template)]
+#[template(path = "personnel/technical/components/technical_personnel_rows.html")]
+pub struct TechnicalPersonnelRowsTemplate {
+    pub personnel: Vec<TechnicalPersonnel>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/components/technical_personnel_details.html")]
+pub struct TechnicalPersonnelDetailsTemplate {
+    pub personnel_details: TechnicalPersonnelDetails,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/components/qualification_selector.html")]
+pub struct QualificationSelectorTemplate {
+    pub selected_qualification: Option<Qualification>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/components/position_selector.html")]
+pub struct PositionSelectorTemplate {
+    pub selected_position: Option<Position>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/technical/components/qualification_fields.html")]
+pub struct QualificationFieldsTemplate {
+    pub qualification: Qualification,
+    // Optional pre-filled values for edit mode
+    pub technician: Option<Technician>,
+    pub technologist: Option<Technologist>,
+    pub engineer: Option<Engineer>,
+}
+
+// Template types for HTMX components - Workers
+#[derive(Template)]
+#[template(path = "personnel/workers/components/worker_rows.html")]
+pub struct WorkerRowsTemplate {
+    pub workers: Vec<Worker>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/components/worker_details.html")]
+pub struct WorkerDetailsTemplate {
+    pub worker_details: WorkerDetails,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/components/profession_selector.html")]
+pub struct ProfessionSelectorTemplate {
+    pub selected_profession: Option<WorkerProfession>,
+}
+
+#[derive(Template)]
+#[template(path = "personnel/workers/components/profession_fields.html")]
+pub struct ProfessionFieldsTemplate {
+    pub profession: WorkerProfession,
+    // Optional pre-filled values for edit mode
+    pub electrician: Option<Electrician>,
+    pub plumber: Option<Plumber>,
+    pub welder: Option<Welder>,
+    pub driver: Option<Driver>,
+    pub mason: Option<Mason>,
+}
+
+// Success notification template (if not already defined elsewhere)
+#[derive(Template)]
+#[template(path = "components/success_notification.html")]
+pub struct SuccessNotificationTemplate {
+    pub message: String,
+}
+
 // Page Endpoints - Technical Personnel
 async fn technical_personnel_page(
     State(database): State<Database>,
     Query(params): Query<TechnicalPersonnelFilter>,
 ) -> Html<String> {
     // Technical personnel listing page
+    // Return rendered TechnicalPersonnelPageTemplate
     Html(String::new())
 }
 
@@ -379,6 +556,7 @@ async fn technical_personnel_new_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // New technical personnel form
+    // Return rendered TechnicalPersonnelNewPageTemplate
     Html(String::new())
 }
 
@@ -387,6 +565,7 @@ async fn technical_personnel_details_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Technical personnel details page
+    // Return rendered TechnicalPersonnelDetailsPageTemplate
     Html(String::new())
 }
 
@@ -395,6 +574,7 @@ async fn technical_personnel_edit_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Edit technical personnel form
+    // Return rendered TechnicalPersonnelEditPageTemplate
     Html(String::new())
 }
 
@@ -404,6 +584,7 @@ async fn workers_page(
     Query(params): Query<WorkerFilter>,
 ) -> Html<String> {
     // Workers listing page
+    // Return rendered WorkersPageTemplate
     Html(String::new())
 }
 
@@ -411,6 +592,7 @@ async fn worker_new_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // New worker form
+    // Return rendered WorkerNewPageTemplate
     Html(String::new())
 }
 
@@ -419,6 +601,7 @@ async fn worker_details_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Worker details page
+    // Return rendered WorkerDetailsPageTemplate
     Html(String::new())
 }
 
@@ -427,6 +610,7 @@ async fn worker_edit_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Edit worker form
+    // Return rendered WorkerEditPageTemplate
     Html(String::new())
 }
 
@@ -436,6 +620,7 @@ async fn fetch_technical_personnel(
     Query(params): Query<TechnicalPersonnelFilter>,
 ) -> Html<String> {
     // Fetch technical personnel with filters
+    // Return rendered TechnicalPersonnelRowsTemplate
     Html(String::new())
 }
 
@@ -444,6 +629,7 @@ async fn create_technical_personnel(
     Form(personnel): Form<TechnicalPersonnelCreate>,
 ) -> Html<String> {
     // Create new technical personnel
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -452,6 +638,7 @@ async fn fetch_technical_personnel_details(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Fetch technical personnel details
+    // Return rendered TechnicalPersonnelDetailsTemplate
     Html(String::new())
 }
 
@@ -461,6 +648,7 @@ async fn update_technical_personnel(
     Form(personnel): Form<TechnicalPersonnelUpdate>,
 ) -> Html<String> {
     // Update technical personnel
+    // Return rendered TechnicalPersonnelDetailsTemplate
     Html(String::new())
 }
 
@@ -469,16 +657,19 @@ async fn delete_technical_personnel(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Delete technical personnel
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
 async fn fetch_qualifications() -> Html<String> {
     // Fetch available qualifications
+    // Return rendered QualificationSelectorTemplate
     Html(String::new())
 }
 
 async fn fetch_positions() -> Html<String> {
     // Fetch available positions
+    // Return rendered PositionSelectorTemplate
     Html(String::new())
 }
 
@@ -488,6 +679,7 @@ async fn fetch_workers(
     Query(params): Query<WorkerFilter>,
 ) -> Html<String> {
     // Fetch workers with filters
+    // Return rendered WorkerRowsTemplate
     Html(String::new())
 }
 
@@ -496,6 +688,7 @@ async fn create_worker(
     Form(worker): Form<WorkerCreate>,
 ) -> Html<String> {
     // Create new worker
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -504,6 +697,7 @@ async fn fetch_worker_details(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Fetch worker details
+    // Return rendered WorkerDetailsTemplate
     Html(String::new())
 }
 
@@ -513,6 +707,7 @@ async fn update_worker(
     Form(worker): Form<WorkerUpdate>,
 ) -> Html<String> {
     // Update worker
+    // Return rendered WorkerDetailsTemplate
     Html(String::new())
 }
 
@@ -521,11 +716,13 @@ async fn delete_worker(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Delete worker
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
 async fn fetch_professions() -> Html<String> {
     // Fetch available professions
+    // Return rendered ProfessionSelectorTemplate
     Html(String::new())
 }
 
@@ -533,6 +730,7 @@ async fn fetch_profession_type_fields(
     Query(params): Query<ProfessionTypeQuery>,
 ) -> Html<String> {
     // Fetch form fields for selected profession
+    // Return rendered ProfessionFieldsTemplate
     Html(String::new())
 }
 
@@ -543,6 +741,7 @@ async fn fetch_personnel_by_department(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch personnel by department
+    // Return rendered TechnicalPersonnelRowsTemplate
     Html(String::new())
 }
 
@@ -552,6 +751,7 @@ async fn fetch_personnel_by_area(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch personnel by area
+    // Return rendered TechnicalPersonnelRowsTemplate
     Html(String::new())
 }
 
@@ -561,6 +761,7 @@ async fn fetch_workers_by_brigade(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch workers by brigade
+    // Return rendered WorkerRowsTemplate
     Html(String::new())
 }
 

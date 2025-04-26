@@ -1,0 +1,185 @@
+{% extends "general/index.html" %}
+
+{% block title %}Edit {{ worker_details.worker.employee.first_name }} {{ worker_details.worker.employee.last_name }} - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="/personnel/workers/{{ worker_details.worker.employee.id }}" class="text-amber hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Worker Details
+        </a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">Edit Worker</h1>
+        
+        <div id="notification-area"></div>
+        
+        <form hx-put="/api/personnel/workers/{{ worker_details.worker.employee.id }}" hx-target="#notification-area" hx-indicator="#form-loading">
+            <!-- Personal Information -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Personal Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="first_name" name="employee.first_name" value="{{ worker_details.worker.employee.first_name }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="last_name" name="employee.last_name" value="{{ worker_details.worker.employee.last_name }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                        <input type="text" id="middle_name" name="employee.middle_name" 
+                               value="{% if let Some(middle_name) = worker_details.worker.employee.middle_name %}{{ middle_name }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                        <select id="gender" name="employee.gender" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="male" {% if worker_details.worker.employee.gender == Gender::Male %}selected{% endif %}>Male</option>
+                            <option value="female" {% if worker_details.worker.employee.gender == Gender::Female %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="phone_number" name="employee.phone_number" value="{{ worker_details.worker.employee.phone_number }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">Salary <span class="text-red-500">*</span></label>
+                        <input type="number" id="salary" name="employee.salary" value="{{ worker_details.worker.employee.salary }}" min="0" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="photo" class="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
+                        <input type="url" id="photo" name="employee.photo" 
+                               value="{% if let Some(photo) = worker_details.worker.employee.photo %}{{ photo }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Professional Information -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Professional Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="profession" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                        <div class="py-2 px-3 border border-gray-300 rounded-md bg-gray-100 text-gray-700">
+                            {% match worker_details.worker.profession %}
+                                {% when WorkerProfession::Electrician %}Electrician
+                                {% when WorkerProfession::Plumber %}Plumber
+                                {% when WorkerProfession::Welder %}Welder
+                                {% when WorkerProfession::Driver %}Driver
+                                {% when WorkerProfession::Mason %}Mason
+                            {% endmatch %}
+                            <div class="text-xs text-gray-500 mt-1">Profession cannot be changed after creation</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="union_name" class="block text-sm font-medium text-gray-700 mb-1">Union Name</label>
+                        <input type="text" id="union_name" name="union_name" 
+                               value="{% if let Some(union_name) = worker_details.worker.union_name %}{{ union_name }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="brigade_id" class="block text-sm font-medium text-gray-700 mb-1">Brigade Assignment</label>
+                        <select id="brigade_id" name="brigade_id" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="">Not Assigned</option>
+                            {% for brigade in brigades %}
+                            <option value="{{ brigade.id }}" {% if let Some(brigade_id) = worker_details.worker.brigade_id %}{% if *brigade_id == brigade.id %}selected{% endif %}{% endif %}>
+                                {% if let Some(brigadier_name) = brigade.brigadier_name %}
+                                    Brigade #{{ brigade.id }} ({{ brigadier_name }})
+                                {% else %}
+                                    Brigade #{{ brigade.id }}
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_brigadier" name="is_brigadier" 
+                               {% if let Some(is_brigadier) = worker_details.worker.is_brigadier %}{% if is_brigadier %}checked{% endif %}{% endif %}
+                               class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                        <label for="is_brigadier" class="ml-2 block text-sm text-gray-900">Assign as Brigadier</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profession-specific fields -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">
+                    {% match worker_details.worker.profession %}
+                        {% when WorkerProfession::Electrician %}Electrician
+                        {% when WorkerProfession::Plumber %}Plumber
+                        {% when WorkerProfession::Welder %}Welder
+                        {% when WorkerProfession::Driver %}Driver
+                        {% when WorkerProfession::Mason %}Mason
+                    {% endmatch %}
+                    Details
+                </h2>
+                
+                {% match worker_details.profession_details %}
+                    {% when ProfessionDetails::Electrician(electrician) %}
+                        <div>
+                            <label for="voltage_specialization" class="block text-sm font-medium text-gray-700 mb-1">Voltage Specialization <span class="text-red-500">*</span></label>
+                            <input type="text" id="voltage_specialization" name="voltage_specialization" value="{{ electrician.voltage_specialization }}" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    {% when ProfessionDetails::Plumber(plumber) %}
+                        <div>
+                            <label for="pipe_specialization" class="block text-sm font-medium text-gray-700 mb-1">Pipe Specialization <span class="text-red-500">*</span></label>
+                            <input type="text" id="pipe_specialization" name="pipe_specialization" value="{{ plumber.pipe_specialization }}" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    {% when ProfessionDetails::Welder(welder) %}
+                        <div>
+                            <label for="welding_machine" class="block text-sm font-medium text-gray-700 mb-1">Welding Machine <span class="text-red-500">*</span></label>
+                            <input type="text" id="welding_machine" name="welding_machine" value="{{ welder.welding_machine }}" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    {% when ProfessionDetails::Driver(driver) %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="vehicle_type" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type <span class="text-red-500">*</span></label>
+                                <input type="text" id="vehicle_type" name="vehicle_type" value="{{ driver.vehicle_type }}" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            </div>
+                            <div>
+                                <label for="number_of_accidents" class="block text-sm font-medium text-gray-700 mb-1">Number of Accidents <span class="text-red-500">*</span></label>
+                                <input type="number" id="number_of_accidents" name="number_of_accidents" value="{{ driver.number_of_accidents }}" min="0" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            </div>
+                        </div>
+                    {% when ProfessionDetails::Mason(mason) %}
+                        <div class="flex items-center">
+                            <input type="checkbox" id="hq_restoration_skills" name="hq_restoration_skills" 
+                                   {% if mason.hq_restoration_skills %}checked{% endif %}
+                                   class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                            <label for="hq_restoration_skills" class="ml-2 block text-sm text-gray-900">HQ Restoration Skills</label>
+                        </div>
+                {% endmatch %}
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="button" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                        onclick="window.location.href='/personnel/workers/{{ worker_details.worker.employee.id }}'">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    Save Changes
+                </button>
+            </div>
+            
+            <div id="form-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "general/index.html" %}
+
+{% block title %}Edit {{ personnel_details.technical_personnel.employee.first_name }} {{ personnel_details.technical_personnel.employee.last_name }} - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}" class="text-amber hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Personnel Details
+        </a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">Edit Technical Personnel</h1>
+        
+        <div id="notification-area"></div>
+        
+        <form hx-put="/api/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}" hx-target="#notification-area" hx-indicator="#form-loading">
+            <!-- Personal Information -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Personal Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="first_name" name="employee.first_name" value="{{ personnel_details.technical_personnel.employee.first_name }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="last_name" name="employee.last_name" value="{{ personnel_details.technical_personnel.employee.last_name }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                        <input type="text" id="middle_name" name="employee.middle_name" 
+                               value="{% if let Some(middle_name) = personnel_details.technical_personnel.employee.middle_name %}{{ middle_name }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                        <select id="gender" name="employee.gender" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="male" {% if personnel_details.technical_personnel.employee.gender == Gender::Male %}selected{% endif %}>Male</option>
+                            <option value="female" {% if personnel_details.technical_personnel.employee.gender == Gender::Female %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="phone_number" name="employee.phone_number" value="{{ personnel_details.technical_personnel.employee.phone_number }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">Salary <span class="text-red-500">*</span></label>
+                        <input type="number" id="salary" name="employee.salary" value="{{ personnel_details.technical_personnel.employee.salary }}" min="0" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="photo" class="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
+                        <input type="url" id="photo" name="employee.photo" 
+                               value="{% if let Some(photo) = personnel_details.technical_personnel.employee.photo %}{{ photo }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Professional Information -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Professional Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="qualification" class="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
+                        <div class="py-2 px-3 border border-gray-300 rounded-md bg-gray-100 text-gray-700">
+                            {{ personnel_details.technical_personnel.qualification }}
+                            <div class="text-xs text-gray-500 mt-1">Qualification cannot be changed after creation</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                        <select id="position" name="position"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="none" {% if let Some(position) = personnel_details.technical_personnel.position %}{% if *position == Position::None %}selected{% endif %}{% else %}selected{% endif %}>None</option>
+                            <option value="master" {% if let Some(position) = personnel_details.technical_personnel.position %}{% if *position == Position::Master %}selected{% endif %}{% endif %}>Master</option>
+                            <option value="foreman" {% if let Some(position) = personnel_details.technical_personnel.position %}{% if *position == Position::Foreman %}selected{% endif %}{% endif %}>Foreman</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Education Level <span class="text-red-500">*</span></label>
+                        <input type="text" id="education_level" name="education_level" value="{{ personnel_details.technical_personnel.education_level }}" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div>
+                        <label for="software_skills" class="block text-sm font-medium text-gray-700 mb-1">Software Skills (comma-separated)</label>
+                        <input type="text" id="software_skills" name="software_skills" 
+                               value="{% if let Some(skills) = personnel_details.technical_personnel.software_skills %}{{ skills|join(", ") }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_project_manager" name="is_project_manager" 
+                               {% if personnel_details.technical_personnel.is_project_manager %}checked{% endif %}
+                               class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                        <label for="is_project_manager" class="ml-2 block text-sm text-gray-900">Is Project Manager</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Assignments -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">Assignments</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="department_id" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <select id="department_id" name="department_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                                hx-get="/api/selectors/areas-by-department" 
+                                hx-target="#area_id"
+                                hx-trigger="change">
+                            <option value="">None</option>
+                            {% for department in departments %}
+                            <option value="{{ department.id }}" {% if let Some(dept_id) = personnel_details.technical_personnel.department_id %}{% if *dept_id == department.id %}selected{% endif %}{% endif %}>
+                                {{ department.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="area_id" class="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                        <select id="area_id" name="area_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="">None</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}" {% if let Some(area_id) = personnel_details.technical_personnel.area_id %}{% if *area_id == area.id %}selected{% endif %}{% endif %}>
+                                {{ area.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Qualification-specific fields -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-4">{{ personnel_details.technical_personnel.qualification }} Details</h2>
+                
+                {% match personnel_details.qualification_details %}
+                    {% when QualificationDetails::Technician(technician) %}
+                        <div>
+                            <label for="safety_training_level" class="block text-sm font-medium text-gray-700 mb-1">Safety Training Level <span class="text-red-500">*</span></label>
+                            <input type="text" id="safety_training_level" name="safety_training_level" value="{{ technician.safety_training_level }}" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    {% when QualificationDetails::Technologist(technologist) %}
+                        <div>
+                            <label for="management_tools" class="block text-sm font-medium text-gray-700 mb-1">Management Tools (comma-separated) <span class="text-red-500">*</span></label>
+                            <input type="text" id="management_tools" name="management_tools" value="{{ technologist.management_tools|join(", ") }}" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    {% when QualificationDetails::Engineer(engineer) %}
+                        <div>
+                            <label for="pe_license_id" class="block text-sm font-medium text-gray-700 mb-1">PE License ID <span class="text-red-500">*</span></label>
+                            <input type="number" id="pe_license_id" name="pe_license_id" value="{{ engineer.pe_license_id }}" min="1" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                {% endmatch %}
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="button" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                        onclick="window.location.href='/personnel/technical/{{ personnel_details.technical_personnel.employee.id }}'">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    Save Changes
+                </button>
+            </div>
+            
+            <div id="form-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

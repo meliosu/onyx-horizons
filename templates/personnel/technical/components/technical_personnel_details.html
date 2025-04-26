@@ -1,0 +1,184 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Personal Information Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Personal Information</h2>
+        </div>
+        <div class="p-6">
+            <div class="flex justify-center mb-6">
+                {% if let Some(photo) = personnel_details.technical_personnel.employee.photo %}
+                <img class="h-40 w-40 rounded-full object-cover" src="{{ photo }}" alt="{{ personnel_details.technical_personnel.employee.first_name }} {{ personnel_details.technical_personnel.employee.last_name }}">
+                {% else %}
+                <div class="h-40 w-40 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+                    <i class="fas fa-user text-5xl"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Full Name</p>
+                    <p class="font-medium">{{ personnel_details.technical_personnel.employee.first_name }} {{ personnel_details.technical_personnel.employee.last_name }}</p>
+                </div>
+                
+                {% if let Some(middle_name) = personnel_details.technical_personnel.employee.middle_name %}
+                <div>
+                    <p class="text-sm text-gray-500">Middle Name</p>
+                    <p>{{ middle_name }}</p>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <p class="text-sm text-gray-500">Gender</p>
+                    <p>
+                        {% match personnel_details.technical_personnel.employee.gender %}
+                            {% when Gender::Male %}Male
+                            {% when Gender::Female %}Female
+                        {% endmatch %}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Phone Number</p>
+                    <p>{{ personnel_details.technical_personnel.employee.phone_number }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Salary</p>
+                    <p>${{ personnel_details.technical_personnel.employee.salary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Professional Details Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Professional Details</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Qualification</p>
+                    <p class="font-medium">{{ personnel_details.technical_personnel.qualification }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Position</p>
+                    <p>
+                        {% if let Some(position) = personnel_details.technical_personnel.position %}
+                            {% match position %}
+                                {% when Position::Master %}Master
+                                {% when Position::Foreman %}Foreman
+                                {% when Position::None %}-
+                            {% endmatch %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Education Level</p>
+                    <p>{{ personnel_details.technical_personnel.education_level }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Project Manager</p>
+                    <p>
+                        {% if personnel_details.technical_personnel.is_project_manager %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Yes</span>
+                        {% else %}
+                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                {% if let Some(software_skills) = personnel_details.technical_personnel.software_skills %}
+                <div>
+                    <p class="text-sm text-gray-500">Software Skills</p>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                        {% for skill in software_skills %}
+                        <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Assignments Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Assignments</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Department</p>
+                    <p>
+                        {% if let Some(dept_name) = personnel_details.technical_personnel.department_name %}
+                            {% if let Some(dept_id) = personnel_details.technical_personnel.department_id %}
+                            <a href="/departments/{{ dept_id }}" class="text-amber hover:underline">
+                                {{ dept_name }}
+                            </a>
+                            {% else %}
+                                {{ dept_name }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Not assigned</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Area</p>
+                    <p>
+                        {% if let Some(area_name) = personnel_details.technical_personnel.area_name %}
+                            {% if let Some(area_id) = personnel_details.technical_personnel.area_id %}
+                            <a href="/areas/{{ area_id }}" class="text-amber hover:underline">
+                                {{ area_name }}
+                            </a>
+                            {% else %}
+                                {{ area_name }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Not assigned</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Qualification-specific details -->
+<div class="mt-6 bg-white rounded-md shadow-md overflow-hidden">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-onyx">{{ personnel_details.technical_personnel.qualification }} Details</h2>
+    </div>
+    <div class="p-6">
+        {% match personnel_details.qualification_details %}
+            {% when QualificationDetails::Technician(technician) %}
+                <div>
+                    <p class="text-sm text-gray-500">Safety Training Level</p>
+                    <p>{{ technician.safety_training_level }}</p>
+                </div>
+            {% when QualificationDetails::Technologist(technologist) %}
+                <div>
+                    <p class="text-sm text-gray-500">Management Tools</p>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                        {% for tool in technologist.management_tools %}
+                        <span class="bg-purple-100 text-purple-600 py-1 px-2 rounded-full text-xs">{{ tool }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% when QualificationDetails::Engineer(engineer) %}
+                <div>
+                    <p class="text-sm text-gray-500">PE License ID</p>
+                    <p>{{ engineer.pe_license_id }}</p>
+                </div>
+        {% endmatch %}
+    </div>
+</div>

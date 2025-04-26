@@ -1,0 +1,185 @@
+{% extends "general/index.html" %}
+
+{% block title %}Workers - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-onyx">Workers</h1>
+        <a href="/personnel/workers/new" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+            <i class="fas fa-plus-circle mr-1"></i> Add Worker
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-md shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Filter Options</h2>
+        <form hx-get="/api/personnel/workers" hx-target="#workers-table-body" hx-indicator="#table-loading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="profession" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                <select id="profession" name="profession" hx-get="/api/personnel/workers/professions" hx-target="#profession"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">Any Profession</option>
+                    <option value="electrician" {% if let Some(filter) = filter %}{% if let Some(profession) = filter.profession %}{% if *profession == WorkerProfession::Electrician %}selected{% endif %}{% endif %}{% endif %}>Electrician</option>
+                    <option value="plumber" {% if let Some(filter) = filter %}{% if let Some(profession) = filter.profession %}{% if *profession == WorkerProfession::Plumber %}selected{% endif %}{% endif %}{% endif %}>Plumber</option>
+                    <option value="welder" {% if let Some(filter) = filter %}{% if let Some(profession) = filter.profession %}{% if *profession == WorkerProfession::Welder %}selected{% endif %}{% endif %}{% endif %}>Welder</option>
+                    <option value="driver" {% if let Some(filter) = filter %}{% if let Some(profession) = filter.profession %}{% if *profession == WorkerProfession::Driver %}selected{% endif %}{% endif %}{% endif %}>Driver</option>
+                    <option value="mason" {% if let Some(filter) = filter %}{% if let Some(profession) = filter.profession %}{% if *profession == WorkerProfession::Mason %}selected{% endif %}{% endif %}{% endif %}>Mason</option>
+                </select>
+            </div>
+            <div>
+                <label for="brigade_id" class="block text-sm font-medium text-gray-700 mb-1">Brigade</label>
+                <select id="brigade_id" name="brigade_id" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">Any Brigade</option>
+                    {% for brigade in brigades %}
+                    <option value="{{ brigade.id }}" {% if let Some(filter) = filter %}{% if let Some(brigade_id) = filter.brigade_id %}{% if *brigade_id == brigade.id %}selected{% endif %}{% endif %}{% endif %}>
+                        {% if let Some(brigadier_name) = brigade.brigadier_name %}
+                            Brigade #{{ brigade.id }} ({{ brigadier_name }})
+                        {% else %}
+                            Brigade #{{ brigade.id }}
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="is_brigadier" class="block text-sm font-medium text-gray-700 mb-1">Brigadier Status</label>
+                <select id="is_brigadier" name="is_brigadier" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">Any</option>
+                    <option value="true" {% if let Some(filter) = filter %}{% if let Some(is_brigadier) = filter.is_brigadier %}{% if is_brigadier %}selected{% endif %}{% endif %}{% endif %}>Brigadier</option>
+                    <option value="false" {% if let Some(filter) = filter %}{% if let Some(is_brigadier) = filter.is_brigadier %}{% if !is_brigadier %}selected{% endif %}{% endif %}{% endif %}>Not Brigadier</option>
+                </select>
+            </div>
+            <div class="md:col-span-3 flex justify-end">
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    <i class="fas fa-filter mr-1"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Name</th>
+                        <th class="py-3 px-6 text-center">Profession</th>
+                        <th class="py-3 px-6 text-center">Brigade</th>
+                        <th class="py-3 px-6 text-center">Brigadier</th>
+                        <th class="py-3 px-6 text-right">Salary</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="workers-table-body">
+                    {% if workers.is_empty() %}
+                    <tr>
+                        <td colspan="6" class="py-6 px-6 text-center text-gray-500">No workers found matching your criteria</td>
+                    </tr>
+                    {% else %}
+                    {% for worker in workers %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-6 text-left">
+                            <div class="flex items-center">
+                                {% if let Some(photo) = worker.employee.photo %}
+                                <img class="h-8 w-8 rounded-full object-cover mr-3" src="{{ photo }}" alt="{{ worker.employee.first_name }} {{ worker.employee.last_name }}">
+                                {% else %}
+                                <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 mr-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <span class="font-medium">{{ worker.employee.first_name }} {{ worker.employee.last_name }}</span>
+                                    <div class="text-xs text-gray-500">{{ worker.employee.phone_number }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% match worker.profession %}
+                                {% when WorkerProfession::Electrician %}Electrician
+                                {% when WorkerProfession::Plumber %}Plumber
+                                {% when WorkerProfession::Welder %}Welder
+                                {% when WorkerProfession::Driver %}Driver
+                                {% when WorkerProfession::Mason %}Mason
+                            {% endmatch %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(brigade_name) = worker.brigade_name %}
+                                {% if let Some(brigade_id) = worker.brigade_id %}
+                                <a href="/brigades/{{ brigade_id }}" class="text-amber hover:underline">
+                                    {{ brigade_name }}
+                                </a>
+                                {% else %}
+                                    {{ brigade_name }}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(is_brigadier) = worker.is_brigadier %}
+                                {% if is_brigadier %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Yes</span>
+                                {% else %}
+                                <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-right">${{ worker.employee.salary }}</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex justify-center space-x-2">
+                                <a href="/personnel/workers/{{ worker.employee.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/personnel/workers/{{ worker.employee.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="text-red-500 hover:text-red-700" title="Delete"
+                                        hx-delete="/api/personnel/workers/{{ worker.employee.id }}" 
+                                        hx-confirm="Are you sure you want to delete this worker? This action cannot be undone."
+                                        hx-target="#notification-area">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="table-loading" class="htmx-indicator flex justify-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+        </div>
+        
+        {% if total_pages > 1 %}
+        <div class="flex justify-between items-center p-4 border-t border-gray-200">
+            <div class="text-sm text-gray-500">
+                Showing page {{ current_page }} of {{ total_pages }}
+            </div>
+            <div class="flex space-x-2">
+                {% if current_page > 1 %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/personnel/workers?page={{ current_page - 1 }}" hx-target="#workers-table-body">
+                    <i class="fas fa-chevron-left mr-1"></i> Previous
+                </button>
+                {% endif %}
+                
+                {% if current_page < total_pages %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/personnel/workers?page={{ current_page + 1 }}" hx-target="#workers-table-body">
+                    Next <i class="fas fa-chevron-right ml-1"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div id="notification-area" class="mt-4"></div>
+</div>
+{% endblock %}

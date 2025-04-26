@@ -1,0 +1,48 @@
+<h3 class="text-lg font-semibold mb-4">{{ profession }} Specific Information</h3>
+<div class="p-4 border border-amber rounded-md bg-amber-50 mb-6">
+    {% match profession %}
+        {% when WorkerProfession::Electrician %}
+            <div>
+                <label for="voltage_specialization" class="block text-sm font-medium text-gray-700 mb-1">Voltage Specialization <span class="text-red-500">*</span></label>
+                <input type="text" id="voltage_specialization" name="voltage_specialization" 
+                       value="{% if let Some(electrician) = electrician %}{{ electrician.voltage_specialization }}{% endif %}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+        {% when WorkerProfession::Plumber %}
+            <div>
+                <label for="pipe_specialization" class="block text-sm font-medium text-gray-700 mb-1">Pipe Specialization <span class="text-red-500">*</span></label>
+                <input type="text" id="pipe_specialization" name="pipe_specialization" 
+                       value="{% if let Some(plumber) = plumber %}{{ plumber.pipe_specialization }}{% endif %}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+        {% when WorkerProfession::Welder %}
+            <div>
+                <label for="welding_machine" class="block text-sm font-medium text-gray-700 mb-1">Welding Machine <span class="text-red-500">*</span></label>
+                <input type="text" id="welding_machine" name="welding_machine" 
+                       value="{% if let Some(welder) = welder %}{{ welder.welding_machine }}{% endif %}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+        {% when WorkerProfession::Driver %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="vehicle_type" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type <span class="text-red-500">*</span></label>
+                    <input type="text" id="vehicle_type" name="vehicle_type" 
+                           value="{% if let Some(driver) = driver %}{{ driver.vehicle_type }}{% endif %}" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="number_of_accidents" class="block text-sm font-medium text-gray-700 mb-1">Number of Accidents <span class="text-red-500">*</span></label>
+                    <input type="number" id="number_of_accidents" name="number_of_accidents" 
+                           value="{% if let Some(driver) = driver %}{{ driver.number_of_accidents }}{% else %}0{% endif %}" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+            </div>
+        {% when WorkerProfession::Mason %}
+            <div class="flex items-center">
+                <input type="checkbox" id="hq_restoration_skills" name="hq_restoration_skills" 
+                       {% if let Some(mason) = mason %}{% if mason.hq_restoration_skills %}checked{% endif %}{% endif %}
+                       class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                <label for="hq_restoration_skills" class="ml-2 block text-sm text-gray-900">HQ Restoration Skills</label>
+            </div>
+    {% endmatch %}
+</div>

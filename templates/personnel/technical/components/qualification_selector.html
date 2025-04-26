@@ -1,0 +1,4 @@
+<option value="">Select qualification</option>
+<option value="technician" {% if let Some(qualification) = selected_qualification %}{% if *qualification == Qualification::Technician %}selected{% endif %}{% endif %}>Technician</option>
+<option value="technologist" {% if let Some(qualification) = selected_qualification %}{% if *qualification == Qualification::Technologist %}selected{% endif %}{% endif %}>Technologist</option>
+<option value="engineer" {% if let Some(qualification) = selected_qualification %}{% if *qualification == Qualification::Engineer %}selected{% endif %}{% endif %}>Engineer</option>

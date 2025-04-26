@@ -1,0 +1,182 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Personal Information Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Personal Information</h2>
+        </div>
+        <div class="p-6">
+            <div class="flex justify-center mb-6">
+                {% if let Some(photo) = worker_details.worker.employee.photo %}
+                <img class="h-40 w-40 rounded-full object-cover" src="{{ photo }}" alt="{{ worker_details.worker.employee.first_name }} {{ worker_details.worker.employee.last_name }}">
+                {% else %}
+                <div class="h-40 w-40 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+                    <i class="fas fa-user text-5xl"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Full Name</p>
+                    <p class="font-medium">{{ worker_details.worker.employee.first_name }} {{ worker_details.worker.employee.last_name }}</p>
+                </div>
+                
+                {% if let Some(middle_name) = worker_details.worker.employee.middle_name %}
+                <div>
+                    <p class="text-sm text-gray-500">Middle Name</p>
+                    <p>{{ middle_name }}</p>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <p class="text-sm text-gray-500">Gender</p>
+                    <p>
+                        {% match worker_details.worker.employee.gender %}
+                            {% when Gender::Male %}Male
+                            {% when Gender::Female %}Female
+                        {% endmatch %}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Phone Number</p>
+                    <p>{{ worker_details.worker.employee.phone_number }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Salary</p>
+                    <p>${{ worker_details.worker.employee.salary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Professional Details Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Professional Details</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Profession</p>
+                    <p class="font-medium">
+                        {% match worker_details.worker.profession %}
+                            {% when WorkerProfession::Electrician %}Electrician
+                            {% when WorkerProfession::Plumber %}Plumber
+                            {% when WorkerProfession::Welder %}Welder
+                            {% when WorkerProfession::Driver %}Driver
+                            {% when WorkerProfession::Mason %}Mason
+                        {% endmatch %}
+                    </p>
+                </div>
+                
+                {% if let Some(union_name) = worker_details.worker.union_name %}
+                <div>
+                    <p class="text-sm text-gray-500">Union</p>
+                    <p>{{ union_name }}</p>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <p class="text-sm text-gray-500">Brigadier Status</p>
+                    <p>
+                        {% if let Some(is_brigadier) = worker_details.worker.is_brigadier %}
+                            {% if is_brigadier %}
+                            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Brigadier</span>
+                            {% else %}
+                            <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">Regular Worker</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Not Assigned to Brigade</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brigade Assignment Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Brigade Assignment</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Current Brigade</p>
+                    <p>
+                        {% if let Some(brigade_name) = worker_details.worker.brigade_name %}
+                            {% if let Some(brigade_id) = worker_details.worker.brigade_id %}
+                            <a href="/brigades/{{ brigade_id }}" class="text-amber hover:underline">
+                                {{ brigade_name }}
+                            </a>
+                            {% else %}
+                                {{ brigade_name }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Not assigned to a brigade</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profession-specific details -->
+<div class="mt-6 bg-white rounded-md shadow-md overflow-hidden">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-onyx">
+            {% match worker_details.worker.profession %}
+                {% when WorkerProfession::Electrician %}Electrician
+                {% when WorkerProfession::Plumber %}Plumber
+                {% when WorkerProfession::Welder %}Welder
+                {% when WorkerProfession::Driver %}Driver
+                {% when WorkerProfession::Mason %}Mason
+            {% endmatch %}
+            Details
+        </h2>
+    </div>
+    <div class="p-6">
+        {% match worker_details.profession_details %}
+            {% when ProfessionDetails::Electrician(electrician) %}
+                <div>
+                    <p class="text-sm text-gray-500">Voltage Specialization</p>
+                    <p>{{ electrician.voltage_specialization }}</p>
+                </div>
+            {% when ProfessionDetails::Plumber(plumber) %}
+                <div>
+                    <p class="text-sm text-gray-500">Pipe Specialization</p>
+                    <p>{{ plumber.pipe_specialization }}</p>
+                </div>
+            {% when ProfessionDetails::Welder(welder) %}
+                <div>
+                    <p class="text-sm text-gray-500">Welding Machine</p>
+                    <p>{{ welder.welding_machine }}</p>
+                </div>
+            {% when ProfessionDetails::Driver(driver) %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-500">Vehicle Type</p>
+                        <p>{{ driver.vehicle_type }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Number of Accidents</p>
+                        <p>{{ driver.number_of_accidents }}</p>
+                    </div>
+                </div>
+            {% when ProfessionDetails::Mason(mason) %}
+                <div>
+                    <p class="text-sm text-gray-500">HQ Restoration Skills</p>
+                    <p>
+                        {% if mason.hq_restoration_skills %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Yes</span>
+                        {% else %}
+                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No</span>
+                        {% endif %}
+                    </p>
+                </div>
+        {% endmatch %}
+    </div>
+</div>
