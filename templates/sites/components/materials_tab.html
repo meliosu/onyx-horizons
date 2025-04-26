@@ -1,0 +1,85 @@
+<div>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Materials Usage</h2>
+    </div>
+
+    {% if materials.is_empty() %}
+        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <p class="text-gray-500">No materials have been assigned to this site yet.</p>
+            <p class="text-sm text-gray-500 mt-2">Materials are assigned through tasks. Create tasks to add materials.</p>
+        </div>
+    {% else %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Material</th>
+                        <th class="py-3 px-6 text-left">Task</th>
+                        <th class="py-3 px-6 text-center">Expected Amount</th>
+                        <th class="py-3 px-6 text-center">Actual Amount</th>
+                        <th class="py-3 px-6 text-center">Units</th>
+                        <th class="py-3 px-6 text-center">Cost Per Unit</th>
+                        <th class="py-3 px-6 text-center">Total Cost</th>
+                        <th class="py-3 px-6 text-center">Variance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for material in materials %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-6 text-left font-medium">{{ material.material_name }}</td>
+                        <td class="py-3 px-6 text-left">Task #{{ material.task_id }}</td>
+                        <td class="py-3 px-6 text-center">{{ material.expected_amount }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(actual) = material.actual_amount %}
+                                {{ actual }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ material.units }}</td>
+                        <td class="py-3 px-6 text-center">${{ material.cost_per_unit }}</td>
+                        <td class="py-3 px-6 text-center">${{ material.total_cost }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(actual) = material.actual_amount %}
+                                {% if *actual > material.expected_amount %}
+                                    <span class="text-red-600">+{{ actual - material.expected_amount }} {{ material.units }}</span>
+                                {% elif *actual < material.expected_amount %}
+                                    <span class="text-green-600">-{{ material.expected_amount - actual }} {{ material.units }}</span>
+                                {% else %}
+                                    <span class="text-gray-500">0 {{ material.units }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="flex justify-between items-center mt-4">
+            <div class="text-sm text-gray-500">
+                Showing page {{ current_page }} of {{ total_pages }}
+            </div>
+            <div class="flex space-x-2">
+                {% if current_page > 1 %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/sites/{{ site_id }}/materials?page={{ current_page - 1 }}" hx-target="#tab-content">
+                    <i class="fas fa-chevron-left mr-1"></i> Previous
+                </button>
+                {% endif %}
+                
+                {% if current_page < total_pages %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/sites/{{ site_id }}/materials?page={{ current_page + 1 }}" hx-target="#tab-content">
+                    Next <i class="fas fa-chevron-right ml-1"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>

@@ -1,0 +1,144 @@
+<div class="border-t border-gray-200 pt-6 mt-6">
+    <h3 class="text-lg font-semibold mb-4">{{ site_type }} Specific Details</h3>
+    
+    {% match site_type %}
+        {% when SiteType::PowerPlant %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="energy_output" class="block text-sm font-medium text-gray-700 mb-1">Energy Output (MW) <span class="text-red-500">*</span></label>
+                    <input type="number" id="energy_output" name="energy_output" step="0.01" required
+                           value="{% if let Some(pp) = power_plant %}{{ pp.energy_output }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="energy_source" class="block text-sm font-medium text-gray-700 mb-1">Energy Source <span class="text-red-500">*</span></label>
+                    <input type="text" id="energy_source" name="energy_source" required
+                           value="{% if let Some(pp) = power_plant %}{{ pp.energy_source }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Grid Connected</label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_grid_connected" name="is_grid_connected" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                              {% if let Some(pp) = power_plant %}{% if pp.is_grid_connected %}checked{% endif %}{% endif %}>
+                        <label for="is_grid_connected" class="ml-2 block text-sm text-gray-900">Yes, this plant is connected to the grid</label>
+                    </div>
+                </div>
+            </div>
+        {% when SiteType::Road %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="length" name="length" step="0.01" required
+                           value="{% if let Some(r) = road %}{{ r.length }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="lanes" class="block text-sm font-medium text-gray-700 mb-1">Lanes <span class="text-red-500">*</span></label>
+                    <input type="number" id="lanes" name="lanes" min="1" required
+                           value="{% if let Some(r) = road %}{{ r.lanes }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="surface" class="block text-sm font-medium text-gray-700 mb-1">Surface <span class="text-red-500">*</span></label>
+                    <select id="surface" name="surface" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="" disabled {% if road is not defined %}selected{% endif %}>Select surface type</option>
+                        <option value="asphalt" {% if let Some(r) = road %}{% if r.surface == "asphalt" %}selected{% endif %}{% endif %}>Asphalt</option>
+                        <option value="concrete" {% if let Some(r) = road %}{% if r.surface == "concrete" %}selected{% endif %}{% endif %}>Concrete</option>
+                        <option value="gravel" {% if let Some(r) = road %}{% if r.surface == "gravel" %}selected{% endif %}{% endif %}>Gravel</option>
+                        <option value="cobblestone" {% if let Some(r) = road %}{% if r.surface == "cobblestone" %}selected{% endif %}{% endif %}>Cobblestone</option>
+                        <option value="dirt" {% if let Some(r) = road %}{% if r.surface == "dirt" %}selected{% endif %}{% endif %}>Dirt</option>
+                    </select>
+                </div>
+            </div>
+        {% when SiteType::Housing %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="number_of_floors" class="block text-sm font-medium text-gray-700 mb-1">Floors <span class="text-red-500">*</span></label>
+                    <input type="number" id="number_of_floors" name="number_of_floors" min="1" required
+                           value="{% if let Some(h) = housing %}{{ h.number_of_floors }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="number_of_entrances" class="block text-sm font-medium text-gray-700 mb-1">Entrances <span class="text-red-500">*</span></label>
+                    <input type="number" id="number_of_entrances" name="number_of_entrances" min="1" required
+                           value="{% if let Some(h) = housing %}{{ h.number_of_entrances }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="housing_type" class="block text-sm font-medium text-gray-700 mb-1">Housing Type <span class="text-red-500">*</span></label>
+                    <select id="housing_type" name="housing_type" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="" disabled {% if housing is not defined %}selected{% endif %}>Select housing type</option>
+                        <option value="apartment" {% if let Some(h) = housing %}{% if h.housing_type == "apartment" %}selected{% endif %}{% endif %}>Apartment Building</option>
+                        <option value="single_family" {% if let Some(h) = housing %}{% if h.housing_type == "single_family" %}selected{% endif %}{% endif %}>Single Family Homes</option>
+                        <option value="townhouse" {% if let Some(h) = housing %}{% if h.housing_type == "townhouse" %}selected{% endif %}{% endif %}>Townhouses</option>
+                        <option value="duplex" {% if let Some(h) = housing %}{% if h.housing_type == "duplex" %}selected{% endif %}{% endif %}>Duplexes</option>
+                        <option value="condo" {% if let Some(h) = housing %}{% if h.housing_type == "condo" %}selected{% endif %}{% endif %}>Condominiums</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="energy_efficiency" class="block text-sm font-medium text-gray-700 mb-1">Energy Efficiency <span class="text-red-500">*</span></label>
+                    <select id="energy_efficiency" name="energy_efficiency" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="" disabled {% if housing is not defined %}selected{% endif %}>Select energy efficiency</option>
+                        <option value="high" {% if let Some(h) = housing %}{% if h.energy_efficiency == EnergyEfficiency::High %}selected{% endif %}{% endif %}>High</option>
+                        <option value="medium" {% if let Some(h) = housing %}{% if h.energy_efficiency == EnergyEfficiency::Medium %}selected{% endif %}{% endif %}>Medium</option>
+                        <option value="low" {% if let Some(h) = housing %}{% if h.energy_efficiency == EnergyEfficiency::Low %}selected{% endif %}{% endif %}>Low</option>
+                    </select>
+                </div>
+            </div>
+        {% when SiteType::Bridge %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="length" name="length" step="0.01" required
+                           value="{% if let Some(b) = bridge %}{{ b.length }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="road_material" class="block text-sm font-medium text-gray-700 mb-1">Road Material <span class="text-red-500">*</span></label>
+                    <select id="road_material" name="road_material" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        <option value="" disabled {% if bridge is not defined %}selected{% endif %}>Select road material</option>
+                        <option value="asphalt" {% if let Some(b) = bridge %}{% if b.road_material == "asphalt" %}selected{% endif %}{% endif %}>Asphalt</option>
+                        <option value="concrete" {% if let Some(b) = bridge %}{% if b.road_material == "concrete" %}selected{% endif %}{% endif %}>Concrete</option>
+                        <option value="steel_plate" {% if let Some(b) = bridge %}{% if b.road_material == "steel_plate" %}selected{% endif %}{% endif %}>Steel Plate</option>
+                        <option value="wood" {% if let Some(b) = bridge %}{% if b.road_material == "wood" %}selected{% endif %}{% endif %}>Wood</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="max_load" class="block text-sm font-medium text-gray-700 mb-1">Maximum Load (tons) <span class="text-red-500">*</span></label>
+                    <input type="number" id="max_load" name="max_load" step="0.1" required
+                           value="{% if let Some(b) = bridge %}{{ b.max_load }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+            </div>
+        {% when SiteType::Park %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="area" class="block text-sm font-medium text-gray-700 mb-1">Area (km²) <span class="text-red-500">*</span></label>
+                    <input type="number" id="area" name="area" step="0.01" required
+                           value="{% if let Some(p) = park %}{{ p.area }}{% endif %}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Playground</label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="has_playground" name="has_playground" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                              {% if let Some(p) = park %}{% if p.has_playground %}checked{% endif %}{% endif %}>
+                        <label for="has_playground" class="ml-2 block text-sm text-gray-900">Yes, this park includes playground facilities</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Lighting</label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="has_lighting" name="has_lighting" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                              {% if let Some(p) = park %}{% if p.has_lighting %}checked{% endif %}{% endif %}>
+                        <label for="has_lighting" class="ml-2 block text-sm text-gray-900">Yes, this park includes lighting</label>
+                    </div>
+                </div>
+            </div>
+    {% endmatch %}
+</div>

@@ -1,0 +1,271 @@
+{% extends "general/index.html" %}
+
+{% block title %}{{ site_details.site.name }} - Site Details - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/sites" class="text-amber hover:underline">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Sites
+    </a>
+</div>
+
+<div id="notification-area"></div>
+
+<!-- Site Information Card -->
+<div class="bg-white p-6 rounded-md shadow-md mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold">{{ site_details.site.name }}</h1>
+        <div class="flex space-x-2">
+            <a href="/sites/{{ site_details.site.id }}/edit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+            <button class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                    hx-delete="/api/sites/{{ site_details.site.id }}"
+                    hx-confirm="Are you sure you want to delete this site?"
+                    hx-target="#notification-area">
+                <i class="fas fa-trash mr-1"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Type</p>
+            <p>
+                {% match site_details.site.site_type %}
+                    {% when SiteType::PowerPlant %}
+                        <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full">Power Plant</span>
+                    {% when SiteType::Road %}
+                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full">Road</span>
+                    {% when SiteType::Housing %}
+                        <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Housing</span>
+                    {% when SiteType::Bridge %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Bridge</span>
+                    {% when SiteType::Park %}
+                        <span class="bg-emerald-100 text-emerald-600 py-1 px-2 rounded-full">Park</span>
+                {% endmatch %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Area</p>
+            <p>
+                {% if let Some(area_name) = site_details.site.area_name %}
+                    {{ area_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Department</p>
+            <p>
+                {% if let Some(dept_name) = site_details.site.department_name %}
+                    {{ dept_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Client</p>
+            <p>
+                {% if let Some(client_name) = site_details.site.client_name %}
+                    {{ client_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Risk Level</p>
+            <p>
+                {% match site_details.site.risk_level %}
+                    {% when RiskLevel::High %}
+                        <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full">High</span>
+                    {% when RiskLevel::Medium %}
+                        <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Medium</span>
+                    {% when RiskLevel::Low %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Low</span>
+                {% endmatch %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Location</p>
+            <p>{{ site_details.site.location.latitude }}, {{ site_details.site.location.longitude }}</p>
+        </div>
+        
+        <div class="md:col-span-2">
+            <p class="text-gray-600 font-semibold mb-1">Description</p>
+            <p>
+                {% if let Some(description) = site_details.site.description %}
+                    {{ description }}
+                {% else %}
+                    <span class="text-gray-400">No description</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Type-specific details -->
+    <div class="mt-6 pt-4 border-t border-gray-200">
+        <h3 class="text-lg font-semibold mb-2">Type Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% match site_details.type_details %}
+                {% when SiteTypeDetails::PowerPlant(power_plant) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Output</p>
+                        <p>{{ power_plant.energy_output }} MW</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Source</p>
+                        <p>{{ power_plant.energy_source }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Grid Connected</p>
+                        <p>{% if power_plant.is_grid_connected %}Yes{% else %}No{% endif %}</p>
+                    </div>
+                {% when SiteTypeDetails::Road(road) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Length</p>
+                        <p>{{ road.length }} m</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Lanes</p>
+                        <p>{{ road.lanes }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Surface</p>
+                        <p>{{ road.surface }}</p>
+                    </div>
+                {% when SiteTypeDetails::Housing(housing) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Number of Floors</p>
+                        <p>{{ housing.number_of_floors }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Number of Entrances</p>
+                        <p>{{ housing.number_of_entrances }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Housing Type</p>
+                        <p>{{ housing.housing_type }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Efficiency</p>
+                        <p>{{ housing.energy_efficiency }}</p>
+                    </div>
+                {% when SiteTypeDetails::Bridge(bridge) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Length</p>
+                        <p>{{ bridge.length }} m</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Road Material</p>
+                        <p>{{ bridge.road_material }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Maximum Load</p>
+                        <p>{{ bridge.max_load }} tons</p>
+                    </div>
+                {% when SiteTypeDetails::Park(park) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Area</p>
+                        <p>{{ park.area }} km²</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Playground</p>
+                        <p>{% if park.has_playground %}Yes{% else %}No{% endif %}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Lighting</p>
+                        <p>{% if park.has_lighting %}Yes{% else %}No{% endif %}</p>
+                    </div>
+            {% endmatch %}
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="border-b border-gray-200 mb-6">
+    <ul class="flex flex-wrap -mb-px">
+        <li class="mr-2">
+            <a href="/sites/{{ site_details.site.id }}?tab=schedule" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "schedule" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-calendar mr-1"></i> Construction Schedule
+            </a>
+        </li>
+        <li class="mr-2">
+            <a href="/sites/{{ site_details.site.id }}?tab=materials" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "materials" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-boxes mr-1"></i> Materials
+            </a>
+        </li>
+        <li class="mr-2">
+            <a href="/sites/{{ site_details.site.id }}?tab=equipment" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "equipment" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-tools mr-1"></i> Equipment
+            </a>
+        </li>
+        <li class="mr-2">
+            <a href="/sites/{{ site_details.site.id }}?tab=brigades" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "brigades" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-users mr-1"></i> Brigades
+            </a>
+        </li>
+        <li class="mr-2">
+            <a href="/sites/{{ site_details.site.id }}?tab=reports" 
+               class="inline-block py-2 px-4 border-b-2 {% if active_tab == "reports" %}border-amber text-amber{% else %}border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700{% endif %}">
+                <i class="fas fa-clipboard-list mr-1"></i> Reports
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="bg-white p-6 rounded-md shadow-md">
+    <div id="tab-content" class="overflow-x-auto">
+        {% if active_tab == "schedule" %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/schedule" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% elif active_tab == "materials" %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/materials" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% elif active_tab == "equipment" %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/equipment" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% elif active_tab == "brigades" %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/brigades" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% elif active_tab == "reports" %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/reports" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% else %}
+            <div hx-get="/api/sites/{{ site_details.site.id }}/schedule" hx-trigger="load" hx-indicator="#tab-loading">
+                <div id="tab-loading" class="htmx-indicator flex justify-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

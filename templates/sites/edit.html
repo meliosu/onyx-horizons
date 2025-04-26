@@ -1,0 +1,243 @@
+{% extends "general/index.html" %}
+
+{% block title %}Edit {{ site_details.site.name }} - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/sites/{{ site_details.site.id }}" class="text-amber hover:underline">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Site Details
+    </a>
+</div>
+
+<div class="bg-white p-6 rounded-md shadow-md">
+    <h1 class="text-2xl font-bold mb-6">Edit Site</h1>
+    
+    <div id="notification-area"></div>
+    
+    <form hx-put="/api/sites/{{ site_details.site.id }}" hx-target="#notification-area" hx-indicator="#form-loading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Site Name <span class="text-red-500">*</span></label>
+                <input type="text" id="name" name="name" value="{{ site_details.site.name }}" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+            
+            <div>
+                <label for="site_type" class="block text-sm font-medium text-gray-700 mb-1">Site Type</label>
+                <div class="py-2 px-3 border border-gray-300 rounded-md bg-gray-100 text-gray-700">
+                    {{ site_details.site.site_type }}
+                    <div class="text-xs text-gray-500 mt-1">Site type cannot be changed after creation</div>
+                </div>
+            </div>
+            
+            <div>
+                <label for="area_id" class="block text-sm font-medium text-gray-700 mb-1">Area <span class="text-red-500">*</span></label>
+                <select id="area_id" name="area_id" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="" disabled>Select area</option>
+                    {% for area in areas %}
+                    <option value="{{ area.id }}" {% if site_details.site.area_id == area.id %}selected{% endif %}>
+                        {{ area.name }}
+                        {% if let Some(dept_name) = area.department_name %}({{ dept_name }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client <span class="text-red-500">*</span></label>
+                <select id="client_id" name="client_id" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="" disabled>Select client</option>
+                    {% for client in clients %}
+                    <option value="{{ client.id }}" {% if site_details.site.client_id == client.id %}selected{% endif %}>
+                        {{ client.name }} ({{ client.inn }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="risk_level" class="block text-sm font-medium text-gray-700 mb-1">Risk Level <span class="text-red-500">*</span></label>
+                <select id="risk_level" name="risk_level" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="" disabled>Select risk level</option>
+                    <option value="high" {% if site_details.site.risk_level == RiskLevel::High %}selected{% endif %}>High</option>
+                    <option value="medium" {% if site_details.site.risk_level == RiskLevel::Medium %}selected{% endif %}>Medium</option>
+                    <option value="low" {% if site_details.site.risk_level == RiskLevel::Low %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="description" name="description" rows="3"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">{% if let Some(desc) = site_details.site.description %}{{ desc }}{% endif %}</textarea>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="latitude" class="block text-sm font-medium text-gray-700 mb-1">Latitude <span class="text-red-500">*</span></label>
+                    <input type="number" id="latitude" name="latitude" value="{{ site_details.site.location.latitude }}" step="0.000001" required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                <div>
+                    <label for="longitude" class="block text-sm font-medium text-gray-700 mb-1">Longitude <span class="text-red-500">*</span></label>
+                    <input type="number" id="longitude" name="longitude" value="{{ site_details.site.location.longitude }}" step="0.000001" required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Type-specific fields -->
+        <div class="mt-6 pt-4 border-t border-gray-200 mb-6">
+            <h3 class="text-lg font-semibold mb-3">Type-specific Details</h3>
+            
+            {% match site_details.type_details %}
+                {% when SiteTypeDetails::PowerPlant(power_plant) %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="energy_output" class="block text-sm font-medium text-gray-700 mb-1">Energy Output (MW) <span class="text-red-500">*</span></label>
+                            <input type="number" id="energy_output" name="energy_output" value="{{ power_plant.energy_output }}" step="0.01" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="energy_source" class="block text-sm font-medium text-gray-700 mb-1">Energy Source <span class="text-red-500">*</span></label>
+                            <input type="text" id="energy_source" name="energy_source" value="{{ power_plant.energy_source }}" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Grid Connected</label>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="is_grid_connected" name="is_grid_connected" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                                      {% if power_plant.is_grid_connected %}checked{% endif %}>
+                                <label for="is_grid_connected" class="ml-2 block text-sm text-gray-900">Yes, this plant is connected to the grid</label>
+                            </div>
+                        </div>
+                    </div>
+                {% when SiteTypeDetails::Road(road) %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (m) <span class="text-red-500">*</span></label>
+                            <input type="number" id="length" name="length" value="{{ road.length }}" step="0.01" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="lanes" class="block text-sm font-medium text-gray-700 mb-1">Lanes <span class="text-red-500">*</span></label>
+                            <input type="number" id="lanes" name="lanes" value="{{ road.lanes }}" min="1" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="surface" class="block text-sm font-medium text-gray-700 mb-1">Surface <span class="text-red-500">*</span></label>
+                            <select id="surface" name="surface" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                                <option value="" disabled>Select surface type</option>
+                                <option value="asphalt" {% if road.surface == "asphalt" %}selected{% endif %}>Asphalt</option>
+                                <option value="concrete" {% if road.surface == "concrete" %}selected{% endif %}>Concrete</option>
+                                <option value="gravel" {% if road.surface == "gravel" %}selected{% endif %}>Gravel</option>
+                                <option value="cobblestone" {% if road.surface == "cobblestone" %}selected{% endif %}>Cobblestone</option>
+                                <option value="dirt" {% if road.surface == "dirt" %}selected{% endif %}>Dirt</option>
+                            </select>
+                        </div>
+                    </div>
+                {% when SiteTypeDetails::Housing(housing) %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="number_of_floors" class="block text-sm font-medium text-gray-700 mb-1">Floors <span class="text-red-500">*</span></label>
+                            <input type="number" id="number_of_floors" name="number_of_floors" value="{{ housing.number_of_floors }}" min="1" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="number_of_entrances" class="block text-sm font-medium text-gray-700 mb-1">Entrances <span class="text-red-500">*</span></label>
+                            <input type="number" id="number_of_entrances" name="number_of_entrances" value="{{ housing.number_of_entrances }}" min="1" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="housing_type" class="block text-sm font-medium text-gray-700 mb-1">Housing Type <span class="text-red-500">*</span></label>
+                            <select id="housing_type" name="housing_type" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                                <option value="" disabled>Select housing type</option>
+                                <option value="apartment" {% if housing.housing_type == "apartment" %}selected{% endif %}>Apartment Building</option>
+                                <option value="single_family" {% if housing.housing_type == "single_family" %}selected{% endif %}>Single Family Homes</option>
+                                <option value="townhouse" {% if housing.housing_type == "townhouse" %}selected{% endif %}>Townhouses</option>
+                                <option value="duplex" {% if housing.housing_type == "duplex" %}selected{% endif %}>Duplexes</option>
+                                <option value="condo" {% if housing.housing_type == "condo" %}selected{% endif %}>Condominiums</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="energy_efficiency" class="block text-sm font-medium text-gray-700 mb-1">Energy Efficiency <span class="text-red-500">*</span></label>
+                            <select id="energy_efficiency" name="energy_efficiency" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                                <option value="" disabled>Select energy efficiency</option>
+                                <option value="high" {% if housing.energy_efficiency == EnergyEfficiency::High %}selected{% endif %}>High</option>
+                                <option value="medium" {% if housing.energy_efficiency == EnergyEfficiency::Medium %}selected{% endif %}>Medium</option>
+                                <option value="low" {% if housing.energy_efficiency == EnergyEfficiency::Low %}selected{% endif %}>Low</option>
+                            </select>
+                        </div>
+                    </div>
+                {% when SiteTypeDetails::Bridge(bridge) %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="length" class="block text-sm font-medium text-gray-700 mb-1">Length (m) <span class="text-red-500">*</span></label>
+                            <input type="number" id="length" name="length" value="{{ bridge.length }}" step="0.01" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label for="road_material" class="block text-sm font-medium text-gray-700 mb-1">Road Material <span class="text-red-500">*</span></label>
+                            <select id="road_material" name="road_material" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                                <option value="" disabled>Select road material</option>
+                                <option value="asphalt" {% if bridge.road_material == "asphalt" %}selected{% endif %}>Asphalt</option>
+                                <option value="concrete" {% if bridge.road_material == "concrete" %}selected{% endif %}>Concrete</option>
+                                <option value="steel_plate" {% if bridge.road_material == "steel_plate" %}selected{% endif %}>Steel Plate</option>
+                                <option value="wood" {% if bridge.road_material == "wood" %}selected{% endif %}>Wood</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="max_load" class="block text-sm font-medium text-gray-700 mb-1">Maximum Load (tons) <span class="text-red-500">*</span></label>
+                            <input type="number" id="max_load" name="max_load" value="{{ bridge.max_load }}" step="0.1" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                    </div>
+                {% when SiteTypeDetails::Park(park) %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="area" class="block text-sm font-medium text-gray-700 mb-1">Area (km²) <span class="text-red-500">*</span></label>
+                            <input type="number" id="area" name="area" value="{{ park.area }}" step="0.01" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Playground</label>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="has_playground" name="has_playground" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                                      {% if park.has_playground %}checked{% endif %}>
+                                <label for="has_playground" class="ml-2 block text-sm text-gray-900">Yes, this park includes playground facilities</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Lighting</label>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="has_lighting" name="has_lighting" class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded"
+                                      {% if park.has_lighting %}checked{% endif %}>
+                                <label for="has_lighting" class="ml-2 block text-sm text-gray-900">Yes, this park includes lighting</label>
+                            </div>
+                        </div>
+                    </div>
+            {% endmatch %}
+        </div>
+        
+        <div class="flex justify-end">
+            <button type="button" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                    onclick="window.location.href='/sites/{{ site_details.site.id }}'">
+                Cancel
+            </button>
+            <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                Save Changes
+            </button>
+        </div>
+        
+        <div id="form-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+        </div>
+    </form>
+</div>
+{% endblock %}

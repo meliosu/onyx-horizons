@@ -1,0 +1,142 @@
+{% extends "general/index.html" %}
+
+{% block title %}Sites - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Site Management</h1>
+    <a href="/sites/new" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+        <i class="fas fa-plus-circle mr-2"></i> New Site
+    </a>
+</div>
+
+<div class="bg-white p-6 rounded-md shadow-md mb-6">
+    <!-- Advanced Filter Form -->
+    <form class="mb-6" hx-get="/api/sites" hx-target="#sites-table-body" hx-trigger="submit" hx-indicator="#loading">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Site Type</label>
+                <select name="site_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                        hx-get="/api/sites/type-fields" hx-target="#type-specific-filters" hx-swap="innerHTML">
+                    <option value="">All Types</option>
+                    <option value="power_plant" {% if let Some(f) = filter %}{% if let Some(t) = f.site_type %}{% if *t == SiteType::PowerPlant %}selected{% endif %}{% endif %}{% endif %}>Power Plant</option>
+                    <option value="road" {% if let Some(f) = filter %}{% if let Some(t) = f.site_type %}{% if *t == SiteType::Road %}selected{% endif %}{% endif %}{% endif %}>Road</option>
+                    <option value="housing" {% if let Some(f) = filter %}{% if let Some(t) = f.site_type %}{% if *t == SiteType::Housing %}selected{% endif %}{% endif %}{% endif %}>Housing</option>
+                    <option value="bridge" {% if let Some(f) = filter %}{% if let Some(t) = f.site_type %}{% if *t == SiteType::Bridge %}selected{% endif %}{% endif %}{% endif %}>Bridge</option>
+                    <option value="park" {% if let Some(f) = filter %}{% if let Some(t) = f.site_type %}{% if *t == SiteType::Park %}selected{% endif %}{% endif %}{% endif %}>Park</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select name="department_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                        hx-get="/api/selectors/areas-by-department" hx-target="select[name=area_id]" hx-trigger="change">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if let Some(f) = filter %}{% if let Some(id) = f.department_id %}{% if *id == dept.id %}selected{% endif %}{% endif %}{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                <select name="area_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">All Areas</option>
+                    {% for area in areas %}
+                    <option value="{{ area.id }}" {% if let Some(f) = filter %}{% if let Some(id) = f.area_id %}{% if *id == area.id %}selected{% endif %}{% endif %}{% endif %}>
+                        {{ area.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                <select name="client_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">All Clients</option>
+                    {% for client in clients %}
+                    <option value="{{ client.id }}" {% if let Some(f) = filter %}{% if let Some(id) = f.client_id %}{% if *id == client.id %}selected{% endif %}{% endif %}{% endif %}>
+                        {{ client.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Risk Level</label>
+                <select name="risk_level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">All Risk Levels</option>
+                    <option value="high" {% if let Some(f) = filter %}{% if let Some(r) = f.risk_level %}{% if *r == RiskLevel::High %}selected{% endif %}{% endif %}{% endif %}>High</option>
+                    <option value="medium" {% if let Some(f) = filter %}{% if let Some(r) = f.risk_level %}{% if *r == RiskLevel::Medium %}selected{% endif %}{% endif %}{% endif %}>Medium</option>
+                    <option value="low" {% if let Some(f) = filter %}{% if let Some(r) = f.risk_level %}{% if *r == RiskLevel::Low %}selected{% endif %}{% endif %}{% endif %}>Low</option>
+                </select>
+            </div>
+            
+            <!-- Additional type-specific filters will be loaded here -->
+            <div id="type-specific-filters"></div>
+            
+            <div class="md:col-span-3 flex items-center justify-end">
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600 mr-2">
+                    <i class="fas fa-filter mr-1"></i> Filter
+                </button>
+                <button type="reset" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300" 
+                        hx-get="/api/sites" hx-target="#sites-table-body">
+                    <i class="fas fa-times mr-1"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Sites Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Site Name</th>
+                    <th class="py-3 px-6 text-center">Type</th>
+                    <th class="py-3 px-6 text-left">Area/Department</th>
+                    <th class="py-3 px-6 text-left">Client</th>
+                    <th class="py-3 px-6 text-center">Risk Level</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sites-table-body" class="text-gray-600 text-sm">
+                {% include "sites/components/site_rows.html" %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/sites?page={{ current_page - 1 }}" hx-target="#sites-table-body">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    hx-get="/api/sites?page={{ current_page + 1 }}" hx-target="#sites-table-body">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" class="htmx-indicator flex justify-center py-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+    </div>
+</div>
+
+<!-- Notification area for HTMX responses -->
+<div id="notification-area"></div>
+{% endblock %}

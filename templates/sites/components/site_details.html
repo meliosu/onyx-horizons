@@ -1,0 +1,167 @@
+<div class="p-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Type</p>
+            <p>
+                {% match site_details.site.site_type %}
+                    {% when SiteType::PowerPlant %}
+                        <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full">Power Plant</span>
+                    {% when SiteType::Road %}
+                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full">Road</span>
+                    {% when SiteType::Housing %}
+                        <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Housing</span>
+                    {% when SiteType::Bridge %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Bridge</span>
+                    {% when SiteType::Park %}
+                        <span class="bg-emerald-100 text-emerald-600 py-1 px-2 rounded-full">Park</span>
+                {% endmatch %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Area</p>
+            <p>
+                {% if let Some(area_name) = site_details.site.area_name %}
+                    {{ area_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Department</p>
+            <p>
+                {% if let Some(dept_name) = site_details.site.department_name %}
+                    {{ dept_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Client</p>
+            <p>
+                {% if let Some(client_name) = site_details.site.client_name %}
+                    {{ client_name }}
+                {% else %}
+                    <span class="text-gray-400">Not specified</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Risk Level</p>
+            <p>
+                {% match site_details.site.risk_level %}
+                    {% when RiskLevel::High %}
+                        <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full">High</span>
+                    {% when RiskLevel::Medium %}
+                        <span class="bg-amber bg-opacity-20 text-amber py-1 px-2 rounded-full">Medium</span>
+                    {% when RiskLevel::Low %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full">Low</span>
+                {% endmatch %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-gray-600 font-semibold mb-1">Location</p>
+            <p>{{ site_details.site.location.latitude }}, {{ site_details.site.location.longitude }}</p>
+        </div>
+        
+        <div class="md:col-span-2">
+            <p class="text-gray-600 font-semibold mb-1">Description</p>
+            <p>
+                {% if let Some(description) = site_details.site.description %}
+                    {{ description }}
+                {% else %}
+                    <span class="text-gray-400">No description</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div class="mt-4 pt-4 border-t border-gray-200">
+        <h3 class="text-lg font-semibold mb-2">Type Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% match site_details.type_details %}
+                {% when SiteTypeDetails::PowerPlant(power_plant) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Output</p>
+                        <p>{{ power_plant.energy_output }} MW</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Source</p>
+                        <p>{{ power_plant.energy_source }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Grid Connected</p>
+                        <p>{% if power_plant.is_grid_connected %}Yes{% else %}No{% endif %}</p>
+                    </div>
+                {% when SiteTypeDetails::Road(road) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Length</p>
+                        <p>{{ road.length }} m</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Lanes</p>
+                        <p>{{ road.lanes }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Surface</p>
+                        <p>{{ road.surface }}</p>
+                    </div>
+                {% when SiteTypeDetails::Housing(housing) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Number of Floors</p>
+                        <p>{{ housing.number_of_floors }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Number of Entrances</p>
+                        <p>{{ housing.number_of_entrances }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Housing Type</p>
+                        <p>{{ housing.housing_type }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Energy Efficiency</p>
+                        <p>
+                            {% match housing.energy_efficiency %}
+                                {% when EnergyEfficiency::High %}High
+                                {% when EnergyEfficiency::Medium %}Medium
+                                {% when EnergyEfficiency::Low %}Low
+                            {% endmatch %}
+                        </p>
+                    </div>
+                {% when SiteTypeDetails::Bridge(bridge) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Length</p>
+                        <p>{{ bridge.length }} m</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Road Material</p>
+                        <p>{{ bridge.road_material }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Maximum Load</p>
+                        <p>{{ bridge.max_load }} tons</p>
+                    </div>
+                {% when SiteTypeDetails::Park(park) %}
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Area</p>
+                        <p>{{ park.area }} km²</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Playground</p>
+                        <p>{% if park.has_playground %}Yes{% else %}No{% endif %}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 font-semibold mb-1">Lighting</p>
+                        <p>{% if park.has_lighting %}Yes{% else %}No{% endif %}</p>
+                    </div>
+            {% endmatch %}
+        </div>
+    </div>
+</div>
