@@ -5,6 +5,7 @@ use axum::{
     Router,
 };
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 
@@ -45,11 +46,137 @@ pub struct ValidationRequest {
     pub fields: std::collections::HashMap<String, String>,
 }
 
+// Template types for selectors
+#[derive(Template)]
+#[template(path = "helpers/selectors/department_selector.html")]
+pub struct DepartmentSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/area_selector.html")]
+pub struct AreaSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/areas_by_department_selector.html")]
+pub struct AreasByDepartmentSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub department_id: i32,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/client_selector.html")]
+pub struct ClientSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/worker_selector.html")]
+pub struct WorkerSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+    pub show_profession: bool,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/brigade_selector.html")]
+pub struct BrigadeSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/site_selector.html")]
+pub struct SiteSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/selectors/material_selector.html")]
+pub struct MaterialSelectorTemplate {
+    pub options: Vec<SelectOption>,
+    pub name: String,
+    pub id: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub required: bool,
+    pub selected_id: Option<i32>,
+    pub search_term: Option<String>,
+    pub show_units: bool,
+}
+
+// Template types for validation
+#[derive(Template)]
+#[template(path = "helpers/validation/validation_message.html")]
+pub struct ValidationMessageTemplate {
+    pub field: String,
+    pub is_valid: bool,
+    pub message: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "helpers/validation/form_validation.html")]
+pub struct FormValidationTemplate {
+    pub is_valid: bool,
+    pub messages: Vec<ValidationMessage>,
+    pub form_type: String,
+}
+
 // Selectors for departments
 async fn department_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered DepartmentSelectorTemplate
     // Get department selector options
     Html(String::new())
 }
@@ -59,6 +186,7 @@ async fn area_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered AreaSelectorTemplate
     // Get area selector options
     Html(String::new())
 }
@@ -69,6 +197,7 @@ async fn areas_by_department_selector(
     Path(department_id): Path<i32>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered AreasByDepartmentSelectorTemplate
     // Get areas filtered by department
     Html(String::new())
 }
@@ -78,6 +207,7 @@ async fn client_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered ClientSelectorTemplate
     // Get client selector options
     Html(String::new())
 }
@@ -87,6 +217,7 @@ async fn worker_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered WorkerSelectorTemplate
     // Get worker selector options
     Html(String::new())
 }
@@ -96,6 +227,7 @@ async fn brigade_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered BrigadeSelectorTemplate
     // Get brigade selector options
     Html(String::new())
 }
@@ -105,6 +237,7 @@ async fn site_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered SiteSelectorTemplate
     // Get site selector options
     Html(String::new())
 }
@@ -114,6 +247,7 @@ async fn material_selector(
     State(database): State<Database>,
     Query(filter): Query<SelectorFilter>,
 ) -> Html<String> {
+    // Should return rendered MaterialSelectorTemplate
     // Get material selector options
     Html(String::new())
 }
@@ -124,6 +258,7 @@ async fn validate_form(
     State(database): State<Database>,
     axum::Json(validation_request): axum::Json<ValidationRequest>,
 ) -> Html<String> {
+    // Should return rendered FormValidationTemplate
     // Validate form fields based on form_type
     Html(String::new())
 }
