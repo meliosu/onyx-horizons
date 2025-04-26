@@ -1,0 +1,139 @@
+{% extends "general/index.html" %}
+
+{% block title %}Clients - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-onyx">Clients</h1>
+        <a href="/clients/new" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+            <i class="fas fa-plus-circle mr-1"></i> Add Client
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-md shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Filter Options</h2>
+        <form hx-get="/api/clients" hx-target="#clients-table-body" hx-indicator="#table-loading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="name" name="name" 
+                       value="{% if let Some(filter) = filter %}{% if let Some(name) = filter.name %}{{ name }}{% endif %}{% endif %}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+            <div>
+                <label for="inn" class="block text-sm font-medium text-gray-700 mb-1">INN</label>
+                <input type="text" id="inn" name="inn" 
+                       value="{% if let Some(filter) = filter %}{% if let Some(inn) = filter.inn %}{{ inn }}{% endif %}{% endif %}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+            <div>
+                <label class="inline-flex items-center mt-4">
+                    <input type="checkbox" id="is_vip" name="is_vip" value="true"
+                           {% if let Some(filter) = filter %}{% if let Some(is_vip) = filter.is_vip %}{% if is_vip %}checked{% endif %}{% endif %}{% endif %}
+                           class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                    <span class="ml-2 text-gray-700">VIP Clients Only</span>
+                </label>
+            </div>
+            <div class="md:col-span-3 flex justify-end">
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    <i class="fas fa-filter mr-1"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Name</th>
+                        <th class="py-3 px-6 text-left">INN</th>
+                        <th class="py-3 px-6 text-left">Contact Person</th>
+                        <th class="py-3 px-6 text-center">VIP Status</th>
+                        <th class="py-3 px-6 text-center">Sites</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clients-table-body">
+                    {% if clients.is_empty() %}
+                    <tr>
+                        <td colspan="6" class="py-6 px-6 text-center text-gray-500">No clients found matching your criteria</td>
+                    </tr>
+                    {% else %}
+                    {% for client in clients %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-6 text-left">{{ client.name }}</td>
+                        <td class="py-3 px-6 text-left">{{ client.inn }}</td>
+                        <td class="py-3 px-6 text-left">
+                            {{ client.contact_person_name }}
+                            <div class="text-xs text-gray-500">{{ client.contact_person_email }}</div>
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if client.is_vip %}
+                                <span class="bg-amber text-onyx py-1 px-2 rounded-full text-xs">VIP</span>
+                            {% else %}
+                                <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">Standard</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(sites_count) = client.sites_count %}
+                                {{ sites_count }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex justify-center space-x-2">
+                                <a href="/clients/{{ client.id }}" class="text-blue-500 hover:text-blue-700" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/clients/{{ client.id }}/edit" class="text-amber hover:text-yellow-600" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="text-red-500 hover:text-red-700" title="Delete"
+                                        hx-delete="/api/clients/{{ client.id }}" 
+                                        hx-confirm="Are you sure you want to delete this client? This action cannot be undone."
+                                        hx-target="#notification-area">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="table-loading" class="htmx-indicator flex justify-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+        </div>
+        
+        {% if total_pages > 1 %}
+        <div class="flex justify-between items-center p-4 border-t border-gray-200">
+            <div class="text-sm text-gray-500">
+                Showing page {{ current_page }} of {{ total_pages }}
+            </div>
+            <div class="flex space-x-2">
+                {% if current_page > 1 %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/clients?page={{ current_page - 1 }}" hx-target="#clients-table-body">
+                    <i class="fas fa-chevron-left mr-1"></i> Previous
+                </button>
+                {% endif %}
+                
+                {% if current_page < total_pages %}
+                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        hx-get="/api/clients?page={{ current_page + 1 }}" hx-target="#clients-table-body">
+                    Next <i class="fas fa-chevron-right ml-1"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div id="notification-area" class="mt-4"></div>
+</div>
+{% endblock %}

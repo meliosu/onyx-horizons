@@ -1,0 +1,75 @@
+{% extends "general/index.html" %}
+
+{% block title %}Edit {{ client.name }} - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="/clients/{{ client.id }}" class="text-amber hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Client Details
+        </a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">Edit Client</h1>
+        
+        <div id="notification-area"></div>
+        
+        <form hx-put="/api/clients/{{ client.id }}" hx-target="#notification-area" hx-indicator="#form-loading">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Company Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" value="{{ client.name }}" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div>
+                    <label for="inn" class="block text-sm font-medium text-gray-700 mb-1">INN <span class="text-red-500">*</span></label>
+                    <input type="text" id="inn" name="inn" value="{{ client.inn }}" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber"
+                        hx-get="/api/clients/check-inn/" hx-target="#inn-validation" hx-trigger="keyup changed delay:500ms">
+                    <div id="inn-validation" class="text-sm mt-1"></div>
+                </div>
+                
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Company Address <span class="text-red-500">*</span></label>
+                    <input type="text" id="address" name="address" value="{{ client.address }}" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div>
+                    <label for="contact_person_name" class="block text-sm font-medium text-gray-700 mb-1">Contact Person Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="contact_person_name" name="contact_person_name" value="{{ client.contact_person_name }}" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div>
+                    <label for="contact_person_email" class="block text-sm font-medium text-gray-700 mb-1">Contact Person Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="contact_person_email" name="contact_person_email" value="{{ client.contact_person_email }}" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="is_vip" name="is_vip" value="true" {% if client.is_vip %}checked{% endif %}
+                        class="h-4 w-4 text-amber focus:ring-amber border-gray-300 rounded">
+                    <label for="is_vip" class="ml-2 block text-sm text-gray-900">VIP Client</label>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="button" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                        onclick="window.location.href='/clients/{{ client.id }}'">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                    <i class="fas fa-save mr-1"></i> Save Changes
+                </button>
+            </div>
+            
+            <div id="form-loading" class="htmx-indicator flex justify-center py-4 mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
