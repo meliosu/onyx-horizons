@@ -1,0 +1,138 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Brigade Workers</h3>
+        <button class="bg-amber text-onyx py-1 px-3 rounded-md hover:bg-yellow-600 text-sm"
+                hx-get="#" 
+                hx-target="#add-worker-form-container"
+                onclick="document.getElementById('add-worker-form-container').classList.toggle('hidden')">
+            <i class="fas fa-plus-circle mr-1"></i> Add Worker
+        </button>
+    </div>
+    
+    <!-- Add Worker Form -->
+    <div id="add-worker-form-container" class="mb-4 hidden">
+        <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <h4 class="font-medium mb-3">Add Worker to Brigade</h4>
+            <form hx-post="/api/brigades/{{ brigade_id }}/workers" hx-target="#tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="worker_id" class="block text-sm font-medium text-gray-700 mb-1">Worker <span class="text-red-500">*</span></label>
+                        <select id="worker_id" name="worker_id" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                            <option value="">Select a worker</option>
+                            <!-- Worker options would be populated from a server call in a real implementation -->
+                            <option value="101">John Smith (Electrician)</option>
+                            <option value="102">Sarah Johnson (Welder)</option>
+                            <option value="103">Mike Davis (Plumber)</option>
+                            <!-- Additional options... -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mt-4">
+                    <button type="button" class="bg-gray-200 text-gray-700 py-1 px-3 rounded-md hover:bg-gray-300 mr-2 text-sm"
+                            onclick="document.getElementById('add-worker-form-container').classList.add('hidden')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-amber text-onyx py-1 px-3 rounded-md hover:bg-yellow-600 text-sm">
+                        Add to Brigade
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if workers.is_empty() %}
+    <div class="text-center py-6 text-gray-500">
+        <p>This brigade has no assigned workers.</p>
+        <p class="text-sm mt-2">Use the "Add Worker" button to assign workers to this brigade.</p>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Name</th>
+                    <th class="py-3 px-6 text-center">Profession</th>
+                    <th class="py-3 px-6 text-center">Is Brigadier</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for worker in workers %}
+                <tr class="hover:bg-gray-50 {% if worker.is_brigadier %}bg-amber-50{% endif %}">
+                    <td class="py-3 px-6 text-left">
+                        <div class="flex items-center">
+                            {% if let Some(photo) = worker.worker.employee.photo %}
+                            <img class="h-8 w-8 rounded-full object-cover mr-3" src="{{ photo }}" alt="{{ worker.worker.employee.first_name }} {{ worker.worker.employee.last_name }}">
+                            {% else %}
+                            <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 mr-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <span class="font-medium">{{ worker.worker.employee.first_name }} {{ worker.worker.employee.last_name }}</span>
+                                {% if worker.is_brigadier %}
+                                <span class="ml-2 bg-amber text-xs text-onyx py-1 px-2 rounded-full">Brigadier</span>
+                                {% endif %}
+                                <div class="text-xs text-gray-500">{{ worker.worker.employee.phone_number }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        {{ worker.worker.profession }}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        {% if worker.is_brigadier %}
+                        <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Yes</span>
+                        {% else %}
+                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex justify-center space-x-2">
+                            <a href="/personnel/workers/{{ worker.worker.employee.id }}" class="text-blue-500 hover:text-blue-700" title="View Worker Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if !worker.is_brigadier %}
+                            <button class="text-red-500 hover:text-red-700" title="Remove from Brigade"
+                                    hx-delete="/api/brigades/{{ brigade_id }}/workers/{{ worker.worker_id }}" 
+                                    hx-confirm="Are you sure you want to remove this worker from the brigade?"
+                                    hx-target="#tab-content">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/brigades/{{ brigade_id }}/workers?page={{ current_page - 1 }}" 
+                    hx-target="#tab-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/brigades/{{ brigade_id }}/workers?page={{ current_page + 1 }}" 
+                    hx-target="#tab-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

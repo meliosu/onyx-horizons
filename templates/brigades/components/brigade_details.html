@@ -1,0 +1,66 @@
+<div class="p-6">
+    <div class="space-y-4">
+        <div>
+            <p class="text-sm text-gray-500">Brigade ID</p>
+            <p class="font-medium">#{{ brigade.id }}</p>
+        </div>
+        
+        <div>
+            <p class="text-sm text-gray-500">Brigadier</p>
+            <p>
+                {% if let Some(brigadier_name) = brigade.brigadier_name %}
+                    {{ brigadier_name }}
+                {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-sm text-gray-500">Workers Count</p>
+            <p>
+                {% if let Some(workers_count) = brigade.workers_count %}
+                    {{ workers_count }} workers
+                {% else %}
+                    0 workers
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-sm text-gray-500">Current Assignment</p>
+            <p>
+                {% if let Some(current_site_name) = brigade.current_site_name %}
+                    {% if let Some(site_id) = brigade.current_site_id %}
+                    <a href="/sites/{{ site_id }}" class="text-amber hover:underline">{{ current_site_name }}</a>
+                    {% else %}
+                    {{ current_site_name }}
+                    {% endif %}
+                {% else %}
+                    <span class="text-gray-400">Not currently assigned</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <p class="text-sm text-gray-500">Task Status</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+                {% if let Some(active_tasks_count) = brigade.active_tasks_count %}
+                    {% if *active_tasks_count > 0 %}
+                    <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">{{ active_tasks_count }} active tasks</span>
+                    {% endif %}
+                {% endif %}
+                
+                {% if let Some(completed_tasks_count) = brigade.completed_tasks_count %}
+                    {% if *completed_tasks_count > 0 %}
+                    <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">{{ completed_tasks_count }} completed tasks</span>
+                    {% endif %}
+                {% endif %}
+                
+                {% if (brigade.active_tasks_count.unwrap_or(0) + brigade.completed_tasks_count.unwrap_or(0)) == 0 %}
+                    <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">No tasks</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

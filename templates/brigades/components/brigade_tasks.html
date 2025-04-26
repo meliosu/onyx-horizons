@@ -1,0 +1,101 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Tasks Performed by Brigade</h3>
+    </div>
+    
+    {% if tasks.is_empty() %}
+    <div class="text-center py-6 text-gray-500">
+        <p>No tasks have been assigned to this brigade.</p>
+        <p class="text-sm mt-2">Tasks are assigned to brigades from the site management section.</p>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Task Name</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-center">Start Date</th>
+                    <th class="py-3 px-6 text-center">End Date</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-6 text-left font-medium">
+                        {{ task.name }}
+                        {% if let Some(description) = &task.description %}
+                        <div class="text-xs text-gray-500">{{ description }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-left">
+                        {% if let Some(site_name) = &task.site_name %}
+                        <a href="/sites/{{ task.site_id }}" class="text-amber hover:underline">{{ site_name }}</a>
+                        {% else %}
+                        Site #{{ task.site_id }}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">{{ task.period_start }}</td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(actual_period_end) = &task.actual_period_end %}
+                            {{ actual_period_end }}
+                        {% else %}
+                            {{ task.expected_period_end }} <span class="text-gray-400">(expected)</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        {% if task.is_completed %}
+                            <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Completed</span>
+                        {% else %}
+                            {% if let Some(is_overdue) = task.is_overdue %}
+                                {% if is_overdue %}
+                                    <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">Overdue</span>
+                                {% else %}
+                                    <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">In Progress</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="bg-yellow-100 text-yellow-600 py-1 px-2 rounded-full text-xs">Planned</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex justify-center space-x-2">
+                            <a href="/tasks/{{ task.id }}" class="text-blue-500 hover:text-blue-700" title="View Task Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/brigades/{{ brigade_id }}/tasks?page={{ current_page - 1 }}" 
+                    hx-target="#tab-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/brigades/{{ brigade_id }}/tasks?page={{ current_page + 1 }}" 
+                    hx-target="#tab-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

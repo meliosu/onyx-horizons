@@ -1,0 +1,6 @@
+<option value="">Select a brigadier</option>
+{% for brigadier in brigadiers %}
+<option value="{{ brigadier.id }}" {% if let Some(id) = selected_brigadier_id %}{% if *id == brigadier.id %}selected{% endif %}{% endif %}>
+    {{ brigadier.name }} ({{ brigadier.profession }})
+</option>
+{% endfor %}
