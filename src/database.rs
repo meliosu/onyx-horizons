@@ -4,7 +4,7 @@ use sqlx::{migrate::MigrateDatabase, PgPool};
 
 #[derive(Clone)]
 pub(crate) struct Database {
-    pool: Arc<PgPool>,
+    pub pool: Arc<PgPool>,
 }
 
 impl Database {
