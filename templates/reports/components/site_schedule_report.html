@@ -1,0 +1,144 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Schedule Report: {{ site_name }}</h2>
+        <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+                {% if let Some(start) = start_date %}
+                    {% if let Some(end) = end_date %}
+                        {{ start }} to {{ end }}
+                    {% else %}
+                        From {{ start }}
+                    {% endif %}
+                {% elif let Some(end) = end_date %}
+                    Until {{ end }}
+                {% else %}
+                    All time
+                {% endif %}
+            </div>
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Timeline visualization -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md overflow-x-auto">
+        <div class="min-w-[800px]">
+            <div class="flex items-center">
+                <div class="w-[150px] font-medium text-sm">Task Name</div>
+                <div class="flex-1 relative h-12">
+                    {% for item in items %}
+                        <div class="absolute h-8 rounded-md text-xs flex items-center justify-center text-center px-2 whitespace-nowrap overflow-hidden"
+                             style="left: 0%; 
+                                    width: 80%; 
+                                    top: {{ task_position(*loop.index0) }};
+                                    {% if item.is_completed %}background-color: #4CAF50; color: white;
+                                    {% elif item.is_on_schedule %}background-color: #2196F3; color: white;
+                                    {% else %}background-color: #F44336; color: white;{% endif %}">
+                            {{ item.task_name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Task</th>
+                    <th class="py-3 px-6 text-left">Brigade</th>
+                    <th class="py-3 px-6 text-center">Start Date</th>
+                    <th class="py-3 px-6 text-center">Expected End Date</th>
+                    <th class="py-3 px-6 text-center">Actual End Date</th>
+                    <th class="py-3 px-6 text-center">Progress</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="7" class="py-6 px-6 text-center text-gray-500">No schedule data available for this site in the selected time period</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 {% if !item.is_on_schedule && !item.is_completed %}bg-red-50{% endif %}">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/tasks/{{ item.task_id }}" class="text-amber hover:underline">{{ item.task_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-left">
+                            {% if let Some(name) = &item.brigade_name %}
+                                {{ name }}
+                            {% else %}
+                                <span class="text-gray-400">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.period_start }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.expected_period_end }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(date) = item.actual_period_end %}
+                                {{ date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(percentage) = item.progress_percentage %}
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="{% if item.is_completed %}bg-green-500{% elif item.is_on_schedule %}bg-amber{% else %}bg-red-500{% endif %} h-2.5 rounded-full" 
+                                     style="width: {{ percentage }}%"></div>
+                            </div>
+                            <span class="text-xs">{{ percentage }}%</span>
+                            {% else %}
+                            <span class="text-gray-400">Not tracked</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if item.is_completed %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Completed</span>
+                            {% elif item.is_on_schedule %}
+                                <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">On Schedule</span>
+                            {% else %}
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">Behind Schedule</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/sites/{{ site_id }}/schedule?page={{ current_page - 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/sites/{{ site_id }}/schedule?page={{ current_page + 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>

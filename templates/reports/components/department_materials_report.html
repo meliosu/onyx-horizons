@@ -1,0 +1,133 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Materials Report: {{ department_name }}</h2>
+        <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+                {% if let Some(start) = start_date %}
+                    {% if let Some(end) = end_date %}
+                        {{ start }} to {{ end }}
+                    {% else %}
+                        From {{ start }}
+                    {% endif %}
+                {% elif let Some(end) = end_date %}
+                    Until {{ end }}
+                {% else %}
+                    All time
+                {% endif %}
+            </div>
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="bg-gray-50 p-4 rounded-md mb-6">
+        <h3 class="text-lg font-medium mb-3">Materials Usage Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Materials Cost</div>
+                <div class="text-xl font-bold">${{ total_materials_cost }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Materials with Excess</div>
+                <div class="text-xl font-bold">{{ materials_with_excess_count }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Sites Using Materials</div>
+                <div class="text-xl font-bold">{{ sites_count_total }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Material</th>
+                    <th class="py-3 px-6 text-center">Units</th>
+                    <th class="py-3 px-6 text-center">Expected Amount</th>
+                    <th class="py-3 px-6 text-center">Actual Amount</th>
+                    <th class="py-3 px-6 text-center">Difference</th>
+                    <th class="py-3 px-6 text-right">Total Cost</th>
+                    <th class="py-3 px-6 text-center">Sites</th>
+                    <th class="py-3 px-6 text-center">Tasks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="8" class="py-6 px-6 text-center text-gray-500">No materials found for this department in the selected time period</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 {% if let Some(diff) = item.difference_percentage %}{% if *diff > 5.0 %}bg-red-50{% endif %}{% if *diff < -5.0 %}bg-green-50{% endif %}{% endif %}">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/materials/{{ item.material_id }}" class="text-amber hover:underline">{{ item.material_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.units }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.total_expected_amount }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(amount) = item.total_actual_amount %}
+                                {{ amount }}
+                            {% else %}
+                                <span class="text-gray-400">Not recorded</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(diff) = item.difference_amount %}
+                                {% if let Some(percent) = item.difference_percentage %}
+                                    {% if *diff > 0.0f64 %}
+                                        <span class="text-red-600">+{{ diff }} ({{ percent }}%)</span>
+                                    {% elif *diff < 0.0f64 %}
+                                        <span class="text-green-600">{{ diff }} ({{ percent }}%)</span>
+                                    {% else %}
+                                        <span class="text-gray-600">0 (0%)</span>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-right font-medium">${{ item.total_cost }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.sites_count }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.tasks_count }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/departments/{{ department_id }}/materials?page={{ current_page - 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/departments/{{ department_id }}/materials?page={{ current_page + 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>

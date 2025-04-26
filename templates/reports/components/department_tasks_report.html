@@ -1,0 +1,119 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Tasks Report: {{ department_name }}</h2>
+        <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+                {% if let Some(start) = start_date %}
+                    {% if let Some(end) = end_date %}
+                        {{ start }} to {{ end }}
+                    {% else %}
+                        From {{ start }}
+                    {% endif %}
+                {% elif let Some(end) = end_date %}
+                    Until {{ end }}
+                {% else %}
+                    All time
+                {% endif %}
+            </div>
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Task</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-left">Brigade</th>
+                    <th class="py-3 px-6 text-center">Start Date</th>
+                    <th class="py-3 px-6 text-center">Expected End</th>
+                    <th class="py-3 px-6 text-center">Actual End</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                    <th class="py-3 px-6 text-right">Materials Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="8" class="py-6 px-6 text-center text-gray-500">No tasks found for this department in the selected time period</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 {% if item.is_overdue %}bg-red-50{% endif %} {% if item.is_completed %}bg-green-50{% endif %}">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/tasks/{{ item.task_id }}" class="text-amber hover:underline">{{ item.task_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-left">{{ item.site_name }}</td>
+                        <td class="py-3 px-6 text-left">
+                            {% if let Some(name) = &item.brigade_name %}
+                                {{ name }}
+                            {% else %}
+                                <span class="text-gray-400">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.period_start }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.expected_period_end }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(date) = item.actual_period_end %}
+                                {{ date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if item.is_completed %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Completed</span>
+                            {% elif item.is_overdue %}
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">
+                                    Overdue
+                                    {% if let Some(days) = item.days_overdue %}
+                                        ({{ days }} days)
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <span class="bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">In Progress</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-right font-medium">${{ item.materials_cost }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/departments/{{ department_id }}/tasks?page={{ current_page - 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/departments/{{ department_id }}/tasks?page={{ current_page + 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated {{ current_timestamp }}
+        </div>
+    </div>
+</div>

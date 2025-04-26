@@ -1,0 +1,118 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Overdue Tasks Report</h2>
+        <div class="flex items-center space-x-4">
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="bg-gray-50 p-4 rounded-md mb-6">
+        <h3 class="text-lg font-medium mb-3">Overdue Tasks Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Overdue Tasks</div>
+                <div class="text-xl font-bold text-red-600">{{ total_overdue_tasks }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Average Days Overdue</div>
+                <div class="text-xl font-bold text-red-600">{{ average_days_overdue }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Tasks Without Brigade</div>
+                <div class="text-xl font-bold text-red-600">{{ tasks_without_brigade }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Task Name</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-center">Type</th>
+                    <th class="py-3 px-6 text-left">Area</th>
+                    <th class="py-3 px-6 text-left">Department</th>
+                    <th class="py-3 px-6 text-left">Brigade</th>
+                    <th class="py-3 px-6 text-center">Expected End Date</th>
+                    <th class="py-3 px-6 text-center">Days Overdue</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="9" class="py-6 px-6 text-center text-gray-500">No overdue tasks found</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 bg-red-50">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/tasks/{{ item.task_id }}" class="text-amber hover:underline">{{ item.task_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-left">{{ item.site_name }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.site_type }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.area_name }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.department_name }}</td>
+                        <td class="py-3 px-6 text-left">
+                            {% if let Some(name) = &item.brigade_name %}
+                                {{ name }}
+                            {% else %}
+                                <span class="text-red-500">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.expected_period_end }}</td>
+                        <td class="py-3 px-6 text-center font-medium text-red-600">{{ item.days_overdue }}</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex flex-col items-center space-y-1">
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">Overdue</span>
+                                {% if !item.materials_allocated %}
+                                    <span class="bg-orange-100 text-orange-600 py-1 px-2 rounded-full text-xs">No Materials</span>
+                                {% endif %}
+                                {% if !item.brigade_assigned %}
+                                    <span class="bg-orange-100 text-orange-600 py-1 px-2 rounded-full text-xs">No Brigade</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/tasks/overdue?page={{ current_page - 1 }}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/tasks/overdue?page={{ current_page + 1 }}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>

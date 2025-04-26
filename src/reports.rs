@@ -6,6 +6,7 @@ use axum::{
 };
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
@@ -198,11 +199,328 @@ pub struct MaterialExcessReportItem {
     pub cost_impact: f64,
 }
 
+// Additional types for templates
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Department {
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Site {
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Brigade {
+    pub id: i32,
+    pub brigadier_name: String,
+}
+
+// Helper trait for computed values
+pub trait ReportUtils {
+    fn current_timestamp(&self) -> String {
+        Utc::now().format("%Y-%m-%d %H:%M:%S").to_string()
+    }
+}
+
+// Template types for Report pages
+#[derive(Template)]
+#[template(path = "reports/departments.html")]
+pub struct DepartmentsReportsPageTemplate {
+    pub departments: Vec<Department>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/sites.html")]
+pub struct SitesReportsPageTemplate {
+    pub sites: Vec<Site>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+}
+
+#[derive(Template)]
+#[template(path = "reports/brigades.html")]
+pub struct BrigadesReportsPageTemplate {
+    pub brigades: Vec<Brigade>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+}
+
+// Template types for Report components
+#[derive(Template)]
+#[template(path = "reports/components/department_sites_report.html")]
+pub struct DepartmentSitesReportTemplate {
+    pub department_id: i32,
+    pub department_name: String,
+    pub items: Vec<DepartmentSiteReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add field for timestamp
+    pub current_timestamp: String,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_equipment_report.html")]
+pub struct DepartmentEquipmentReportTemplate {
+    pub department_id: i32,
+    pub department_name: String,
+    pub items: Vec<DepartmentEquipmentReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add field for timestamp
+    pub current_timestamp: String,
+}
+
+impl DepartmentEquipmentReportTemplate {
+    pub fn new(
+        department_id: i32,
+        department_name: String,
+        items: Vec<DepartmentEquipmentReportItem>,
+        start_date: Option<NaiveDate>,
+        end_date: Option<NaiveDate>,
+        current_page: usize,
+        total_pages: usize,
+    ) -> Self {
+        Self {
+            department_id,
+            department_name,
+            items,
+            start_date,
+            end_date,
+            current_page,
+            total_pages,
+            current_timestamp: Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        }
+    }
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_tasks_report.html")]
+pub struct DepartmentTasksReportTemplate {
+    pub department_id: i32,
+    pub department_name: String,
+    pub items: Vec<DepartmentTaskReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add field for timestamp
+    pub current_timestamp: String,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/department_materials_report.html")]
+pub struct DepartmentMaterialsReportTemplate {
+    pub department_id: i32,
+    pub department_name: String,
+    pub items: Vec<DepartmentMaterialReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    pub current_timestamp: String,
+    pub total_materials_cost: f64,
+    pub materials_with_excess_count: usize,
+    pub sites_count_total: i32,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_schedule_report.html")]
+pub struct SiteScheduleReportTemplate {
+    pub site_id: i32,
+    pub site_name: String,
+    pub items: Vec<SiteScheduleReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add field for timestamp
+    pub current_timestamp: String,
+}
+
+impl SiteScheduleReportTemplate {
+    // Add the task_position method to calculate vertical position
+    pub fn task_position(&self, task_index: usize) -> String {
+        format!("{}px", task_index * 32)
+    }
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_materials_report.html")]
+pub struct SiteMaterialsReportTemplate {
+    pub site_id: i32,
+    pub site_name: String,
+    pub items: Vec<SiteMaterialReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_materials_cost: f64,
+    pub materials_with_excess_count: usize,
+    pub materials_under_budget_count: usize,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_equipment_report.html")]
+pub struct SiteEquipmentReportTemplate {
+    pub site_id: i32,
+    pub site_name: String,
+    pub items: Vec<SiteEquipmentReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String, 
+    pub total_equipment_units: i32,
+    pub unique_equipment_types: usize,
+    pub average_days_allocated: i32,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_brigades_report.html")]
+pub struct SiteBrigadesReportTemplate {
+    pub site_id: i32,
+    pub site_name: String,
+    pub items: Vec<SiteBrigadeReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_brigades: usize,
+    pub total_workers: i32,
+    pub total_completed_tasks: i32,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/site_construction_report.html")]
+pub struct SiteConstructionReportTemplate {
+    pub site_id: i32,
+    pub site_name: String,
+    pub item: SiteConstructionReportItem,
+    // Add field for timestamp
+    pub current_timestamp: String,
+}
+
+impl SiteConstructionReportTemplate {
+    pub fn new(
+        site_id: i32,
+        site_name: String,
+        item: SiteConstructionReportItem,
+    ) -> Self {
+        Self {
+            site_id,
+            site_name,
+            item,
+            current_timestamp: Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        }
+    }
+    
+    pub fn cost_efficiency(&self) -> String {
+        if self.item.total_days > 0 {
+            format!("${:.2} per day", self.item.total_materials_cost / self.item.total_days as f64)
+        } else {
+            "N/A".to_string()
+        }
+    }
+    
+    pub fn labor_efficiency(&self) -> String {
+        if self.item.total_workers_involved > 0 {
+            format!("{:.2}% per worker", 
+                self.item.completed_percentage / self.item.total_workers_involved as f64)
+        } else {
+            "N/A".to_string()
+        }
+    }
+    
+    pub fn equipment_utilization(&self) -> String {
+        if self.item.total_equipment_allocations > 0 {
+            format!("{:.2} days per allocation", 
+                self.item.total_days as f64 / self.item.total_equipment_allocations as f64)
+        } else {
+            "N/A".to_string()
+        }
+    }
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/brigade_tasks_report.html")]
+pub struct BrigadeTasksReportTemplate {
+    pub brigade_id: i32,
+    pub brigade_name: String,
+    pub items: Vec<BrigadeTaskReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_tasks: usize,
+    pub completed_tasks: usize,
+    pub total_days_worked: i32,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/brigade_sites_report.html")]
+pub struct BrigadeSitesReportTemplate {
+    pub brigade_id: i32,
+    pub brigade_name: String,
+    pub items: Vec<BrigadeSiteReportItem>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_sites: usize,
+    pub total_tasks: i32,
+    pub total_days_worked: i32,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/overdue_tasks_report.html")]
+pub struct OverdueTasksReportTemplate {
+    pub items: Vec<OverdueTaskReportItem>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_overdue_tasks: usize,
+    pub average_days_overdue: i32,
+    pub tasks_without_brigade: usize,
+}
+
+#[derive(Template)]
+#[template(path = "reports/components/material_excesses_report.html")]
+pub struct MaterialExcessesReportTemplate {
+    pub items: Vec<MaterialExcessReportItem>,
+    pub current_page: usize,
+    pub total_pages: usize,
+    // Add fields for computed values
+    pub current_timestamp: String,
+    pub total_materials_with_excess: usize,
+    pub average_excess_percentage: f64,
+    pub total_cost_impact: f64,
+}
+
 // Page Endpoints
 async fn departments_reports_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // Department reports page
+    // Return rendered DepartmentsReportsPageTemplate
     Html(String::new())
 }
 
@@ -210,6 +528,7 @@ async fn sites_reports_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // Site reports page
+    // Return rendered SitesReportsPageTemplate
     Html(String::new())
 }
 
@@ -217,6 +536,7 @@ async fn brigades_reports_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // Brigade reports page
+    // Return rendered BrigadesReportsPageTemplate
     Html(String::new())
 }
 
@@ -227,6 +547,7 @@ async fn department_sites_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate department sites report
+    // Return rendered DepartmentSitesReportTemplate
     Html(String::new())
 }
 
@@ -236,6 +557,7 @@ async fn department_equipment_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate department equipment report
+    // Return rendered DepartmentEquipmentReportTemplate
     Html(String::new())
 }
 
@@ -245,6 +567,7 @@ async fn department_tasks_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate department tasks report
+    // Return rendered DepartmentTasksReportTemplate
     Html(String::new())
 }
 
@@ -254,6 +577,7 @@ async fn department_materials_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate department materials report
+    // Return rendered DepartmentMaterialsReportTemplate
     Html(String::new())
 }
 
@@ -264,6 +588,7 @@ async fn site_schedule_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate site schedule report
+    // Return rendered SiteScheduleReportTemplate
     Html(String::new())
 }
 
@@ -273,6 +598,7 @@ async fn site_materials_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate site materials report
+    // Return rendered SiteMaterialsReportTemplate
     Html(String::new())
 }
 
@@ -282,6 +608,7 @@ async fn site_equipment_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate site equipment report
+    // Return rendered SiteEquipmentReportTemplate
     Html(String::new())
 }
 
@@ -291,6 +618,7 @@ async fn site_brigades_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate site brigades report
+    // Return rendered SiteBrigadesReportTemplate
     Html(String::new())
 }
 
@@ -299,6 +627,7 @@ async fn site_construction_report(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Generate site construction report
+    // Return rendered SiteConstructionReportTemplate
     Html(String::new())
 }
 
@@ -309,6 +638,7 @@ async fn brigade_tasks_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate brigade tasks report
+    // Return rendered BrigadeTasksReportTemplate
     Html(String::new())
 }
 
@@ -318,6 +648,7 @@ async fn brigade_sites_report(
     Query(params): Query<DateRangeParams>,
 ) -> Html<String> {
     // Generate brigade sites report
+    // Return rendered BrigadeSitesReportTemplate
     Html(String::new())
 }
 
@@ -327,6 +658,7 @@ async fn overdue_tasks_report(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Generate overdue tasks report
+    // Return rendered OverdueTasksReportTemplate
     Html(String::new())
 }
 
@@ -335,6 +667,7 @@ async fn material_excesses_report(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Generate material excesses report
+    // Return rendered MaterialExcessesReportTemplate
     Html(String::new())
 }
 

@@ -1,0 +1,104 @@
+{% extends "general/index.html" %}
+
+{% block title %}Department Reports - Onyx Horizons{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-onyx mb-6">Department Reports</h1>
+    
+    <div class="bg-white rounded-md shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Select Department and Report Type</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="department_id" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select id="department_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="">Select a department</option>
+                    {% for department in departments %}
+                    <option value="{{ department.id }}">{{ department.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="report_type" class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+                <select id="report_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+                    <option value="sites">Sites Report</option>
+                    <option value="equipment">Equipment Report</option>
+                    <option value="tasks">Tasks Report</option>
+                    <option value="materials">Materials Report</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input type="date" id="start_date" name="start_date" 
+                       value="{% if let Some(date) = start_date %}{{ date }}{% endif %}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+            
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input type="date" id="end_date" name="end_date" 
+                       value="{% if let Some(date) = end_date %}{{ date }}{% endif %}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber">
+            </div>
+        </div>
+        
+        <div class="mt-6 flex justify-end">
+            <button type="button" id="generate-report" class="bg-amber text-onyx py-2 px-4 rounded-md hover:bg-yellow-600">
+                <i class="fas fa-file-alt mr-1"></i> Generate Report
+            </button>
+        </div>
+    </div>
+    
+    <div id="report-container" class="bg-white rounded-md shadow-md overflow-hidden">
+        <div class="p-6 text-center text-gray-500">
+            <p>Select a department and report type, then click "Generate Report" to view the results.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('generate-report').addEventListener('click', function() {
+        const departmentId = document.getElementById('department_id').value;
+        const reportType = document.getElementById('report_type').value;
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        if (!departmentId) {
+            alert('Please select a department');
+            return;
+        }
+        
+        let url = `/api/reports/departments/${departmentId}/`;
+        
+        switch (reportType) {
+            case 'sites':
+                url += 'sites';
+                break;
+            case 'equipment':
+                url += 'equipment';
+                break;
+            case 'tasks':
+                url += 'tasks';
+                break;
+            case 'materials':
+                url += 'materials';
+                break;
+        }
+        
+        url += '?';
+        
+        if (startDate) {
+            url += `start_date=${startDate}&`;
+        }
+        
+        if (endDate) {
+            url += `end_date=${endDate}&`;
+        }
+        
+        htmx.ajax('GET', url, {target: '#report-container', swap: 'innerHTML'});
+    });
+</script>
+{% endblock %}

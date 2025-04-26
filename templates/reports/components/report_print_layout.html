@@ -1,0 +1,49 @@
+<div class="print:p-6 print:block hidden">
+    <div class="text-center mb-8">
+        <div class="text-3xl font-bold mb-2">Onyx Horizons Construction Company</div>
+        <div class="text-xl">{{ report_title }}</div>
+        <div class="text-sm text-gray-500 mt-2">Generated on {{ now() }}</div>
+        
+        {% if let Some(date_range) = date_range %}
+        <div class="text-sm mt-1">Period: {{ date_range }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="mb-6">
+        {% if entity_info %}
+        <div class="border-b pb-2 mb-2">
+            {% for item in entity_info %}
+            <div class="flex">
+                <div class="font-medium w-32">{{ item.label }}:</div>
+                <div>{{ item.value }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="mb-8">
+        {% if summary_stats %}
+        <h3 class="font-medium mb-3 border-b pb-2">Summary</h3>
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            {% for stat in summary_stats %}
+            <div>
+                <div class="text-sm text-gray-500">{{ stat.label }}</div>
+                <div class="font-bold">{{ stat.value }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div id="print-content">
+        {{ report_content|safe }}
+    </div>
+    
+    <div class="mt-8 pt-4 border-t text-sm text-gray-500">
+        <div class="flex justify-between">
+            <div>Onyx Horizons Construction Company</div>
+            <div>Page 1 of 1</div>
+        </div>
+    </div>
+</div>

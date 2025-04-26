@@ -1,0 +1,122 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Construction Summary Report: {{ site_name }}</h2>
+        <div class="flex items-center space-x-4">
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Construction Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-md shadow-sm p-4">
+            <h3 class="font-medium text-lg mb-4">Construction Timeline</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Start Date:</span>
+                    <span class="font-medium">
+                        {% if let Some(date) = item.start_date %}
+                            {{ date }}
+                        {% else %}
+                            <span class="text-gray-400">Not started</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Expected End Date:</span>
+                    <span class="font-medium">
+                        {% if let Some(date) = item.expected_end_date %}
+                            {{ date }}
+                        {% else %}
+                            <span class="text-gray-400">Not planned</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Actual End Date:</span>
+                    <span class="font-medium">
+                        {% if let Some(date) = item.actual_end_date %}
+                            {{ date }}
+                        {% else %}
+                            <span class="text-gray-400">In progress</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Days:</span>
+                    <span class="font-medium">{{ item.total_days }}</span>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mt-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Progress</span>
+                    <span>{{ item.completed_percentage }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-amber h-3 rounded-full" style="width: {{ item.completed_percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-md shadow-sm p-4">
+            <h3 class="font-medium text-lg mb-4">Resources Summary</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Brigades Involved:</span>
+                    <span class="font-medium">{{ item.total_brigades_involved }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Workers Involved:</span>
+                    <span class="font-medium">{{ item.total_workers_involved }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Materials Cost:</span>
+                    <span class="font-medium">${{ item.total_materials_cost }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Equipment Allocations:</span>
+                    <span class="font-medium">{{ item.total_equipment_allocations }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics Visualization -->
+    <div class="bg-white rounded-md shadow-sm p-4 mb-6">
+        <h3 class="font-medium text-lg mb-4">Key Performance Indicators</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-3 bg-gray-50 rounded-md">
+                <div class="text-sm text-gray-500 mb-1">Cost Efficiency</div>
+                <div class="flex items-center space-x-2">
+                    <div class="font-medium">{{ cost_efficiency() }}</div>
+                    <div class="text-green-500 text-sm"><i class="fas fa-arrow-down"></i> 3.2%</div>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-gray-50 rounded-md">
+                <div class="text-sm text-gray-500 mb-1">Labor Efficiency</div>
+                <div class="flex items-center space-x-2">
+                    <div class="font-medium">{{ labor_efficiency() }}</div>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-gray-50 rounded-md">
+                <div class="text-sm text-gray-500 mb-1">Equipment Utilization</div>
+                <div class="flex items-center space-x-2">
+                    <div class="font-medium">{{ equipment_utilization() }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>

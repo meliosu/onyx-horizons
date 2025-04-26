@@ -1,0 +1,102 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Material Excesses Report</h2>
+        <div class="flex items-center space-x-4">
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="bg-gray-50 p-4 rounded-md mb-6">
+        <h3 class="text-lg font-medium mb-3">Material Excesses Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Materials with Excess</div>
+                <div class="text-xl font-bold text-red-600">{{ total_materials_with_excess }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Average Excess Percentage</div>
+                <div class="text-xl font-bold text-red-600">{{ average_excess_percentage }}%</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Cost Impact</div>
+                <div class="text-xl font-bold text-red-600">${{ total_cost_impact }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Material</th>
+                    <th class="py-3 px-6 text-center">Units</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-left">Task</th>
+                    <th class="py-3 px-6 text-center">Expected Amount</th>
+                    <th class="py-3 px-6 text-center">Actual Amount</th>
+                    <th class="py-3 px-6 text-center">Difference</th>
+                    <th class="py-3 px-6 text-center">Difference %</th>
+                    <th class="py-3 px-6 text-right">Cost Impact</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="9" class="py-6 px-6 text-center text-gray-500">No material excesses found in the selected time period</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50 bg-red-50">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/materials/{{ item.material_id }}" class="text-amber hover:underline">{{ item.material_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.units }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.site_name }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.task_name }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.expected_amount }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.actual_amount }}</td>
+                        <td class="py-3 px-6 text-center font-medium text-red-600">+{{ item.difference_amount }}</td>
+                        <td class="py-3 px-6 text-center font-medium text-red-600">+{{ item.difference_percentage }}%</td>
+                        <td class="py-3 px-6 text-right font-medium text-red-600">${{ item.cost_impact }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/materials/excesses?page={{ current_page - 1 }}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/materials/excesses?page={{ current_page + 1 }}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>

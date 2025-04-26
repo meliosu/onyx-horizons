@@ -1,0 +1,125 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold">Sites Report: {{ brigade_name }}</h2>
+        <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+                {% if let Some(start) = start_date %}
+                    {% if let Some(end) = end_date %}
+                        {{ start }} to {{ end }}
+                    {% else %}
+                        From {{ start }}
+                    {% endif %}
+                {% elif let Some(end) = end_date %}
+                    Until {{ end }}
+                {% else %}
+                    All time
+                {% endif %}
+            </div>
+            <button class="bg-gray-200 text-gray-700 py-1 px-3 rounded hover:bg-gray-300" 
+                    onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="bg-gray-50 p-4 rounded-md mb-6">
+        <h3 class="text-lg font-medium mb-3">Sites Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Sites</div>
+                <div class="text-xl font-bold">{{ total_sites }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Tasks</div>
+                <div class="text-xl font-bold">{{ total_tasks }}</div>
+            </div>
+            <div class="bg-white p-3 rounded-md shadow-sm">
+                <div class="text-sm text-gray-500">Total Days Worked</div>
+                <div class="text-xl font-bold">{{ total_days_worked }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-center">Type</th>
+                    <th class="py-3 px-6 text-left">Client</th>
+                    <th class="py-3 px-6 text-left">Area</th>
+                    <th class="py-3 px-6 text-center">Tasks</th>
+                    <th class="py-3 px-6 text-center">First Task Date</th>
+                    <th class="py-3 px-6 text-center">Last Task Date</th>
+                    <th class="py-3 px-6 text-center">Days Worked</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items.is_empty() %}
+                <tr>
+                    <td colspan="8" class="py-6 px-6 text-center text-gray-500">No sites data available for this brigade in the selected time period</td>
+                </tr>
+                {% else %}
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-6 text-left">
+                            <a href="/sites/{{ item.site_id }}" class="text-amber hover:underline">{{ item.site_name }}</a>
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.site_type }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.client_name }}</td>
+                        <td class="py-3 px-6 text-left">{{ item.area_name }}</td>
+                        <td class="py-3 px-6 text-center">{{ item.tasks_count }}</td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(date) = item.first_task_date %}
+                                {{ date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            {% if let Some(date) = item.last_task_date %}
+                                {{ date }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6 text-center">{{ item.total_days_worked }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/brigades/{{ brigade_id }}/sites?page={{ current_page - 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    hx-get="/api/reports/brigades/{{ brigade_id }}/sites?page={{ current_page + 1 }}{% if let Some(start) = start_date %}&start_date={{ start }}{% endif %}{% if let Some(end) = end_date %}&end_date={{ end }}{% endif %}" 
+                    hx-target="#report-container">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+            Report generated on {{ current_timestamp }}
+        </div>
+    </div>
+</div>
