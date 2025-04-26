@@ -7,6 +7,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
 use std::str::FromStr;
+use askama::Template;
 
 use crate::database::Database;
 use crate::general::PaginationParams;
@@ -123,12 +124,103 @@ pub struct AllocationFilter {
     pub pagination: PaginationParams,
 }
 
+// Additional types for template data
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Department {
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Site {
+    pub id: i32,
+    pub name: String,
+    pub area_id: i32,
+    pub area_name: Option<String>,
+    pub department_name: Option<String>,
+}
+
+// Template types for Equipment pages
+#[derive(Template)]
+#[template(path = "equipment/index.html")]
+pub struct EquipmentPageTemplate {
+    pub equipment: Vec<Equipment>,
+    pub filter: Option<EquipmentFilter>,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/new.html")]
+pub struct EquipmentNewPageTemplate {}
+
+#[derive(Template)]
+#[template(path = "equipment/details.html")]
+pub struct EquipmentDetailsPageTemplate {
+    pub equipment: Equipment,
+    pub active_tab: String,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/edit.html")]
+pub struct EquipmentEditPageTemplate {
+    pub equipment: Equipment,
+}
+
+// Template types for HTMX components
+#[derive(Template)]
+#[template(path = "equipment/components/equipment_rows.html")]
+pub struct EquipmentRowsTemplate {
+    pub equipment: Vec<Equipment>,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/components/equipment_details.html")]
+pub struct EquipmentDetailsTemplate {
+    pub equipment: Equipment,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/components/allocations_table.html")]
+pub struct AllocationsTableTemplate {
+    pub allocations: Vec<Allocation>,
+    pub equipment_id: i32,
+    pub available_amount: i32,
+    pub total_amount: i32,
+    pub departments: Vec<Department>,
+    pub sites: Vec<Site>,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/components/allocation_history.html")]
+pub struct AllocationHistoryTemplate {
+    pub allocations: Vec<Allocation>,
+    pub equipment_id: i32,
+    pub current_page: usize,
+    pub total_pages: usize,
+}
+
+#[derive(Template)]
+#[template(path = "equipment/components/fuel_type_selector.html")]
+pub struct FuelTypeSelectorTemplate {
+    pub selected_fuel_type: Option<FuelType>,
+}
+
+#[derive(Template)]
+#[template(path = "components/success_notification.html")]
+pub struct SuccessNotificationTemplate {
+    pub message: String,
+}
+
 // Page Endpoints
 async fn equipment_page(
     State(database): State<Database>,
     Query(params): Query<EquipmentFilter>,
 ) -> Html<String> {
     // Equipment listing page
+    // Return rendered EquipmentPageTemplate
     Html(String::new())
 }
 
@@ -136,6 +228,7 @@ async fn equipment_new_page(
     State(database): State<Database>,
 ) -> Html<String> {
     // New equipment form
+    // Return rendered EquipmentNewPageTemplate
     Html(String::new())
 }
 
@@ -144,6 +237,7 @@ async fn equipment_details_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Equipment details page
+    // Return rendered EquipmentDetailsPageTemplate
     Html(String::new())
 }
 
@@ -152,6 +246,7 @@ async fn equipment_edit_page(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Edit equipment form
+    // Return rendered EquipmentEditPageTemplate
     Html(String::new())
 }
 
@@ -161,6 +256,7 @@ async fn fetch_equipment(
     Query(params): Query<EquipmentFilter>,
 ) -> Html<String> {
     // Fetch equipment with filters
+    // Return rendered EquipmentRowsTemplate
     Html(String::new())
 }
 
@@ -169,6 +265,7 @@ async fn create_equipment(
     Form(equipment): Form<EquipmentCreate>,
 ) -> Html<String> {
     // Create new equipment
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -177,6 +274,7 @@ async fn fetch_equipment_details(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Fetch equipment details
+    // Return rendered EquipmentDetailsTemplate
     Html(String::new())
 }
 
@@ -186,6 +284,7 @@ async fn update_equipment(
     Form(equipment): Form<EquipmentUpdate>,
 ) -> Html<String> {
     // Update equipment
+    // Return rendered EquipmentDetailsTemplate
     Html(String::new())
 }
 
@@ -194,6 +293,7 @@ async fn delete_equipment(
     Path(id): Path<i32>,
 ) -> Html<String> {
     // Delete equipment
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -204,6 +304,7 @@ async fn fetch_equipment_allocations(
     Query(params): Query<AllocationFilter>,
 ) -> Html<String> {
     // Fetch current equipment allocations
+    // Return rendered AllocationsTableTemplate
     Html(String::new())
 }
 
@@ -213,6 +314,7 @@ async fn fetch_allocation_history(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch allocation history
+    // Return rendered AllocationHistoryTemplate
     Html(String::new())
 }
 
@@ -222,6 +324,7 @@ async fn create_allocation(
     Form(allocation): Form<AllocationCreate>,
 ) -> Html<String> {
     // Create new equipment allocation
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -231,6 +334,7 @@ async fn update_allocation(
     Form(allocation): Form<AllocationUpdate>,
 ) -> Html<String> {
     // Update equipment allocation
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -239,6 +343,7 @@ async fn delete_allocation(
     Path(allocation_id): Path<i32>,
 ) -> Html<String> {
     // Delete equipment allocation
+    // Return rendered SuccessNotificationTemplate
     Html(String::new())
 }
 
@@ -249,6 +354,7 @@ async fn fetch_equipment_by_department(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch equipment by department
+    // Return rendered EquipmentRowsTemplate
     Html(String::new())
 }
 
@@ -258,12 +364,14 @@ async fn fetch_equipment_by_site(
     Query(params): Query<PaginationParams>,
 ) -> Html<String> {
     // Fetch equipment by site
+    // Return rendered EquipmentRowsTemplate
     Html(String::new())
 }
 
 // Utility endpoints
 async fn fetch_fuel_types() -> Html<String> {
     // Fetch available fuel types
+    // Return rendered FuelTypeSelectorTemplate
     Html(String::new())
 }
 

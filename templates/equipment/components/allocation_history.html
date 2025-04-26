@@ -1,0 +1,81 @@
+<div class="p-6">
+    <h3 class="text-lg font-semibold mb-4">Allocation History</h3>
+    
+    {% if allocations.is_empty() %}
+    <div class="text-center py-6 text-gray-500">
+        <p>No allocation history found for this equipment.</p>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50 text-gray-600 text-sm leading-normal">
+                <tr>
+                    <th class="py-3 px-6 text-left">Department</th>
+                    <th class="py-3 px-6 text-left">Site</th>
+                    <th class="py-3 px-6 text-center">Amount</th>
+                    <th class="py-3 px-6 text-center">Start Date</th>
+                    <th class="py-3 px-6 text-center">End Date</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for allocation in allocations %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-6 text-left">{{ allocation.department_name.as_ref().unwrap_or(&"Unknown".to_string()) }}</td>
+                    <td class="py-3 px-6 text-left">
+                        {% if let Some(site_name) = &allocation.site_name %}
+                            {% if let Some(site_id) = allocation.site_id %}
+                            <a href="/sites/{{ site_id }}" class="text-amber hover:underline">{{ site_name }}</a>
+                            {% else %}
+                                {{ site_name }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Department-wide</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-center">{{ allocation.amount }}</td>
+                    <td class="py-3 px-6 text-center">{{ allocation.period_start }}</td>
+                    <td class="py-3 px-6 text-center">{{ allocation.period_end }}</td>
+                    <td class="py-3 px-6 text-center">
+                        {% if let Some(is_active) = allocation.is_active %}
+                            {% if is_active %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">Active</span>
+                            {% else %}
+                                <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">Completed</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">Unknown</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-500">
+            Showing page {{ current_page }} of {{ total_pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if current_page > 1 %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/equipment/{{ equipment_id }}/allocation-history?page={{ current_page - 1 }}" 
+                    hx-target="#allocation-content">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% if current_page < total_pages %}
+            <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                    hx-get="/api/equipment/{{ equipment_id }}/allocation-history?page={{ current_page + 1 }}" 
+                    hx-target="#allocation-content">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>

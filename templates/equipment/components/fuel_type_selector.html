@@ -1,0 +1,6 @@
+<option value="">All Fuel Types</option>
+<option value="diesel" {% if let Some(fuel) = &selected_fuel_type %}{% if fuel == &FuelType::Diesel %}selected{% endif %}{% endif %}>Diesel</option>
+<option value="petrol" {% if let Some(fuel) = &selected_fuel_type %}{% if fuel == &FuelType::Petrol %}selected{% endif %}{% endif %}>Petrol</option>
+<option value="electric" {% if let Some(fuel) = &selected_fuel_type %}{% if fuel == &FuelType::Electric %}selected{% endif %}{% endif %}>Electric</option>
+<option value="gas" {% if let Some(fuel) = &selected_fuel_type %}{% if fuel == &FuelType::Gas %}selected{% endif %}{% endif %}>Gas</option>
+<option value="none" {% if let Some(fuel) = &selected_fuel_type %}{% if fuel == &FuelType::None %}selected{% endif %}{% endif %}>None</option>

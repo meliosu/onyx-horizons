@@ -1,0 +1,65 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Equipment Information Card -->
+    <div class="bg-white rounded-md shadow-md overflow-hidden col-span-3 lg:col-span-1">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-onyx">Equipment Information</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Name</p>
+                    <p class="font-medium">{{ equipment.name }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Total Amount</p>
+                    <p>{{ equipment.amount }} units</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Available Amount</p>
+                    <p>
+                        {% if let Some(available) = equipment.available_amount %}
+                            {% if available == &0 %}
+                                <span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">{{ available }} units</span>
+                            {% elif *available < equipment.amount / 2 %}
+                                <span class="bg-yellow-100 text-yellow-600 py-1 px-2 rounded-full text-xs">{{ available }} units</span>
+                            {% else %}
+                                <span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">{{ available }} units</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">Unknown</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Purchase Date</p>
+                    <p>{{ equipment.purchase_date }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Purchase Cost</p>
+                    <p>${{ equipment.purchase_cost }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500">Fuel Type</p>
+                    <p>
+                        {% if let Some(fuel) = &equipment.fuel_type %}
+                            {% match fuel %}
+                                {% when FuelType::Diesel %}<span class="bg-gray-100 text-gray-800 py-1 px-2 rounded-full text-xs">Diesel</span>
+                                {% when FuelType::Petrol %}<span class="bg-blue-100 text-blue-800 py-1 px-2 rounded-full text-xs">Petrol</span>
+                                {% when FuelType::Electric %}<span class="bg-green-100 text-green-800 py-1 px-2 rounded-full text-xs">Electric</span>
+                                {% when FuelType::Gas %}<span class="bg-purple-100 text-purple-800 py-1 px-2 rounded-full text-xs">Gas</span>
+                                {% when FuelType::None %}<span class="bg-gray-50 text-gray-500 py-1 px-2 rounded-full text-xs">None</span>
+                            {% endmatch %}
+                        {% else %}
+                            <span class="bg-gray-50 text-gray-500 py-1 px-2 rounded-full text-xs">None</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

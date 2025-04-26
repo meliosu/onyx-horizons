@@ -777,56 +777,7 @@ async fn fetch_departments(
 ) -> Html<String> {
     // Fetch departments with filters
     // Return rendered DepartmentRowsTemplate
-    
-    // Mock data for departments (filtered if params are provided)
-    let mut departments = vec![
-        Department {
-            id: 1,
-            supervisor_id: Some(101),
-            name: "North Construction Department".to_string(),
-            supervisor_name: Some("John Smith".to_string()),
-            areas_count: Some(3),
-            sites_count: Some(8),
-            personnel_count: Some(45),
-        },
-        Department {
-            id: 2,
-            supervisor_id: Some(102),
-            name: "South Construction Department".to_string(),
-            supervisor_name: Some("Sarah Johnson".to_string()),
-            areas_count: Some(5),
-            sites_count: Some(12),
-            personnel_count: Some(78),
-        },
-        Department {
-            id: 3,
-            supervisor_id: None,
-            name: "East Construction Department".to_string(),
-            supervisor_name: None,
-            areas_count: Some(2),
-            sites_count: Some(4),
-            personnel_count: Some(23),
-        },
-    ];
-    
-    // Filter departments based on params
-    if let Some(name) = &params.name {
-        departments.retain(|dept| dept.name.to_lowercase().contains(&name.to_lowercase()));
-    }
-    
-    if let Some(supervisor_id) = params.supervisor_id {
-        departments.retain(|dept| dept.supervisor_id == Some(supervisor_id));
-    }
-    
-    let template = DepartmentRowsTemplate { departments };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error fetching departments".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn create_department(
@@ -835,20 +786,7 @@ async fn create_department(
 ) -> Html<String> {
     // Create new department
     // Return rendered SuccessNotificationTemplate
-    
-    // In a real implementation, this would create a new department in the database
-    // For now, just return a success message
-    let template = SuccessNotificationTemplate {
-        message: format!("Department '{}' was created successfully.", department.name),
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error creating department".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_department_details(
@@ -857,27 +795,7 @@ async fn fetch_department_details(
 ) -> Html<String> {
     // Fetch department details
     // Return rendered DepartmentDetailsTemplate
-    
-    // Mock data for the department
-    let department = Department {
-        id,
-        supervisor_id: Some(101),
-        name: format!("Department #{}", id),
-        supervisor_name: Some("John Smith".to_string()),
-        areas_count: Some(3),
-        sites_count: Some(8),
-        personnel_count: Some(45),
-    };
-    
-    let template = DepartmentDetailsTemplate { department };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching department details for ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn update_department(
@@ -887,28 +805,7 @@ async fn update_department(
 ) -> Html<String> {
     // Update department
     // Return rendered DepartmentDetailsTemplate
-    
-    // In a real implementation, this would update the department in the database
-    // Mock updated department data
-    let updated_department = Department {
-        id,
-        supervisor_id: department.supervisor_id,
-        name: department.name,
-        supervisor_name: department.supervisor_id.map(|_| "New Supervisor Name".to_string()),
-        areas_count: Some(3),
-        sites_count: Some(8),
-        personnel_count: Some(45),
-    };
-    
-    let template = DepartmentDetailsTemplate { department: updated_department };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error updating department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn delete_department(
@@ -917,19 +814,7 @@ async fn delete_department(
 ) -> Html<String> {
     // Delete department
     // Return rendered SuccessNotificationTemplate
-    
-    // In a real implementation, this would delete the department from the database
-    let template = SuccessNotificationTemplate {
-        message: format!("Department #{} was deleted successfully.", id),
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error deleting department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_department_areas(
@@ -939,58 +824,7 @@ async fn fetch_department_areas(
 ) -> Html<String> {
     // Fetch areas for department
     // Return rendered DepartmentAreasTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for areas in this department
-    let areas = vec![
-        Area {
-            id: 1,
-            department_id: id,
-            supervisor_id: Some(201),
-            name: "Downtown Construction Area".to_string(),
-            department_name: Some(format!("Department #{}", id)),
-            supervisor_name: Some("Robert Lee".to_string()),
-            sites_count: Some(3),
-            personnel_count: Some(15),
-        },
-        Area {
-            id: 2,
-            department_id: id,
-            supervisor_id: Some(202),
-            name: "Riverside Construction Area".to_string(),
-            department_name: Some(format!("Department #{}", id)),
-            supervisor_name: Some("Lisa Chen".to_string()),
-            sites_count: Some(2),
-            personnel_count: Some(12),
-        },
-        Area {
-            id: 3,
-            department_id: id,
-            supervisor_id: None,
-            name: "Industrial Park Construction Area".to_string(),
-            department_name: Some(format!("Department #{}", id)),
-            supervisor_name: None,
-            sites_count: Some(4),
-            personnel_count: Some(25),
-        },
-    ];
-    
-    let template = DepartmentAreasTemplate {
-        areas,
-        department_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching areas for department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_department_equipment(
@@ -1000,55 +834,7 @@ async fn fetch_department_equipment(
 ) -> Html<String> {
     // Fetch equipment for department
     // Return rendered DepartmentEquipmentTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for equipment in this department
-    let equipment = vec![
-        Equipment {
-            id: 1,
-            name: "Tower Crane XL-5000".to_string(),
-            amount: 2,
-            available_amount: Some(1),
-            purchase_date: "2021-03-15".to_string(),
-            purchase_cost: 250000.0,
-            fuel_type: Some("Diesel".to_string()),
-        },
-        Equipment {
-            id: 2,
-            name: "Excavator CAT-320".to_string(),
-            amount: 3,
-            available_amount: Some(0),
-            purchase_date: "2020-06-22".to_string(),
-            purchase_cost: 180000.0,
-            fuel_type: Some("Diesel".to_string()),
-        },
-        Equipment {
-            id: 3,
-            name: "Concrete Mixer B-2000".to_string(),
-            amount: 5,
-            available_amount: Some(2),
-            purchase_date: "2022-01-10".to_string(),
-            purchase_cost: 45000.0,
-            fuel_type: None,
-        },
-    ];
-    
-    let template = DepartmentEquipmentTemplate {
-        equipment,
-        department_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching equipment for department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_department_sites(
@@ -1058,64 +844,7 @@ async fn fetch_department_sites(
 ) -> Html<String> {
     // Fetch sites for department
     // Return rendered DepartmentSitesTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for sites in this department
-    let sites = vec![
-        Site {
-            id: 1,
-            name: "Downtown Tower".to_string(),
-            area_id: 1,
-            client_id: 101,
-            site_type: SiteType::Housing,
-            risk_level: RiskLevel::Medium,
-            description: Some("25-floor commercial building in the city center".to_string()),
-            area_name: Some("Downtown Construction Area".to_string()),
-            client_name: Some("Metro Development Corp".to_string()),
-            status: Some("in_progress".to_string()),
-        },
-        Site {
-            id: 2,
-            name: "Riverside Bridge".to_string(),
-            area_id: 2,
-            client_id: 102,
-            site_type: SiteType::Bridge,
-            risk_level: RiskLevel::High,
-            description: Some("600m bridge across the river".to_string()),
-            area_name: Some("Riverside Construction Area".to_string()),
-            client_name: Some("City Administration".to_string()),
-            status: Some("planned".to_string()),
-        },
-        Site {
-            id: 3,
-            name: "Green Valley Park".to_string(),
-            area_id: 3,
-            client_id: 103,
-            site_type: SiteType::Park,
-            risk_level: RiskLevel::Low,
-            description: Some("Community park with recreational facilities".to_string()),
-            area_name: Some("Industrial Park Construction Area".to_string()),
-            client_name: Some("Parks & Recreation Department".to_string()),
-            status: Some("completed".to_string()),
-        },
-    ];
-    
-    let template = DepartmentSitesTemplate {
-        sites,
-        department_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching sites for department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_department_personnel(
@@ -1125,68 +854,7 @@ async fn fetch_department_personnel(
 ) -> Html<String> {
     // Fetch personnel for department
     // Return rendered DepartmentPersonnelTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for personnel in this department
-    let personnel = vec![
-        TechnicalPersonnel {
-            id: 101,
-            first_name: "John".to_string(),
-            last_name: "Smith".to_string(),
-            qualification: Qualification::Engineer,
-            position: Some("Construction Manager".to_string()),
-            education_level: "Master's Degree".to_string(),
-            is_project_manager: true,
-            full_name: "John Smith".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 102,
-            first_name: "Sarah".to_string(),
-            last_name: "Johnson".to_string(),
-            qualification: Qualification::Engineer,
-            position: Some("Senior Project Manager".to_string()),
-            education_level: "Master's Degree".to_string(),
-            is_project_manager: true,
-            full_name: "Sarah Johnson".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 103,
-            first_name: "Michael".to_string(),
-            last_name: "Brown".to_string(),
-            qualification: Qualification::Technologist,
-            position: Some("Process Supervisor".to_string()),
-            education_level: "Bachelor's Degree".to_string(),
-            is_project_manager: false,
-            full_name: "Michael Brown".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 104,
-            first_name: "Emily".to_string(),
-            last_name: "Wilson".to_string(),
-            qualification: Qualification::Technician,
-            position: None,
-            education_level: "Associate's Degree".to_string(),
-            is_project_manager: false,
-            full_name: "Emily Wilson".to_string(),
-        },
-    ];
-    
-    let template = DepartmentPersonnelTemplate {
-        personnel,
-        department_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching personnel for department ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 // Area API endpoints
@@ -1196,63 +864,7 @@ async fn fetch_areas(
 ) -> Html<String> {
     // Fetch areas with filters
     // Return rendered AreaRowsTemplate
-    
-    // Mock data for areas (filtered if params are provided)
-    let mut areas = vec![
-        Area {
-            id: 1,
-            department_id: 1,
-            supervisor_id: Some(201),
-            name: "Downtown Construction Area".to_string(),
-            department_name: Some("North Construction Department".to_string()),
-            supervisor_name: Some("Robert Lee".to_string()),
-            sites_count: Some(3),
-            personnel_count: Some(15),
-        },
-        Area {
-            id: 2,
-            department_id: 1,
-            supervisor_id: Some(202),
-            name: "Riverside Construction Area".to_string(),
-            department_name: Some("North Construction Department".to_string()),
-            supervisor_name: Some("Lisa Chen".to_string()),
-            sites_count: Some(2),
-            personnel_count: Some(12),
-        },
-        Area {
-            id: 3,
-            department_id: 2,
-            supervisor_id: None,
-            name: "Industrial Park Construction Area".to_string(),
-            department_name: Some("South Construction Department".to_string()),
-            supervisor_name: None,
-            sites_count: Some(4),
-            personnel_count: Some(25),
-        },
-    ];
-    
-    // Filter areas based on params
-    if let Some(name) = &params.name {
-        areas.retain(|area| area.name.to_lowercase().contains(&name.to_lowercase()));
-    }
-    
-    if let Some(department_id) = params.department_id {
-        areas.retain(|area| area.department_id == department_id);
-    }
-    
-    if let Some(supervisor_id) = params.supervisor_id {
-        areas.retain(|area| area.supervisor_id == Some(supervisor_id));
-    }
-    
-    let template = AreaRowsTemplate { areas };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error fetching areas".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn create_area(
@@ -1261,20 +873,7 @@ async fn create_area(
 ) -> Html<String> {
     // Create new area
     // Return rendered SuccessNotificationTemplate
-    
-    // In a real implementation, this would create a new area in the database
-    // For now, just return a success message
-    let template = SuccessNotificationTemplate {
-        message: format!("Area '{}' was created successfully.", area.name),
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error creating area".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_area_details(
@@ -1283,39 +882,7 @@ async fn fetch_area_details(
 ) -> Html<String> {
     // Fetch area details
     // Return rendered AreaDetailsTemplate
-    
-    // Mock data for the area
-    let area = Area {
-        id,
-        department_id: 1,
-        supervisor_id: Some(201),
-        name: format!("Area #{}", id),
-        department_name: Some("North Construction Department".to_string()),
-        supervisor_name: Some("Robert Lee".to_string()),
-        sites_count: Some(3),
-        personnel_count: Some(15),
-    };
-    
-    // Mock data for the department
-    let department = Department {
-        id: 1,
-        supervisor_id: Some(101),
-        name: "North Construction Department".to_string(),
-        supervisor_name: Some("John Smith".to_string()),
-        areas_count: Some(3),
-        sites_count: Some(8),
-        personnel_count: Some(45),
-    };
-    
-    let template = AreaDetailsTemplate { area, department };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching area details for ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn update_area(
@@ -1325,40 +892,7 @@ async fn update_area(
 ) -> Html<String> {
     // Update area
     // Return rendered AreaDetailsTemplate
-    
-    // In a real implementation, this would update the area in the database
-    // Mock updated area data
-    let area = Area {
-        id,
-        department_id: area_update.department_id,
-        supervisor_id: area_update.supervisor_id,
-        name: area_update.name,
-        department_name: Some("Department Name".to_string()), // This would come from the DB in a real impl
-        supervisor_name: area_update.supervisor_id.map(|_| "Supervisor Name".to_string()),
-        sites_count: Some(3),
-        personnel_count: Some(15),
-    };
-    
-    // Mock data for the department
-    let department = Department {
-        id: area_update.department_id,
-        supervisor_id: Some(101),
-        name: "Department Name".to_string(),
-        supervisor_name: Some("Department Supervisor".to_string()),
-        areas_count: Some(3),
-        sites_count: Some(8),
-        personnel_count: Some(45),
-    };
-    
-    let template = AreaDetailsTemplate { area, department };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error updating area ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn delete_area(
@@ -1367,19 +901,7 @@ async fn delete_area(
 ) -> Html<String> {
     // Delete area
     // Return rendered SuccessNotificationTemplate
-    
-    // In a real implementation, this would delete the area from the database
-    let template = SuccessNotificationTemplate {
-        message: format!("Area #{} was deleted successfully.", id),
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error deleting area ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_area_sites(
@@ -1389,64 +911,7 @@ async fn fetch_area_sites(
 ) -> Html<String> {
     // Fetch sites for area
     // Return rendered AreaSitesTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for sites in this area
-    let sites = vec![
-        Site {
-            id: 1,
-            name: "Downtown Tower".to_string(),
-            area_id: id,
-            client_id: 101,
-            site_type: SiteType::Housing,
-            risk_level: RiskLevel::Medium,
-            description: Some("25-floor commercial building in the city center".to_string()),
-            area_name: Some(format!("Area #{}", id)),
-            client_name: Some("Metro Development Corp".to_string()),
-            status: Some("in_progress".to_string()),
-        },
-        Site {
-            id: 2,
-            name: "Riverside Bridge".to_string(),
-            area_id: id,
-            client_id: 102,
-            site_type: SiteType::Bridge,
-            risk_level: RiskLevel::High,
-            description: Some("600m bridge across the river".to_string()),
-            area_name: Some(format!("Area #{}", id)),
-            client_name: Some("City Administration".to_string()),
-            status: Some("planned".to_string()),
-        },
-        Site {
-            id: 3,
-            name: "Green Valley Park".to_string(),
-            area_id: id,
-            client_id: 103,
-            site_type: SiteType::Park,
-            risk_level: RiskLevel::Low,
-            description: Some("Community park with recreational facilities".to_string()),
-            area_name: Some(format!("Area #{}", id)),
-            client_name: Some("Parks & Recreation Department".to_string()),
-            status: Some("completed".to_string()),
-        },
-    ];
-    
-    let template = AreaSitesTemplate {
-        sites,
-        area_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching sites for area ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_area_personnel(
@@ -1456,68 +921,7 @@ async fn fetch_area_personnel(
 ) -> Html<String> {
     // Fetch personnel for area
     // Return rendered AreaPersonnelTemplate
-    
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(10);
-    
-    // Mock data for personnel in this area
-    let personnel = vec![
-        TechnicalPersonnel {
-            id: 201,
-            first_name: "Robert".to_string(),
-            last_name: "Lee".to_string(),
-            qualification: Qualification::Engineer,
-            position: Some("Area Supervisor".to_string()),
-            education_level: "Master's Degree".to_string(),
-            is_project_manager: true,
-            full_name: "Robert Lee".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 202,
-            first_name: "Lisa".to_string(),
-            last_name: "Chen".to_string(),
-            qualification: Qualification::Engineer,
-            position: Some("Project Manager".to_string()),
-            education_level: "Master's Degree".to_string(),
-            is_project_manager: true,
-            full_name: "Lisa Chen".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 203,
-            first_name: "David".to_string(),
-            last_name: "Miller".to_string(),
-            qualification: Qualification::Technologist,
-            position: Some("Foreman".to_string()),
-            education_level: "Bachelor's Degree".to_string(),
-            is_project_manager: false,
-            full_name: "David Miller".to_string(),
-        },
-        TechnicalPersonnel {
-            id: 204,
-            first_name: "Jennifer".to_string(),
-            last_name: "Taylor".to_string(),
-            qualification: Qualification::Technician,
-            position: Some("Assistant Supervisor".to_string()),
-            education_level: "Bachelor's Degree".to_string(),
-            is_project_manager: false,
-            full_name: "Jennifer Taylor".to_string(),
-        },
-    ];
-    
-    let template = AreaPersonnelTemplate {
-        personnel,
-        area_id: id,
-        current_page: page,
-        total_pages: 1, // Mock single page
-    };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html(format!("Error fetching personnel for area ID: {}", id))
-        }
-    }
+    Html::from(String::new())
 }
 
 // Supervisor selectors
@@ -1526,44 +930,7 @@ async fn fetch_department_supervisors(
 ) -> Html<String> {
     // Fetch available supervisors for departments
     // Return rendered DepartmentSupervisorSelectorTemplate
-    
-    // Mock data for available supervisors
-    let supervisors = vec![
-        Supervisor {
-            id: 101,
-            name: "John Smith".to_string(),
-            qualification: "Engineer".to_string(),
-            position: Some("Construction Manager".to_string()),
-        },
-        Supervisor {
-            id: 102,
-            name: "Sarah Johnson".to_string(),
-            qualification: "Engineer".to_string(),
-            position: Some("Senior Project Manager".to_string()),
-        },
-        Supervisor {
-            id: 103,
-            name: "Michael Brown".to_string(),
-            qualification: "Technologist".to_string(),
-            position: Some("Process Supervisor".to_string()),
-        },
-        Supervisor {
-            id: 104,
-            name: "Emily Wilson".to_string(),
-            qualification: "Engineer".to_string(),
-            position: None,
-        },
-    ];
-    
-    let template = DepartmentSupervisorSelectorTemplate { supervisors };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error fetching department supervisors".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 async fn fetch_area_supervisors(
@@ -1571,38 +938,7 @@ async fn fetch_area_supervisors(
 ) -> Html<String> {
     // Fetch available supervisors for areas
     // Return rendered AreaSupervisorSelectorTemplate
-    
-    // Mock data for available supervisors
-    let supervisors = vec![
-        Supervisor {
-            id: 201,
-            name: "Robert Lee".to_string(),
-            qualification: "Engineer".to_string(),
-            position: Some("Area Supervisor".to_string()),
-        },
-        Supervisor {
-            id: 202,
-            name: "Lisa Chen".to_string(),
-            qualification: "Engineer".to_string(),
-            position: Some("Area Manager".to_string()),
-        },
-        Supervisor {
-            id: 203,
-            name: "David Miller".to_string(),
-            qualification: "Technologist".to_string(),
-            position: Some("Process Manager".to_string()),
-        },
-    ];
-    
-    let template = AreaSupervisorSelectorTemplate { supervisors };
-    
-    match template.render() {
-        Ok(html) => Html(html),
-        Err(err) => {
-            eprintln!("Template error: {}", err);
-            Html("Error fetching area supervisors".to_string())
-        }
-    }
+    Html::from(String::new())
 }
 
 // Add the missing SuccessNotificationTemplate
